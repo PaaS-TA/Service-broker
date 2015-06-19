@@ -1,0 +1,210 @@
+buildscript {
+    repositories {
+        maven { url "http://repo.spring.io/libs-snapshot" }
+        maven { url "http://repo.spring.io/snapshot" }
+    	maven { url "http://repo.spring.io/milestone" }
+        //mavenLocal()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.3.0.BUILD-SNAPSHOT")
+        //classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.2.RELEASE")
+        //classpath("org.springframework.boot:spring-boot-starter-web:1.3.0.BUILD-SNAPSHOT")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+apply plugin: 'war'
+apply plugin: 'maven-publish'
+apply plugin: 'maven'
+
+
+ext {
+  springBootCfServiceBrokerVersion = "2.4.0"
+  springBootVersion = '1.3.0.BUILD-SNAPSHOT'
+  baseName = 'openpaas-cf-service-java-broker-mysql'
+  version =  '2.4'
+  
+  
+  hibernateValidatorVersion = '5.1.0.Final'
+  jsonPathVersion = '0.9.1'
+  baseNameTests = "${project.archivesBaseName}-tests"
+}
+
+task testsJar(type: Jar) {
+    from sourceSets.test.output
+    baseName = baseNameTests
+}
+
+task sourcesJar(type: Jar, dependsOn:classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn:javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+war {
+    baseName = baseName
+    version =  version
+}
+
+repositories {
+    mavenCentral()
+    maven { url "http://repo.spring.io/libs-snapshot" }
+    maven { url "http://repo.spring.io/snapshot" }
+    maven { url "http://repo.spring.io/milestone" }
+}
+
+configurations {
+    providedRuntime
+    emma
+}
+
+dependencies {
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
+    compile("org.hibernate:hibernate-validator:${hibernateValidatorVersion}")
+
+    testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testCompile("com.jayway.jsonpath:json-path:${jsonPathVersion}")
+    
+    
+    // EMMS Code Coverage
+    //emma "emma:emma:2.1.5320"
+    //emma "emma:emma_ant:2.1.5320"
+        
+    compile("org.apache.commons:commons-dbcp2")
+    runtime "mysql:mysql-connector-java:5.1.27"
+    compile "org.springframework:spring-jdbc:4.0.0.M3"
+}
+
+/*
+def emmaConvention = new EmmaPluginConvention(project)
+project.convention.plugins.emma = emmaConvention
+
+class EmmaPluginConvention{
+	def verbosityLevel = "info" 
+	def reportPath;
+	def coverageFileName;
+	def tmpDir;
+	def instrDir;
+	def metaDataFilePath;
+	
+	def emma(Closure close){
+		close.delegate = this;
+		close.run()
+	}
+	
+	EmmaPluginConvention(Project project){
+		reportPath 			= "${project.reportsDir.absolutePath}/emma"
+		coverageFileName	= "coverage"
+		tmpDir				= "${project.buildDir}/tmp/emma"
+		instrDir			= "${tmpDir}/instr"
+		metaDataFilePath 	= "${tmpDir}/metadata.emma"
+	}
+}
+
+
+test {
+    // add EMMA related JVM args to our tests 
+    //jvmArgs "-XX:-UseSplitVerifier", "-Demma.coverage.out.file=$buildDir/tmp/emma/metadata.emma", "-Demma.coverage.out.merge=true"
+    
+    jvmArgs "-Demma.coverage.out.file=$buildDir/tmp/emma/metadata.emma", "-Demma.coverage.out.merge=true"
+ 
+    doFirst {
+       println "Instrumenting the classes at " + sourceSets.main.output.classesDir.absolutePath
+       // define the custom EMMA ant tasks
+       ant.taskdef( resource:"emma_ant.properties", classpath: configurations.emma.asPath)
+ 
+       ant.path(id:"run.classpath") {
+          pathelement(location:sourceSets.main.output.classesDir.absolutePath)
+       }
+       def emmaInstDir = new File(sourceSets.main.output.classesDir.parentFile.parentFile, "tmp/emma/instr")
+       emmaInstDir.mkdirs()
+       println "Creating $emmaInstDir to instrument from " +       sourceSets.main.output.classesDir.absolutePath
+       // instruct our compiled classes and store them at $buildDir/tmp/emma/instr
+       ant.emma(enabled: 'true', verbosity:'info'){
+          instr(merge:"true", destdir: emmaInstDir.absolutePath, instrpathref:"run.classpath",
+                metadatafile: new File(emmaInstDir, '/metadata.emma').absolutePath) {
+             instrpath {
+             */
+             //fileset(dir:sourceSets.main.output.classesDir.absolutePath, includes:"**/*.class")
+             /*
+             }
+          }
+       }
+       setClasspath(files("$buildDir/tmp/emma/instr") + configurations.emma +    getClasspath())
+    }
+ 
+    // The report should be generated directly after the tests are done.
+    // We create three types (txt, html, xml) of reports here. Running your build script now should
+    // result in output like that:
+    doLast {
+       def srcDir = sourceSets.main.java.srcDirs.toArray()[0]
+       println "Creating test coverage reports for classes " + srcDir
+       def emmaInstDir = new File(sourceSets.main.output.classesDir.parentFile.parentFile, "tmp/emma")
+       ant.emma(enabled:"true"){
+          new File("$buildDir/reports/emma").mkdirs()
+          report(sourcepath: srcDir){
+             fileset(dir: emmaInstDir.absolutePath){
+             */
+              //  include(name:"**/*.emma")
+              /*
+             }
+             txt(outfile:"$buildDir/reports/emma/coverage.txt")
+             html(outfile:"$buildDir/reports/emma/coverage.html")
+             xml(outfile:"$buildDir/reports/emma/coverage.xml")
+          }
+       }
+       println "Test coverage reports available at $buildDir/reports/emma."
+       println "txt: $buildDir/reports/emma/coverage.txt"
+       println "Test $buildDir/reports/emma/coverage.html"
+       println "Test $buildDir/reports/emma/coverage.xml"
+    }
+}
+*/
+publishing {
+    publications {
+        jar(MavenPublication) {
+            artifactId project.archivesBaseName
+            from components.java
+        }
+        test(MavenPublication) {
+            artifactId baseNameTests
+            artifact testsJar
+        }
+        sources(MavenPublication) {
+            artifact sourcesJar {
+                classifier "sources"
+            }
+            from components.java
+        }
+        javadoc(MavenPublication) {
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+            from components.java
+        }
+    }
+    if (project.hasProperty("artifactory_contextUrl")) {
+        repositories {
+            maven {
+                credentials {
+                    username "${artifactory_user}"
+                    password "${artifactory_password}"
+                }
+                url "${artifactory_contextUrl}/libs-release-local"
+            }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
