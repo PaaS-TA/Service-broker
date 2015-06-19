@@ -1,0 +1,60 @@
+buildscript {
+    repositories {
+        maven { url "http://repo.spring.io/libs-snapshot" }
+        mavenLocal()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.3.0.BUILD-SNAPSHOT")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+apply plugin: 'war'
+
+ext {
+  springBootCfServiceBrokerVersion = "2.4.0"
+  springBootVersion = '1.3.0.BUILD-SNAPSHOT'
+  baseName = 'openpaas-service-java-broker-sample'
+  version =  '2.4'
+  
+  hibernateValidatorVersion = '5.1.0.Final'
+  jsonPathVersion = '0.9.1'
+}
+
+war {
+    baseName = baseName
+    version =  version
+}
+
+repositories {
+    mavenCentral()
+    maven { url "http://repo.spring.io/libs-snapshot" }
+}
+
+configurations {
+    providedRuntime
+}
+
+dependencies {
+    
+    compile files('libs/openpaas-service-java-broker.jar')
+    
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
+    //compile("org.hibernate:hibernate-validator:${hibernateValidatorVersion}")
+
+    testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testCompile("com.jayway.jsonpath:json-path:${jsonPathVersion}")
+       
+    compile("org.apache.commons:commons-dbcp2")
+    runtime "mysql:mysql-connector-java:5.1.27"
+    compile "org.springframework:spring-jdbc:4.0.0.M3"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
