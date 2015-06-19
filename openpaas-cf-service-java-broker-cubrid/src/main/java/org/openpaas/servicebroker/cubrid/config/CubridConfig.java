@@ -38,7 +38,7 @@ public class CubridConfig {
 	
 	//@Override
 	
-	public @Bean JSchUtil jschUtil() { 
+	public @Bean JSchUtil jschUtil() {
 
 		String serverUser = env.getRequiredProperty("cubrid.server.userName");
 		String serverHost = env.getRequiredProperty("cubrid.server.hostName");
