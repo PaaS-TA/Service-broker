@@ -74,8 +74,8 @@ public class ServiceInstance {
 	 * @param request containing details of ServiceInstance
 	 */
 	public ServiceInstance(UpdateServiceInstanceRequest request) { 
-		request.getPlanId();
-		request.getServiceInstanceId();
+		this.planId = request.getPlanId();
+		this.serviceInstanceId = request.getServiceInstanceId();
 	}
 	
 	public ServiceInstance withDashboardUrl(String dashboardUrl) { 
