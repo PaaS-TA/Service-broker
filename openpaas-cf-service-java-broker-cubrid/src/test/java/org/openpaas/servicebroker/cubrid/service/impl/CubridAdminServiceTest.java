@@ -2,8 +2,6 @@ package org.openpaas.servicebroker.cubrid.service.impl;
 
 import static org.junit.Assert.*;
 
-import javax.sql.DataSource;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,9 +14,7 @@ import org.openpaas.servicebroker.cubrid.exception.CubridServiceException;
 import org.openpaas.servicebroker.util.JSchUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)

@@ -9,10 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 //import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-
-import com.sun.corba.se.spi.activation.Server;
 
 @Configuration
 @PropertySource("classpath:datasource.properties")
@@ -43,13 +40,13 @@ public class CubridConfig {
 	
 	public @Bean JSchUtil jschUtil() {
 
-		String serverUser = env.getRequiredProperty("server.userName");
-		String serverHost = env.getRequiredProperty("server.hostName");
-		int serverPort = Integer.parseInt((String)env.getRequiredProperty("server.portNumber"));
+		String serverUser = env.getRequiredProperty("cubrid.server.userName");
+		String serverHost = env.getRequiredProperty("cubrid.server.hostName");
+		int serverPort = Integer.parseInt((String)env.getRequiredProperty("cubrid.server.portNumber"));
 		
 		// serverPassword, serverIdentity. Only one of the two
-		String serverPassword = env.getRequiredProperty("server.password");
-		String serverIdentity = env.getRequiredProperty("server.identity");
+		String serverPassword = env.getRequiredProperty("cubrid.server.password");
+		String serverIdentity = env.getRequiredProperty("cubrid.server.identity");
 		
 		JSchUtil jsch = new JSchUtil(serverUser, serverHost, serverPort);
 		
@@ -60,5 +57,18 @@ public class CubridConfig {
 		
 		return jsch;
 	}
+	
+	@Bean
+    public DataSource dataSource() {
+		DriverManagerDataSource dataSource = new DriverManagerDataSource();
+		//dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+		dataSource.setDriverClassName(env.getRequiredProperty("jdbc.driver"));
+//		dataSource.setUrl("");
+//		dataSource.setUsername("");
+//		dataSource.setPassword("");
+//
+		return dataSource;
+        // instantiate, configure and return DataSource
+    }
 	
 }

@@ -7,10 +7,6 @@ import org.openpaas.servicebroker.util.JSchUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,14 +16,10 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-@PropertySource("classpath:datasource.properties")
 public class CubridAdminService {
 
 	
 	private Logger logger = LoggerFactory.getLogger(CubridAdminService.class);
-	
-	@Autowired
-	private Environment env;
 	
 	@Autowired
 	private JSchUtil jsch;
@@ -154,14 +146,4 @@ public class CubridAdminService {
 		logger.warn(e.getLocalizedMessage(), e);
 		return new CubridServiceException(e.getLocalizedMessage());
 	}
-	/*
-	private JdbcTemplate getJdbcTemplate(String database) {
-		JdbcTemplate jdbcTamplate = new JdbcTemplate();
-		
-		DriverManagerDataSource dataSource = new DriverManagerDataSource();
-		dataSource.setDriverClassName(env.getRequiredProperty("jdbc.driver"));
-		dataSource.setUrl(getConnectionString(database, env.getRequiredProperty("cubrid.username"), env.getRequiredProperty("cubrid.password")));
-		
-		return jdbcTamplate;
-	}*/
 }
