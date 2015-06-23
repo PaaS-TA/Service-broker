@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <title>MySQL Management Dashboard</title>
+      <%= favicon_link_tag %>
+      <%= stylesheet_link_tag "application", media: "all" %>
+    </head>
+    <body>
+      <div class="container-gmajor">
+        <div class="main-wrapper no-sidebar-main-wrapper">
+          <div class="row header pvl mhn">
+            <div class="teal-text col-xs-16 phn pvn">
+              Pivotal CF Services
+            </div>
+            <div class="col-xs-8 phn pvn text-right">
+            <% if Configuration.documentation_url %>
+                <%= link_to "Docs", Configuration.documentation_url, class: 'mlxl' %>
+            <% end %>
+            <% if Configuration.support_url %>
+                <%= link_to "Support", Configuration.support_url, class: 'mlxl' %>
+            <% end %>
+            </div>
+          </div>
+
+          <div class="services-container">
+            <div class="header-container pvm">
+              <%= image_tag("cf-mysql-logo.png", height: '64', width: '64') %>
+              <span class="phm">
+                <strong>MySQL</strong> for Pivotal Cloud Foundry
+              </span>
+            </div>
+
+            <%= yield %>
+          </div>
+        </div>
+      </div>
+    </body>
+</html>

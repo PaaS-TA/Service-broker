@@ -1,0 +1,6 @@
+---
+applications:
+- name: openpaas-mysql-broker
+  memory: 512M
+  instances: 1
+  path: build/libs/openpaas-cf-service-java-broker-mysql.war
