@@ -1,5 +1,9 @@
 package org.openpaas.servicebroker.cubrid.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.openpaas.servicebroker.cubrid.exception.CubridServiceException;
 import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.ServiceInstanceBinding;
@@ -30,9 +34,17 @@ public class CubridAdminService {
 	}
 		
 	public boolean isExistsService(ServiceInstance instance){
+		
+		for (String dbName : getDBList()) {
+			if (instance.getServiceInstanceId().equals(dbName)) {
+				return false;
+			}
+		}
+		
 		return true;
 	}
 	
+	//always true
 	public boolean isExistsUser(String userId){
 		return true;
 	}
@@ -79,7 +91,6 @@ public class CubridAdminService {
 	
 	public void deleteDatabase(ServiceInstance serviceInstance) throws CubridServiceException{
 		try{
-			
 		} catch (Exception e) {
 			throw handleException(e);
 		}
@@ -87,7 +98,9 @@ public class CubridAdminService {
 	
 	public void createDatabase(ServiceInstance serviceInstance) throws CubridServiceException{
 		try{
+			List<String> commands = new ArrayList<>();
 			
+			jsch.shell(commands);
 		} catch (Exception e) {
 			throw handleException(e);
 		}
@@ -145,5 +158,24 @@ public class CubridAdminService {
 	private CubridServiceException handleException(Exception e) {
 		logger.warn(e.getLocalizedMessage(), e);
 		return new CubridServiceException(e.getLocalizedMessage());
+	}
+	
+	// get DB List from ResultMap
+	// get DBname List  from DB List
+	public List<String> getDBList() {
+		String command = "cm_admin listdb";
+		Map<String, List<String>> resultMap = jsch.shell(command);
+		
+		//value exam..
+		//listDB = [  1.  DBName1,   2.  DBname2]
+		//I want ... [DBName1, DBname2]
+		List<String> listDB = resultMap.get(command);
+
+		List<String> listDBName = new ArrayList<>();
+		for (int i=0; i < listDB.size(); i++) {
+			 listDBName.add( listDB.get(i).split("  ")[2]);
+		}
+		
+		return listDBName;
 	}
 }

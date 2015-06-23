@@ -2,6 +2,9 @@ package org.openpaas.servicebroker.cubrid.service.impl;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +14,8 @@ import org.openpaas.servicebroker.cubrid.config.BrokerConfig;
 import org.openpaas.servicebroker.cubrid.config.CatalogConfig;
 import org.openpaas.servicebroker.cubrid.config.CubridConfig;*/
 import org.openpaas.servicebroker.cubrid.exception.CubridServiceException;
+import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
+import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.util.JSchUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -60,6 +65,15 @@ public class CubridAdminServiceTest {
 		assertEquals(expected, cubridAdminService.getConnectionString(database, username, password));
 		
 		
+		
+	}
+	
+	//private method test
+	public @Test void getDBList() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		
+		Method m = cubridAdminService.getClass().getDeclaredMethod("getDBList", null);
+		
+		System.out.println(m.invoke(cubridAdminService, null));
 		
 	}
 
