@@ -2,7 +2,6 @@ package org.openpaas.servicebroker.apiplatform.common;
 
 import java.io.IOException;
 
-import org.openpaas.servicebroker.apiplatform.common.test.JsonUtilsTest;
 import org.openpaas.servicebroker.apiplatform.exception.APICatalogException;
 import org.openpaas.servicebroker.apiplatform.exception.APIServiceInstanceException;
 import org.openpaas.servicebroker.apiplatform.service.impl.APICatalogService;
@@ -17,7 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonUtils {
-	private static final Logger logger = LoggerFactory.getLogger(JsonUtilsTest.class) ;
+	private static final Logger logger = LoggerFactory.getLogger(JsonUtils.class) ;
 	
 	static public JsonNode convertToJson(ResponseEntity<String> httpResponse) throws ServiceBrokerException{
 
