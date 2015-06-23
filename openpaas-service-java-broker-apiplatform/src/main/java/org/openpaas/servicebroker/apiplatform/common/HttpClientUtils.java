@@ -1,6 +1,5 @@
 package org.openpaas.servicebroker.apiplatform.common;
 
-import org.openpaas.servicebroker.apiplatform.common.test.HttpClientUtilsTest;
 import org.openpaas.servicebroker.apiplatform.exception.APICatalogException;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.slf4j.Logger;
@@ -12,8 +11,9 @@ import org.springframework.web.client.RestTemplate;
 
 public class HttpClientUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(HttpClientUtilsTest.class);
-	static public ResponseEntity<String> send(String uri, HttpEntity<String> entity,HttpMethod httpMethod){
+	private static final Logger logger = LoggerFactory.getLogger(HttpClientUtils.class);
+	
+	static public ResponseEntity<String> send(String uri, HttpEntity<String> entity,HttpMethod httpMethod) throws ServiceBrokerException {
 
 		RestTemplate client = new RestTemplate();
 		ResponseEntity<String> httpResponse=null;
