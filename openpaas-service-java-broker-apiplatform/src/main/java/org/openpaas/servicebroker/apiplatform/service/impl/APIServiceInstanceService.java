@@ -3,6 +3,8 @@ package org.openpaas.servicebroker.apiplatform.service.impl;
 
 import org.openpaas.servicebroker.apiplatform.common.HttpClientUtils;
 import org.openpaas.servicebroker.apiplatform.common.JsonUtils;
+import org.openpaas.servicebroker.apiplatform.common.test.HttpClientUtilsTest;
+import org.openpaas.servicebroker.apiplatform.common.test.JsonUtilsTest;
 import org.openpaas.servicebroker.apiplatform.dao.APIServiceInstanceDAO;
 import org.openpaas.servicebroker.apiplatform.exception.APIServiceInstanceException;
 import org.openpaas.servicebroker.apiplatform.model.APIUser;
@@ -45,8 +47,8 @@ public class APIServiceInstanceService implements ServiceInstanceService{
 	@Autowired
 	APICatalogService APICatalogService;
 	
-	@Autowired
-	ServiceInstance instance;
+//	@Autowired
+//	ServiceInstance instance;
 	
 	@Override
 	public ServiceInstance createServiceInstance(CreateServiceInstanceRequest createServiceInstaceRequest) throws ServiceInstanceExistsException, ServiceBrokerException 
@@ -88,7 +90,7 @@ public class APIServiceInstanceService implements ServiceInstanceService{
 		HttpEntity<String> entity = new HttpEntity<String>(parameters, headers);
 
 		ResponseEntity<String> userSignupHttpResponse;
-		userSignupHttpResponse = HttpClientUtils.send(uri, entity, HttpMethod.POST);
+		userSignupHttpResponse = HttpClientUtilsTest.send(uri, entity, HttpMethod.POST);
 		int status = 0;
 		
 			try {
@@ -97,7 +99,7 @@ public class APIServiceInstanceService implements ServiceInstanceService{
 				throw new APIServiceInstanceException(status,e.getMessage());
 			}
 			
-		instance = new ServiceInstance(createServiceInstaceRequest);
+		ServiceInstance instance = new ServiceInstance(createServiceInstaceRequest);
 		logger.debug("create ServiceInstance");
 		return instance;
 	}

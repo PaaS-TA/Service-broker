@@ -1,14 +1,10 @@
 package org.openpaas.servicebroker.apiplatform.service.impl;
 
-import javax.servlet.http.HttpServletResponse;
 
 import org.openpaas.servicebroker.apiplatform.common.HttpClientUtils;
 import org.openpaas.servicebroker.apiplatform.common.JsonUtils;
 import org.openpaas.servicebroker.apiplatform.exception.APICatalogException;
-import org.openpaas.servicebroker.apiplatform.exception.APIServiceInstanceException;
-import org.openpaas.servicebroker.controller.BaseController;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
-import org.openpaas.servicebroker.model.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +13,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -69,10 +64,4 @@ public class LoginService {
 	}
 	
 
-	
-//	private APICatalogException handleException(Exception e) {
-//		logger.error(e.getLocalizedMessage(), e);
-//		return new APICatalogException(e.getLocalizedMessage());
-//	}
-	
 }
