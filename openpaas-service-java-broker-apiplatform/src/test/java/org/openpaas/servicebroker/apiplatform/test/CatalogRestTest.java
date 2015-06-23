@@ -14,8 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openpaas.servicebroker.apiplatform.common.HttpClientUtils;
-import org.openpaas.servicebroker.apiplatform.common.JsonUtils;
+import org.openpaas.servicebroker.apiplatform.common.test.HttpClientUtilsTest;
+import org.openpaas.servicebroker.apiplatform.common.test.JsonUtilsTest;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
 import org.springframework.http.HttpEntity;
@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
+import ch.qos.logback.core.net.server.Client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
@@ -91,7 +92,7 @@ public class CatalogRestTest {
 			
 			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.PUT);
+			response = HttpClientUtilsTest.client(url, entity, HttpMethod.PUT);
 
 		} catch (ServiceBrokerException sbe) {
 			
@@ -125,7 +126,7 @@ public class CatalogRestTest {
 			
 			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
+			response = HttpClientUtilsTest.client(url, entity, HttpMethod.GET);
 			
 		} catch (ServiceBrokerException sbe) {
 			
@@ -158,7 +159,7 @@ public class CatalogRestTest {
 			
 			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
+			response = HttpClientUtilsTest.client(url, entity, HttpMethod.GET);
 			
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
@@ -194,7 +195,7 @@ public class CatalogRestTest {
 			
 			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
+			response = HttpClientUtilsTest.client(url, entity, HttpMethod.GET);
 			
 		} catch (ServiceBrokerException sbe) {
 			
@@ -227,11 +228,11 @@ public class CatalogRestTest {
 			
 			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
+			response = HttpClientUtilsTest.client(url, entity, HttpMethod.GET);
 			
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 			
-			JsonNode json = JsonUtils.convertToJson(response);
+			JsonNode json = JsonUtilsTest.convertStringToJson(response.getBody());
 			
 			if (!checkValidCatalogJson(json)) throw new ServiceBrokerException("validation check is fail.");
 			
@@ -322,7 +323,7 @@ public class CatalogRestTest {
 			
 			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
+			response = HttpClientUtilsTest.client(url, entity, HttpMethod.POST);
 			
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
@@ -360,7 +361,7 @@ public class CatalogRestTest {
 			
 			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.PUT);
+			response = HttpClientUtilsTest.client(url, entity, HttpMethod.PUT);
 			
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
@@ -397,7 +398,7 @@ public class CatalogRestTest {
 			
 			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.DELETE);
+			response = HttpClientUtilsTest.client(url, entity, HttpMethod.DELETE);
 			
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
@@ -434,7 +435,7 @@ public class CatalogRestTest {
 			
 			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.PATCH);
+			response = HttpClientUtilsTest.client(url, entity, HttpMethod.PATCH);
 			
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
@@ -474,7 +475,7 @@ public class CatalogRestTest {
 			
 			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.OPTIONS);
+			response = HttpClientUtilsTest.client(url, entity, HttpMethod.OPTIONS);
 			
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
@@ -513,7 +514,7 @@ public class CatalogRestTest {
 			
 			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.HEAD);
+			response = HttpClientUtilsTest.client(url, entity, HttpMethod.HEAD);
 			
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
