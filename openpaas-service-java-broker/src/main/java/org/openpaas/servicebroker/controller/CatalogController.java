@@ -1,5 +1,6 @@
 package org.openpaas.servicebroker.controller;
 
+import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.model.Catalog;
 import org.openpaas.servicebroker.service.CatalogService;
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class CatalogController extends BaseController {
 	}
 	
 	@RequestMapping(value = BASE_PATH, method = RequestMethod.GET)
-	public @ResponseBody Catalog getCatalog() {
+	public @ResponseBody Catalog getCatalog() throws ServiceBrokerException{
 		logger.debug("GET: " + BASE_PATH + ", getCatalog()");
 		return service.getCatalog();
 	}
