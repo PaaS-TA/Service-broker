@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+
+
 import org.openpaas.servicebroker.apiplatform.model.APIUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,32 +56,14 @@ public class APIServiceInstanceDAO {
 			};
 
 		try {
-			apiUser = jdbcTemplate.queryForObject(sql, mapper);
+			apiUser = (APIUser)jdbcTemplate.queryForObject(sql, mapper);
 			
 		} catch (EmptyResultDataAccessException e) {
 			
 			logger.info("no User");
 		}
 		
-//			@Override
-//			public APIUser mapRow(ResultSet rs, int rowNum) throws SQLException {
-////				APIUser apiUser = new APIUser()
-//				
-//				apiUser.setOrganization_guid(rs.getString("organization_guid"));
-//				apiUser.setUser_id(rs.getString("user_id"));
-//				apiUser.setUser_password(rs.getString("user_password"));
-//				
-//				
-//				System.out.println("APIUser get");
-//				System.out.println(apiUser.getUser_id());
-//				return apiUser;
-//			});
-//
-//		if(response==null){
-//			return null;
-//		}
-//		
-//		
+
 		System.out.println("APIUser get");
 		System.out.println(apiUser.getUser_id());
 		logger.info("getAPIUserByOrgID - end");

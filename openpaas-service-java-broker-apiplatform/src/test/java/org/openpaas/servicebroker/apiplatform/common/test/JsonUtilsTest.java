@@ -1,11 +1,8 @@
-package org.openpaas.servicebroker.apiplatform.common;
+package org.openpaas.servicebroker.apiplatform.common.test;
 
 import java.io.IOException;
 
-import org.openpaas.servicebroker.apiplatform.common.test.JsonUtilsTest;
-import org.openpaas.servicebroker.apiplatform.exception.APICatalogException;
-import org.openpaas.servicebroker.apiplatform.exception.APIServiceInstanceException;
-import org.openpaas.servicebroker.apiplatform.service.impl.APICatalogService;
+import org.openpaas.servicebroker.apiplatform.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +13,33 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class JsonUtils {
-	private static final Logger logger = LoggerFactory.getLogger(JsonUtilsTest.class) ;
+public class JsonUtilsTest {
 	
-	static public JsonNode convertToJson(ResponseEntity<String> httpResponse) throws ServiceBrokerException{
+	
+	public static JsonNode convertStringToJson(String data) throws ServiceBrokerException{
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode result = null;
+		
+		try {
+			// Convert response body(string) to JSON Object
+			result = mapper.readValue(data, JsonNode.class);
+			
+		} catch (JsonParseException e) {
+			throw new ServiceBrokerException(e.getMessage());
+		} catch (JsonMappingException e) {
+			throw new ServiceBrokerException(e.getMessage());
+		} catch (IOException e) {
+			throw new ServiceBrokerException(e.getMessage());
+		}
+		
+		return result;
+		
+	}
+
+	
+	private static final Logger logger = LoggerFactory.getLogger(JsonUtils.class) ;
+	
+	static public JsonNode convertToJson(ResponseEntity<String> httpResponse) throws Exception{
 
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode json = null;
@@ -41,19 +61,16 @@ public class JsonUtils {
 		
 		if (json.get("error").asBoolean() == true) { 
 			String apiPlatformMessage = json.get("message").asText();
-			
-			logger.info("API Platform Message : "+apiPlatformMessage);
+			System.out.println(apiPlatformMessage);
 			
 			if(apiPlatformMessage.equals("null is not supported")){
-				throw new ServiceBrokerException("Check! the HttpMethod or Media Type");				
+				throw new ServiceBrokerException("Check! HttpMethod");				
 			}
 			else if(apiPlatformMessage.equals("Login failed.Please recheck the username and password and try again.")){
 				throw new ServiceBrokerException("Check! the Username and Password");
 			}
-			else if(apiPlatformMessage.equals("User name already exists")){
-				
-				throw new APIServiceInstanceException(400, "APIPlatform UserSignup error");
-			}
+			
+			
 			else{
 				throw new ServiceBrokerException(json.get("message").asText());
 			}
@@ -74,3 +91,4 @@ public class JsonUtils {
 	
 
 }
+
