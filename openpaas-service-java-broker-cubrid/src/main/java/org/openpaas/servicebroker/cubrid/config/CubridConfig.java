@@ -53,8 +53,6 @@ public class CubridConfig {
 		if( !"".equals(serverPassword) && serverPassword != null) jsch.setPassword(serverPassword);
 		if( !"".equals(serverIdentity) && serverIdentity != null) jsch.setIdentity(serverIdentity);
 		
-		System.out.println(jsch.toString());
-		
 		return jsch;
 	}
 	
@@ -63,10 +61,10 @@ public class CubridConfig {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		//dataSource.setDriverClassName("com.mysql.jdbc.Driver");
 		dataSource.setDriverClassName(env.getRequiredProperty("jdbc.driver"));
-//		dataSource.setUrl("");
-//		dataSource.setUsername("");
-//		dataSource.setPassword("");
-//
+		dataSource.setUrl(env.getRequiredProperty("cubrid.url"));
+		dataSource.setUsername(env.getRequiredProperty("cubrid.userName"));
+		dataSource.setPassword(env.getRequiredProperty("cubrid.password"));
+
 		return dataSource;
         // instantiate, configure and return DataSource
     }
