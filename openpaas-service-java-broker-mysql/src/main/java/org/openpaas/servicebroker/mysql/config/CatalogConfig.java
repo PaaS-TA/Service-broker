@@ -22,7 +22,7 @@ public class CatalogConfig {
 					"Mysql DB", 
 					"A simple mysql implementation", 
 					true, 
-					false,
+					true,
 					Arrays.asList(
 							new Plan("411d0c3e-b086-4a24-b041-0aeef1a819d1", 
 									"Default Mysql Plan1", 
@@ -86,15 +86,12 @@ public class CatalogConfig {
 	private List<String> getBullets(String planType) {
 		if(planType.equals("A")){
 			return Arrays.asList("Shared MysqlDB server", 
-					//"10 MB Storage (not enforced)", 
 					"10 concurrent connections (not enforced)");
 		}else if(planType.equals("B")){
 			return Arrays.asList("Shared MysqlDB server", 
-					//"100 MB Storage (not enforced)", 
 					"100 concurrent connections (not enforced)");
 		}
 		return Arrays.asList("Shared MysqlDB server", 
-				//"10 MB Storage (not enforced)", 
 				"10 concurrent connections (not enforced)");
 	}
 	
