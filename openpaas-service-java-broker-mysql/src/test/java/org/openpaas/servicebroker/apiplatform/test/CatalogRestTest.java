@@ -29,8 +29,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 /**
- * 시작전에 Spring Boot로 Service Broker를 띄워 놓구 진행합니다.
- * 향후에 Spring Configuration?으로 서비스를 시작하게 만들 예정
+ * �떆�옉�쟾�뿉 Spring Boot濡� Service Broker瑜� �쓣�썙 �넃援� 吏꾪뻾�빀�땲�떎.
+ * �뼢�썑�뿉 Spring Configuration?�쑝濡� �꽌鍮꾩뒪瑜� �떆�옉�븯寃� 留뚮뱾 �삁�젙
  * 
  * @author ahnchan
  */
@@ -60,7 +60,7 @@ public class CatalogRestTest {
 	}
 	
 	/**
-	 * 사용자 ID, 비밀번호가 없을 경우
+	 * �궗�슜�옄 ID, 鍮꾨�踰덊샇媛� �뾾�쓣 寃쎌슦
 	 */
 	@Test	
 	public void getCatalogTest_noUser() {
@@ -93,7 +93,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * 사용자 ID, 비밀번호가 잘못 입력되었을 경우
+	 * �궗�슜�옄 ID, 鍮꾨�踰덊샇媛� �옒紐� �엯�젰�릺�뿀�쓣 寃쎌슦
 	 */
 	@Test	
 	public void getCatalogTest_invalidUser() {
@@ -127,7 +127,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * 사용자 ID, 비밀번호가 정상적으로 입력되었을 경우
+	 * �궗�슜�옄 ID, 鍮꾨�踰덊샇媛� �젙�긽�쟻�쑝濡� �엯�젰�릺�뿀�쓣 寃쎌슦
 	 */
 	@Test	
 	public void getCatalogTest_correctUser() {
@@ -161,7 +161,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * Version이 잘못 입력되었을 경우
+	 * Version�씠 �옒紐� �엯�젰�릺�뿀�쓣 寃쎌슦
 	 */
 	@Test	
 	public void getCatalogTest_incorrectAPIVersion() {
@@ -195,8 +195,8 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * Catalog 정보를 정상적으로 가져옴
-	 * Mandatory 부분이 다 들어가 있는지 확인
+	 * Catalog �젙蹂대�� �젙�긽�쟻�쑝濡� 媛��졇�샂
+	 * Mandatory 遺�遺꾩씠 �떎 �뱾�뼱媛� �엳�뒗吏� �솗�씤
 	 */
 	@Test	
 	public void getCatalogTest_validCatalog() {
@@ -289,7 +289,7 @@ public class CatalogRestTest {
 	
 	
 	/**
-	 * POST로 요청
+	 * POST濡� �슂泥�
 	 */
 	@Test	
 	public void getCatalogTest_methodPOST() {
@@ -327,7 +327,7 @@ public class CatalogRestTest {
 
 
 	/**
-	 * PUT으로 요청
+	 * PUT�쑝濡� �슂泥�
 	 */
 	@Test	
 	public void getCatalogTest_methodPUT() {
@@ -364,7 +364,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * DELETE로 요청
+	 * DELETE濡� �슂泥�
 	 */
 	@Test	
 	public void getCatalogTest_methodDELETE() {
@@ -401,7 +401,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * PATCH로 요청
+	 * PATCH濡� �슂泥�
 	 */
 	@Test	
 	public void getCatalogTest_methodPATCH() {
@@ -426,7 +426,7 @@ public class CatalogRestTest {
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
 		} catch (ServiceBrokerException sbe) {
-			
+			System.out.println("sbe.getMessage():::" + sbe.getMessage()+":::");
 			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
 			bException = true;
 			
@@ -441,7 +441,7 @@ public class CatalogRestTest {
 	
 	
 	/**
-	 * OPTIONS로 요청
+	 * OPTIONS濡� �슂泥�
 	 */
 	@Test	
 	public void getCatalogTest_methodOPTIONS() {
@@ -480,7 +480,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * HEAD로 요청
+	 * HEAD濡� �슂泥�
 	 */
 	@Test	
 	public void getCatalogTest_methodHEAD() {
@@ -504,7 +504,7 @@ public class CatalogRestTest {
 			
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
-		} catch (ServiceBrokerException sbe) {
+		} catch (ServiceBrokerException sbe) { 
 			
 			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
 			bException = true;

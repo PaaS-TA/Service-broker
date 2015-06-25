@@ -29,7 +29,7 @@ public class CatalogConfig {
 									"This is a default mysql plan1.  All services are created equally.",
 									getPlanMetadata("A")),
 							new Plan("4a932d9d-9bc5-4a86-937f-e2c14bb9f497", 
-									"Default Mysql Plan2", 
+									"Mysql Plan2", 
 									"This is a default mysql plan2.  All services are created equally.",
 									getPlanMetadata("B"))),
 					Arrays.asList("mysql", "document"),
@@ -86,15 +86,15 @@ public class CatalogConfig {
 	private List<String> getBullets(String planType) {
 		if(planType.equals("A")){
 			return Arrays.asList("Shared MysqlDB server", 
-					"10 MB Storage (not enforced)", 
+					//"10 MB Storage (not enforced)", 
 					"10 concurrent connections (not enforced)");
 		}else if(planType.equals("B")){
 			return Arrays.asList("Shared MysqlDB server", 
-					"100 MB Storage (not enforced)", 
-					"20 concurrent connections (not enforced)");
+					//"100 MB Storage (not enforced)", 
+					"100 concurrent connections (not enforced)");
 		}
 		return Arrays.asList("Shared MysqlDB server", 
-				"10 MB Storage (not enforced)", 
+				//"10 MB Storage (not enforced)", 
 				"10 concurrent connections (not enforced)");
 	}
 	

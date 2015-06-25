@@ -43,12 +43,13 @@ public class MysqlConfig {
 	@Bean
     public DataSource dataSource() {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
-		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+		dataSource.setDriverClassName(env.getRequiredProperty("jdbc.driver"));
 		//dataSource.setDriverClassName(env.getRequiredProperty("jdbc.driver"));
-		dataSource.setUrl("jdbc:mysql://192.168.4.41:3306");
-		dataSource.setUsername("borker");
-		dataSource.setPassword("qwer1234");
-//
+		//dataSource.setUrl("jdbc:mysql://192.168.4.37:3306");10.30.40.219
+		dataSource.setUrl(env.getRequiredProperty("jdbc.url"));
+		dataSource.setUsername(env.getRequiredProperty("jdbc.username"));
+		dataSource.setPassword(env.getRequiredProperty("jdbc.pwd"));
+
 		return dataSource;
         // instantiate, configure and return DataSource
     }
