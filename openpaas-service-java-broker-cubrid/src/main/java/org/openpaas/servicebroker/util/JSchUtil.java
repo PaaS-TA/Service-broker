@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
@@ -199,7 +198,7 @@ public class JSchUtil {
 	}
 	
 	public Map<String, List<String>> getResults(List<String> commands, String[] results) {
-		Map<String, List<String>> rsMap = new HashMap();
+		Map<String, List<String>> rsMap = new HashMap<String, List<String>>();
 		List<String> rsList = null;
 		
 		int i = 0;
@@ -219,7 +218,7 @@ public class JSchUtil {
 					if (j >= commands.size()-1) break;
 					
 					j++;
-					rsList = new ArrayList();					
+					rsList = new ArrayList<String>();					
 				} else if ( rsList != null) {
 					rsList.add(results[i]);
 				}

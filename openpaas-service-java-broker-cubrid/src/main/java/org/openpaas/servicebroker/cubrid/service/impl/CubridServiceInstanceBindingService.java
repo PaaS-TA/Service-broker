@@ -1,7 +1,11 @@
 package org.openpaas.servicebroker.cubrid.service.impl;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.exception.ServiceInstanceBindingExistsException;
@@ -48,17 +52,14 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 		}
 		ServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
 		
-		String database = instance.getServiceInstanceId();
-		String username = request.getBindingId();
+		String database = instance.getDatabaseName();
 		// TODO Password Generator
-		String password = "password";
+		String password = getPassword();
+		String username = null;
+		do {
+			username = getUsername();
+		} while(cubridAdminService.isExistsUser(database, username));
 		
-		if (cubridAdminService.isExistsUser(username)) {
-			// ensure the instance is empty
-			cubridAdminService.deleteUser(database, username);
-		}
-		
-
 		cubridAdminService.createUser(database, username, password);
 		
 		Map<String,Object> credentials = new HashMap<String,Object>();
@@ -66,6 +67,7 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 		credentials.put("hostname", cubridAdminService.getConnectionString(database, username, password));
 		
 		binding = new ServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, null, request.getAppGuid());
+		binding.setDatabaseUserName(username);
 		cubridAdminService.saveBind(binding);
 		
 		return binding;
@@ -80,11 +82,40 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 			throws ServiceBrokerException {
 		String bindingId = request.getBindingId();
 		ServiceInstanceBinding binding = getServiceInstanceBinding(bindingId);
+		ServiceInstance instance = cubridAdminService.findById(binding.getServiceInstanceId());
 		if (binding!= null) {
-			cubridAdminService.deleteUser(binding.getServiceInstanceId(), bindingId);
+			cubridAdminService.deleteUser(instance.getDatabaseName(), binding.getDatabaseUserName());
 			cubridAdminService.deleteBind(bindingId);
 		}
 		return binding;
+	}
+	
+	private String getUsername() {
+		String uuid16 = null;
+		MessageDigest digest = null;
+		try {
+			do {
+				digest = MessageDigest.getInstance("MD5");
+				digest.update(UUID.randomUUID().toString().getBytes());
+				uuid16 = new BigInteger(1, digest.digest()).toString(16).replaceAll("/[^a-zA-Z]+/", "").substring(0, 16);
+			} while(!uuid16.matches("^[a-zA-Z][a-zA-Z0-9]+"));
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		
+		return uuid16;
+	}
+	
+	private String getPassword() {
+		MessageDigest digest = null;
+		try {
+				digest = MessageDigest.getInstance("MD5");
+				digest.update(UUID.randomUUID().toString().getBytes());
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		
+		return new BigInteger(1, digest.digest()).toString(16).replaceAll("/[^a-zA-Z]+/", "").substring(0, 16);
 	}
 
 }

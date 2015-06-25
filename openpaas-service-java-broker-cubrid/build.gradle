@@ -40,7 +40,7 @@ configurations {
 
 dependencies {
     
-    compile files('libs/openpaas-cf-service-java-broker.jar')
+    compile files('libs/openpaas-service-java-broker.jar')
     
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat:${springBootVersion}")
     compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")

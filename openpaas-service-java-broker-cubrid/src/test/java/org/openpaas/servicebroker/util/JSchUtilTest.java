@@ -41,7 +41,7 @@ public class JSchUtilTest {
 	public void shellTest() {
 		
 		
-		List<String> commands = new ArrayList();
+		List<String> commands = new ArrayList<String>();
 		commands.add("cm_admin listdb");
 		
 

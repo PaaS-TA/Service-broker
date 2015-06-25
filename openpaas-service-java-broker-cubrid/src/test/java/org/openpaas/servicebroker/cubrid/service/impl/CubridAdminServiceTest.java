@@ -69,7 +69,7 @@ public class CubridAdminServiceTest {
 	@Test
 	public void deleteDatabase() throws CubridServiceException {
 		ServiceInstance serviceInstance = new ServiceInstance();
-		serviceInstance.setDatabaseName("test_db_name");
+		serviceInstance.setDatabaseName("testdb1");
 		
 		cubridAdminService.deleteDatabase(serviceInstance );
 	}
@@ -109,7 +109,7 @@ public class CubridAdminServiceTest {
 		System.out.println(m.invoke(cubridAdminService, null));
 	}
 	*/
-	@Test
+	/*@Test
 	@Transactional
 	public void queryTest() {
 		String service_instance_id = "test_service_instance_id";
@@ -125,7 +125,7 @@ public class CubridAdminServiceTest {
 		System.out.println("databases : " + databases);
 		
 		jdbcTemplate.update("delete from service_instances where guid = ?", service_instance_id);
-	}
+	}*/
 	
 	@Test
 	public void isExistsService() {
@@ -141,8 +141,8 @@ public class CubridAdminServiceTest {
 	@Test
 	public void isExistsUser() {
 		
-		assertTrue(cubridAdminService.isExistsUser("test_db_user_name"));
-		assertFalse(cubridAdminService.isExistsUser("test_db_user_name_not_exist"));
+		assertTrue(cubridAdminService.isExistsUser("test_db_name", "test_db_user_name"));
+		assertFalse(cubridAdminService.isExistsUser("test_db_name", "test_db_user_name_not_exist"));
 	}
 	
 	@Test

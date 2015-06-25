@@ -22,11 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Mongo impl to manage service instances.  Creating a service does the following:
+ * Cubrid impl to manage service instances.  Creating a service does the following:
  * creates a new database,
- * saves the ServiceInstance info to the Mongo repository.
+ * saves the ServiceInstance info to the Cubrid repository.
  *  
- * @author sgreenberg@gopivotal.com
+ * @author
  *
  */
 @Service
@@ -48,18 +48,17 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		System.out.println("CubridServiceInstanceService CLASS createServiceInstance");
 		logger.debug("CubridServiceInstanceService CLASS createServiceInstance");
 		// TODO Cubrid dashboard
-		ServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
+		//ServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
 		
-		if (cubridAdminService.isExistsService(instance)) {
-			// ensure the instance is empty
-			cubridAdminService.deleteDatabase(instance);
-		}
-		
-		instance.setDatabaseName(getDatabaseName());
-		
+		ServiceInstance instance = new ServiceInstance();
+		instance.setServiceInstanceId(request.getServiceInstanceId());
+		instance.setPlanId(request.getPlanId());
+		do {
+			instance.setDatabaseName(getDatabaseName());
+		} while(cubridAdminService.isExistsService(instance));
 		cubridAdminService.createDatabase(instance);
-		
 		cubridAdminService.save(instance);
+		
 		return instance;
 	}
 	
@@ -95,7 +94,7 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
-		//[^a-zA-Z0-9]  ->  ^이 안으로 들어가면 제외(부정)의 의미가 된다. 영문자나 숫자로 시작할 수 없을 때
+		//[^a-zA-Z0-9]
 		return new BigInteger(1, digest.digest()).toString(16).replaceAll("/[^a-zA-Z0-9]+/", "").substring(0, 16);
 		
 	}
