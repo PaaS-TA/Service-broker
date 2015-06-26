@@ -23,6 +23,7 @@ import org.openpaas.servicebroker.util.JSchUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,7 +70,7 @@ public class CubridAdminServiceTest {
 	@Test
 	public void deleteDatabase() throws CubridServiceException {
 		ServiceInstance serviceInstance = new ServiceInstance();
-		serviceInstance.setDatabaseName("testdb1");
+		serviceInstance.setDatabaseName("test_createdb_A");
 		
 		cubridAdminService.deleteDatabase(serviceInstance );
 	}
@@ -77,8 +78,9 @@ public class CubridAdminServiceTest {
 	@Test
 	public void createDatabase() throws CubridServiceException {
 		ServiceInstance serviceInstance = new ServiceInstance();
-		serviceInstance.setDatabaseName("cubrid_test");
-		
+		serviceInstance.setServiceInstanceId("test_createdb_A");
+		serviceInstance.setDatabaseName("test_createdb_A");
+		serviceInstance.setPlanId("cubrid-plan-A");
 		cubridAdminService.createDatabase(serviceInstance );
 	}
 	
@@ -179,6 +181,21 @@ public class CubridAdminServiceTest {
 		assertEquals(service_instance_id, serviceInstanceBinding.getServiceInstanceId());
 		assertEquals(db_user_name, serviceInstanceBinding.getDatabaseUserName());
 		
+	}
+	
+	@Test public void getServiceAddress() {
+		StringBuilder builder = new StringBuilder();
+		
+		DriverManagerDataSource ds = (DriverManagerDataSource) jdbcTemplate.getDataSource();
+		
+		String[] split = ds.getUrl().split(":");
+		
+		builder.append(jsch.getHostname());
+		builder.append(":");
+		builder.append("30000");
+		builder.append(":");
+		
+		System.out.println(split[3]);
 	}
 
 }

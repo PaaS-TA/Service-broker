@@ -45,7 +45,7 @@ public class CubridConfiguration {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		//dataSource.setDriverClassName("com.mysql.jdbc.Driver");
 		dataSource.setDriverClassName("cubrid.jdbc.driver.CUBRIDDriver");
-		dataSource.setUrl("jdbc:cubrid:localhost::cubrid_test:::");
+		dataSource.setUrl("jdbc:cubrid:localhost:30000:cubrid_test:::");
 		dataSource.setUsername("dba");
 		dataSource.setPassword("");
 

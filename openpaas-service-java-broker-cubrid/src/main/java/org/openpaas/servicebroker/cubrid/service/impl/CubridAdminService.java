@@ -1,6 +1,7 @@
 package org.openpaas.servicebroker.cubrid.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -32,10 +34,39 @@ public class CubridAdminService {
 	@Autowired 
 	private JdbcTemplate jdbcTemplate;
 	
+	private Map<String, Object> plans = null;
+	
 	@Autowired
 	public CubridAdminService(JSchUtil jsch, JdbcTemplate jdbcTemplate) {
 		this.jsch = jsch;
 		this.jdbcTemplate = jdbcTemplate;
+		
+		this.plans = new HashMap<String, Object>();
+		Map<String, String> plan = new HashMap<String, String>();
+		
+		//Plan A
+		plan.put("vol", "100M");
+		plan.put("charset", "ko_KR.utf8");
+		this.plans.put("cubrid-plan-A", plan);
+		
+		plan = new HashMap<String, String>();
+		//Plan B
+		plan.put("vol", "200M");
+		plan.put("charset", "ko_KR.utf8");
+		this.plans.put("cubrid-plan-B", plan);
+		
+		plan = new HashMap<String, String>();
+		//Plan C
+		plan.put("vol", "100M");
+		plan.put("charset", "ko_KR.euckr");
+		this.plans.put("cubrid-plan-C", plan);
+		
+		plan = new HashMap<String, String>();
+		//Plan D
+		plan.put("vol", "200M");
+		plan.put("charset", "ko_KR.euckr");
+		this.plans.put("cubrid-plan-D", plan);
+		
 	}
 		
 	public boolean isExistsService(ServiceInstance instance){
@@ -126,8 +157,26 @@ public class CubridAdminService {
 	
 	public void saveBind(ServiceInstanceBinding serviceInstanceBinding) throws CubridServiceException{
 		try{
-			jdbcTemplate.update("insert into service_instance_bindings (guid, service_instance_id, db_user_name) values (?, ?, ?)",
+			jdbcTemplate.update("INSERT INTO service_instance_bindings (guid, service_instance_id, db_user_name) values (?, ?, ?)",
 					serviceInstanceBinding.getId(), serviceInstanceBinding.getServiceInstanceId(), serviceInstanceBinding.getDatabaseUserName());
+		} catch (Exception e) {
+			throw handleException(e);
+		}
+	}
+	
+	public void update(ServiceInstance instance, ServiceInstance updateInstance) throws CubridServiceException{
+		try{
+			jdbcTemplate.update("UPDATE service_instances SET plan_id = ? WHERE guid = ?", 
+						updateInstance.getPlanId(), instance.getServiceInstanceId());
+		} catch (Exception e) {
+			throw handleException(e);
+		}
+	}
+	
+	public void addVolume(String databaseName) throws CubridServiceException{
+		try{
+			String command = "cubrid addvoldb -p data --db-volume-size=100MB " + databaseName;
+			jsch.shell(command);
 		} catch (Exception e) {
 			throw handleException(e);
 		}
@@ -161,16 +210,21 @@ public class CubridAdminService {
 			String databaseName = serviceInstance.getDatabaseName();
 			String filePath = "$CUBRID_DATABASES/" + databaseName;
 			List<String> commands = new ArrayList<>();
+			String planId = serviceInstance.getPlanId();
+			
+			Map<String, String> plan = (Map<String, String>) plans.get(planId);
+			
+			if (plan == null) plan = (Map<String, String>) plans.get("A");
 			
 			//1. create shell command(s)
 			//1-1. create directory for database
 			commands.add("mkdir -p " + filePath);
 			//1-2. create database
 			commands.add("cubrid createdb "
-					+ "--db-volume-size=100M "
+					+ "--db-volume-size="+plan.get("vol")+" "
 					+ "--log-volume-size=100M "
 					+ "--file-path="+filePath+" "
-					+ databaseName+" en_US");
+					+ databaseName+" "+plan.get("charset"));
 			//1-3. start database server
 			commands.add("cubrid server start " + databaseName);
 			
@@ -229,9 +283,12 @@ public class CubridAdminService {
 	public String getServerAddresses() {
 		StringBuilder builder = new StringBuilder();
 		
-		builder.append(jsch.getHostname());
+		DriverManagerDataSource ds = (DriverManagerDataSource) jdbcTemplate.getDataSource();
+		String[] url = ds.getUrl().split(":");
+		
+		builder.append(url[2]);
 		builder.append(":");
-		builder.append("30000");
+		builder.append(url[3]);
 		builder.append(":");
 		return builder.toString();
 	}

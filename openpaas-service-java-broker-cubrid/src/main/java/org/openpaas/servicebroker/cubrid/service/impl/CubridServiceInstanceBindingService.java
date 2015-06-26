@@ -65,6 +65,8 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 		Map<String,Object> credentials = new HashMap<String,Object>();
 		credentials.put("uri", cubridAdminService.getConnectionString(database, username, password));
 		credentials.put("hostname", cubridAdminService.getConnectionString(database, username, password));
+		credentials.put("username", username);
+		credentials.put("password", password);
 		
 		binding = new ServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, null, request.getAppGuid());
 		binding.setDatabaseUserName(username);

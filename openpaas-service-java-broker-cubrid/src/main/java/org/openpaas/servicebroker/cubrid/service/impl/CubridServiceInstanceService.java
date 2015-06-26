@@ -80,9 +80,17 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 	public ServiceInstance updateServiceInstance(UpdateServiceInstanceRequest request)
 			throws ServiceInstanceUpdateNotSupportedException, ServiceBrokerException, ServiceInstanceDoesNotExistException {
 		ServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
-		cubridAdminService.delete(instance.getServiceInstanceId());
+		//cubridAdminService.delete(instance.getServiceInstanceId());
 		ServiceInstance updatedInstance = new ServiceInstance(request);
-		cubridAdminService.save(updatedInstance);
+		//cubridAdminService.save(updatedInstance);
+		if ( ("cubrid-plan-A".equals(instance.getPlanId()) && "cubrid-plan-B".equals(updatedInstance.getPlanId()))
+				|| ("cubrid-plan-C".equals(instance.getPlanId()) && "cubrid-plan-D".equals(updatedInstance.getPlanId())) ) {
+			cubridAdminService.addVolume(instance.getDatabaseName());
+			cubridAdminService.update(updatedInstance, updatedInstance);
+		} else {
+			throw new ServiceInstanceUpdateNotSupportedException("Only supported add volume.");
+		}
+		
 		return updatedInstance;
 	}
 	
