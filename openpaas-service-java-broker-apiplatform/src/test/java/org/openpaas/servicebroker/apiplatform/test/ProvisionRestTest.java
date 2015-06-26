@@ -15,9 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openpaas.servicebroker.apiplatform.common.JsonUtils;
-import org.openpaas.servicebroker.apiplatform.test.common.HttpClientTestUtils;
-import org.openpaas.servicebroker.apiplatform.test.common.ProvisionBody;
+import org.openpaas.servicebroker.common.JsonUtils;
+import org.openpaas.servicebroker.common.HttpClientUtils;
+import org.openpaas.servicebroker.common.ProvisionBody;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -94,7 +94,7 @@ public class ProvisionRestTest {
 			System.out.println("url:"+url);
 			System.out.println("body:"+body);
 			
-			response = HttpClientTestUtils.sendProvision(url, entity, HttpMethod.PUT);
+			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 			
 		} catch (ServiceBrokerException sbe) {
 			
@@ -140,11 +140,11 @@ public class ProvisionRestTest {
 			System.out.println("url:"+url);
 			System.out.println("body:"+body);
 			
-			response = HttpClientTestUtils.sendProvision(url, entity, HttpMethod.PUT);
+			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 			
 		} catch (ServiceBrokerException sbe) {
 			
-			assertEquals("No user", sbe.getMessage(), "401 Unauthorized");
+			assertEquals("No user", sbe.getMessage(), "401 Unauthorize");
 			bException = true;
 			
 		}
@@ -185,13 +185,12 @@ public class ProvisionRestTest {
 			System.out.println("url:"+url);
 			System.out.println("body:"+body);
 			
-			response = HttpClientTestUtils.sendProvision(url, entity, HttpMethod.PUT);
+			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 			
 		} catch (ServiceBrokerException sbe) {
 			
 			assertTrue("Success", true);
 			bException = true;
-			
 		}
 		
 		if (!bException) assertFalse("Success", true);

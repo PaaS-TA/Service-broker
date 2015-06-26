@@ -15,6 +15,11 @@ public class APIServiceInstanceException extends ServiceBrokerException{
 		this.statusCode = status;
 		this.codeMessage = message;
 	}
+	
+	public APIServiceInstanceException(String message) {
+		super(message);
+		this.codeMessage = message;
+	}
 
 	public int getStatusCode() {
 		return statusCode;

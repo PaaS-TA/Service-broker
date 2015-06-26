@@ -56,7 +56,7 @@ public class ServiceInstanceController extends BaseController {
 		logger.debug("PUT: " + BASE_PATH + "/{instanceId}" 
 				+ ", createServiceInstance(), serviceInstanceId = " + serviceInstanceId);
 		ServiceDefinition svc = catalogService.getServiceDefinition(request.getServiceDefinitionId());
-		logger.debug("svc.........................."); 
+		logger.debug("svc..........................");
 		if (svc == null) {
 			throw new ServiceDefinitionDoesNotExistException(request.getServiceDefinitionId());
 		}

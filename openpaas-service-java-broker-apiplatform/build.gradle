@@ -45,7 +45,7 @@ dependencies {
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat:${springBootVersion}")
     compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
     compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
-    //compile("org.hibernate:hibernate-validator:${hibernateValidatorVersion}")
+    compile("org.hibernate:hibernate-validator:${hibernateValidatorVersion}")
 
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
     testCompile("com.jayway.jsonpath:json-path:${jsonPathVersion}")
