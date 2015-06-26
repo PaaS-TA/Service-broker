@@ -1,7 +1,8 @@
 package org.openpaas.servicebroker.mysql.service.impl;
 
 
-import java.util.UUID;
+import java.util.List;
+import java.util.Map;
 
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.exception.ServiceInstanceDoesNotExistException;
@@ -11,7 +12,6 @@ import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
 import org.openpaas.servicebroker.model.DeleteServiceInstanceRequest;
 import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.UpdateServiceInstanceRequest;
-import org.openpaas.servicebroker.mysql.exception.MysqlServiceException;
 import org.openpaas.servicebroker.service.CatalogService;
 import org.openpaas.servicebroker.service.ServiceInstanceService;
 import org.slf4j.Logger;
@@ -20,18 +20,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Mongo impl to manage service instances.  Creating a service does the following:
+ * Mysql impl to manage service instances.  Creating a service does the following:
  * creates a new database,
- * saves the ServiceInstance info to the Mongo repository.
+ * saves the ServiceInstance info to the Mysql repository.
  *  
- * @author sgreenberg@gopivotal.com
+ * @author kkanzo@bluedigm.com
  *
  */
 @Service
 public class MysqlServiceInstanceService implements ServiceInstanceService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MysqlServiceInstanceService.class);
-	
+
 	@Autowired
 	private MysqlAdminService mysqlAdminService;
 	
@@ -43,67 +43,114 @@ public class MysqlServiceInstanceService implements ServiceInstanceService {
 		this.mysqlAdminService = mysqlAdminService;
 	}
 	
+	/**
+	 * Provision(create)
+	 */
 	@Override
 	public ServiceInstance createServiceInstance(CreateServiceInstanceRequest request) 
 			throws ServiceInstanceExistsException, ServiceBrokerException {
 		System.out.println("MysqlServiceInstanceService CLASS createServiceInstance");
 		logger.debug("MysqlServiceInstanceService CLASS createServiceInstance");
-
+		
+		/* 최초 ServiceInstance 생성 요청시에는 해당 ServiceInstance가 존재하지 않아 해당 메소드를 주석처리 하였습니다.*/
 		//ServiceInstance instance = mysqlAdminService.findById(request.getServiceInstanceId());
+		
+		// 요청 정보로부터 ServiceInstance정보를 생성합니다.
 		ServiceInstance instance = mysqlAdminService.createServiceInstanceByRequest(request);
-		//if(instance == null) instance = mysqlAdminService.createServiceInstanceByRequest(request);
 		
-		/*System.out.println("ServiceInstanceId 	: " + instance.getServiceInstanceId());
-		System.out.println("ServiceDefinitionId : " + instance.getServiceDefinitionId());
-		System.out.println("PlanId 				: " + instance.getPlanId());
-		System.out.println("OrganizationGuid 	: " + instance.getOrganizationGuid());
-		System.out.println("SpaceGuid 			: " + instance.getSpaceGuid());
-		System.out.println("DashboardUrl 		: " + instance.getDashboardUrl());
-		*/
-		
+		// 해당 요청 정보로부터 생성된 Database가 존재하는지 확인합니다.
+		// 존재 할 경우 Database를 삭제합니다.
 		if (mysqlAdminService.isExistsService(instance)) {
 			// ensure the instance is empty
 			mysqlAdminService.deleteDatabase(instance);
+			//throw new ServiceInstanceExistsException(instance);
 		}
+		
+		// Database를 생성합니다.
 		mysqlAdminService.createDatabase(instance);
 		
+		// ServiceInstance 정보를 저장합니다.
 		mysqlAdminService.save(instance);
+		
 		return instance;
 	}
 	
-
-	@Override
-	public ServiceInstance getServiceInstance(String id) {
-		return mysqlAdminService.findById(id);
-	}
-
+	/**
+	 * Provision(delete)
+	 */
 	@Override
 	public ServiceInstance deleteServiceInstance(DeleteServiceInstanceRequest request) throws ServiceBrokerException {
+		
+		// ServiceInstanceId로 ServiceInstance 정보를 조회합니다.
 		ServiceInstance instance = mysqlAdminService.findById(request.getServiceInstanceId());
+		
+		// 조회된 ServiceInstance가 없을경우 예외처리
+		if(instance == null) throw new ServiceBrokerException("Not Exists ServiceInstance");
+		
+		// 조회된 ServiceInstance정보로 해당 Database를 삭제합니다
 		mysqlAdminService.deleteDatabase(instance);
+		// 조회된 ServiceInstance정보로 해당 ServiceInstance정보를 삭제합니다
 		mysqlAdminService.delete(instance.getServiceInstanceId());
+		
+		/* 조회된 ServiceInstance정보로 해당 ServiceInstanceBinding 정보를 삭제합니다.*/
+		// ServiceInstanceBinding정보를 조회합니다.
+		List<Map<String,Object>> list = mysqlAdminService.findBindByInstanceId(instance.getServiceInstanceId());
+		for(Map<String,Object> tmp : list){
+			// ServiceInstance에 Binding 된 사용자 정보를 삭제합니다.
+			mysqlAdminService.deleteUser(instance.getServiceInstanceId(), (String)tmp.get("binding_id"));
+			
+			// ServiceInstance에 Binding정보를 삭제합니다.
+			mysqlAdminService.deleteBind((String)tmp.get("binding_id"));
+		}
+		
 		return instance;		
 	}
 
+	/**
+	 * Provision(update)
+	 */
 	@Override
 	public ServiceInstance updateServiceInstance(UpdateServiceInstanceRequest request)
 			throws ServiceInstanceUpdateNotSupportedException, ServiceBrokerException, ServiceInstanceDoesNotExistException {
+		
+		// ServiceInstanceId로 ServiceInstance 정보를 조회합니다.
 		ServiceInstance instance = mysqlAdminService.findById(request.getServiceInstanceId());
 		
+		// ServiceInstance가 없을경우 예외처리
+		if(instance == null) throw new ServiceInstanceDoesNotExistException(request.getServiceInstanceId());
+		
+		// 요청 정보로부터 새로운 ServiceInstance정보를 생성합니다.
 		ServiceInstance updatedInstance = new ServiceInstance(request);
 
+		/* Provision(update)시 Database에 직접적인 변경사항이 존재하지 않아 주석처리 합니다.
+		 * 
 		if (mysqlAdminService.isExistsService(instance)) {
 			// ensure the instance is empty
 			mysqlAdminService.deleteDatabase(instance);
 		}
 
 		mysqlAdminService.createDatabase(updatedInstance);
+			
+		mysqlAdminService.delete(instance.getServiceInstanceId());
+		*/
 		
-		//mysqlAdminService.delete(instance.getServiceInstanceId());
-		
-		mysqlAdminService.updatePlan(instance, updatedInstance);
+		/* 기존 ServiceInstance의 Plan에 변견될경우 다음 처리를 수행합니다. */
+		if(!instance.getPlanId().equals(updatedInstance.getPlanId())){
+			// ServiceInstance의 Plan 정보를 수정합니다.
+			mysqlAdminService.updatePlan(instance, updatedInstance);
+			
+			// Plan 정보에 따라 해당 Database 사용자의 MAX_USER_CONNECTIONS 정보를 조정합니다.
+			mysqlAdminService.setUserConnections(updatedInstance.getPlanId(), instance.getServiceInstanceId());
+		}
 		return updatedInstance;
 	}
 	
+	/**
+	 * Provision Info
+	 */
+	@Override
+	public ServiceInstance getServiceInstance(String id) {
+		return mysqlAdminService.findById(id);
+	}
 	
 }
