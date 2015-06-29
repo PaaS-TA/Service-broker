@@ -20,7 +20,7 @@ public class CatalogConfig {
 		return new Catalog( Arrays.asList(
 				new ServiceDefinition(
 						"cubrid", 
-						"Cubrid DB", 
+						"Cubrid-DB", 
 						"A simple cubrid implementation", 
 						true, 
 						true,
@@ -73,22 +73,22 @@ public class CatalogConfig {
 		
 		List<Plan> plans = Arrays.asList(
 				new Plan("cubrid-plan-A", 
-						"Cubrid Plan A", 
+						"Cubrid-Plan-A", 
 						"This is a Cubrid plan A. 100 MB Database volume size and UTF-8 Charactor set.",
 						getPlanMetadata("100 MB", "UTF-8"),
 						true),
 				new Plan("cubrid-plan-B", 
-						"Cubrid Plan B", 
+						"Cubrid-Plan-B", 
 						"This is a Cubrid plan B. 200 MB Database volume size and UTF-8 Charactor set.",
 						getPlanMetadata("200 MB", "UTF-8"),
 						true),
 				new Plan("cubrid-plan-C", 
-						"Cubrid Plan C", 
+						"Cubrid-Plan-C", 
 						"This is a Cubrid plan C. 100 MB Database volume size and EUC-KR Charactor set.",
 						getPlanMetadata("100 MB", "EUC-KR"),
 						true),
 				new Plan("cubrid-plan-D", 
-						"Cubrid Plan D", 
+						"Cubrid-Plan-D", 
 						"This is a Cubrid plan D. 200 MB Database volume size and EUC-KR Charactor set.",
 						getPlanMetadata("200 MB", "EUC-KR"),
 						true));
