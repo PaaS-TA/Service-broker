@@ -13,6 +13,8 @@ import org.openpaas.servicebroker.model.CreateServiceInstanceBindingRequest;
 import org.openpaas.servicebroker.model.DeleteServiceInstanceBindingRequest;
 import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.ServiceInstanceBinding;
+import org.openpaas.servicebroker.cubrid.model.CubridServiceInstance;
+import org.openpaas.servicebroker.cubrid.model.CubridServiceInstanceBinding;
 import org.openpaas.servicebroker.service.ServiceInstanceBindingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,11 +48,11 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 			throws ServiceInstanceBindingExistsException, ServiceBrokerException {
 		
 		logger.debug("CubridServiceInstanceBindingService CLASS createServiceInstanceBinding");
-		ServiceInstanceBinding binding = cubridAdminService.findBindById(request.getBindingId());
+		CubridServiceInstanceBinding binding = cubridAdminService.findBindById(request.getBindingId());
 		if (binding != null) {
 			throw new ServiceInstanceBindingExistsException(binding);
 		}
-		ServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
+		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
 		
 		String database = instance.getDatabaseName();
 		// TODO Password Generator
@@ -68,14 +70,14 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 		credentials.put("username", username);
 		credentials.put("password", password);
 		
-		binding = new ServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, null, request.getAppGuid());
+		binding = new CubridServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, null, request.getAppGuid());
 		binding.setDatabaseUserName(username);
 		cubridAdminService.saveBind(binding);
 		
 		return binding;
 	}
 
-	protected ServiceInstanceBinding getServiceInstanceBinding(String id) {
+	protected CubridServiceInstanceBinding getServiceInstanceBinding(String id) {
 		return cubridAdminService.findBindById(id);
 	}
  
@@ -83,8 +85,8 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 	public ServiceInstanceBinding deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request)
 			throws ServiceBrokerException {
 		String bindingId = request.getBindingId();
-		ServiceInstanceBinding binding = getServiceInstanceBinding(bindingId);
-		ServiceInstance instance = cubridAdminService.findById(binding.getServiceInstanceId());
+		CubridServiceInstanceBinding binding = getServiceInstanceBinding(bindingId);
+		CubridServiceInstance instance = cubridAdminService.findById(binding.getServiceInstanceId());
 		if (binding!= null) {
 			cubridAdminService.deleteUser(instance.getDatabaseName(), binding.getDatabaseUserName());
 			cubridAdminService.deleteBind(bindingId);

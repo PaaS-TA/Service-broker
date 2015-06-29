@@ -1,15 +1,17 @@
-package org.openpaas.servicebroker.model;
+package org.openpaas.servicebroker.cubrid.model;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.openpaas.servicebroker.model.ServiceInstanceBinding;
+
 /**
  * A binding to a service instance
  * 
- * @author sgreenberg@gopivotal.com
+ * @author 
  *
  */
-public class ServiceInstanceBinding {
+public class CubridServiceInstanceBinding extends ServiceInstanceBinding{
 
 	private String id;
 	private String serviceInstanceId;
@@ -18,21 +20,18 @@ public class ServiceInstanceBinding {
 	private String syslogDrainUrl;
 	private String appGuid;
 
-	public ServiceInstanceBinding(String id, 
+	public CubridServiceInstanceBinding(String id, 
 			String serviceInstanceId, 
 			Map<String,Object> credentials,
 			String syslogDrainUrl, String appGuid) {
-		this.id = id;
-		this.serviceInstanceId = serviceInstanceId;
-		setCredentials(credentials);
-		this.syslogDrainUrl = syslogDrainUrl;
-		this.appGuid = appGuid;
+		super(id, serviceInstanceId, credentials, syslogDrainUrl, appGuid);
+		
 	}
 
-	public ServiceInstanceBinding() {
-		// TODO Auto-generated constructor stub
+	public CubridServiceInstanceBinding() {
+		super("", "", new HashMap<String, Object>() , "", "");
 	}
-
+	
 	public void setId(String id) {
 		this.id = id;
 	}

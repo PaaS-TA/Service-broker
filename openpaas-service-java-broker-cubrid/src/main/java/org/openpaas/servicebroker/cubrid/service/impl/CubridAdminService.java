@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.openpaas.servicebroker.cubrid.exception.CubridServiceException;
+import org.openpaas.servicebroker.cubrid.model.CubridServiceInstance;
+import org.openpaas.servicebroker.cubrid.model.CubridServiceInstanceBinding;
 import org.openpaas.servicebroker.model.ServiceInstance;
-import org.openpaas.servicebroker.model.ServiceInstanceBinding;
 import org.openpaas.servicebroker.util.JSchUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,7 @@ public class CubridAdminService {
 		
 	}
 		
-	public boolean isExistsService(ServiceInstance instance){
+	public boolean isExistsService(CubridServiceInstance instance){
 		
 		List<Map<String,Object>> databases = jdbcTemplate.queryForList("SELECT * FROM service_instances WHERE db_name = '"+instance.getDatabaseName()+"'");
 		
@@ -85,14 +86,14 @@ public class CubridAdminService {
 		return users.size() > 0 ? true : false;
 	}
 	
-	public ServiceInstance findById(String id){
-		ServiceInstance serviceInstance = null;
+	public CubridServiceInstance findById(String id){
+		CubridServiceInstance serviceInstance = null;
 		
 		List<Map<String,Object>> findByIdList = jdbcTemplate.queryForList("SELECT * FROM service_instances WHERE guid = '"+id+"'");
 		
 		if ( findByIdList.size() > 0) {
 			
-			serviceInstance = new ServiceInstance();
+			serviceInstance = new CubridServiceInstance();
 			Map<String,Object> findById = findByIdList.get(0); 
 			
 			String serviceInstanceId = (String)findById.get("guid");
@@ -107,19 +108,18 @@ public class CubridAdminService {
 		return serviceInstance;
 	}
 	
-	public ServiceInstanceBinding findBindById(String id){
-		ServiceInstanceBinding serviceInstanceBinding = null;
+	public CubridServiceInstanceBinding findBindById(String id){
+		CubridServiceInstanceBinding serviceInstanceBinding = null;
 		
 		List<Map<String,Object>> findByIdList = jdbcTemplate.queryForList("SELECT * FROM service_instance_bindings WHERE guid = '"+id+"'");
 		
 		if ( findByIdList.size() > 0) {
-			serviceInstanceBinding = new ServiceInstanceBinding();
+			serviceInstanceBinding = new CubridServiceInstanceBinding();
 			Map<String,Object> findById = findByIdList.get(0);
 			
 			String serviceInstanceBindingId = (String)findById.get("guid");
 			String serviceInstanceId = (String)findById.get("service_instance_id");
 			String databaseUserName = (String)findById.get("db_user_name");
-			
 			if ( !"".equals(serviceInstanceBindingId) && serviceInstanceBindingId !=null) serviceInstanceBinding.setId(serviceInstanceBindingId);
 			if ( !"".equals(serviceInstanceId) && serviceInstanceId !=null) serviceInstanceBinding.setServiceInstanceId(serviceInstanceId);
 			if ( !"".equals(databaseUserName) && databaseUserName !=null) serviceInstanceBinding.setDatabaseUserName(databaseUserName);
@@ -146,7 +146,7 @@ public class CubridAdminService {
 		}
 	}
 	
-	public void save(ServiceInstance serviceInstance) throws CubridServiceException{
+	public void save(CubridServiceInstance serviceInstance) throws CubridServiceException{
 		try{
 			jdbcTemplate.update("INSERT INTO service_instances (guid, plan_id, db_name) values (?, ?, ?)", 
 					serviceInstance.getServiceInstanceId(), serviceInstance.getPlanId(), serviceInstance.getDatabaseName());
@@ -155,8 +155,11 @@ public class CubridAdminService {
 		}
 	}
 	
-	public void saveBind(ServiceInstanceBinding serviceInstanceBinding) throws CubridServiceException{
+	public void saveBind(CubridServiceInstanceBinding serviceInstanceBinding) throws CubridServiceException{
 		try{
+			System.out.println(serviceInstanceBinding.getId());
+			System.out.println(serviceInstanceBinding.getServiceInstanceId());
+			System.out.println(serviceInstanceBinding.getDatabaseUserName());
 			jdbcTemplate.update("INSERT INTO service_instance_bindings (guid, service_instance_id, db_user_name) values (?, ?, ?)",
 					serviceInstanceBinding.getId(), serviceInstanceBinding.getServiceInstanceId(), serviceInstanceBinding.getDatabaseUserName());
 		} catch (Exception e) {
@@ -182,7 +185,7 @@ public class CubridAdminService {
 		}
 	}
 	
-	public void deleteDatabase(ServiceInstance serviceInstance) throws CubridServiceException{
+	public void deleteDatabase(CubridServiceInstance serviceInstance) throws CubridServiceException{
 		try{
 			// database name
 			String databaseName = serviceInstance.getDatabaseName();
@@ -204,7 +207,7 @@ public class CubridAdminService {
 		}
 	}
 	
-	public void createDatabase(ServiceInstance serviceInstance) throws CubridServiceException{
+	public void createDatabase(CubridServiceInstance serviceInstance) throws CubridServiceException{
 		try{
 			// database name
 			String databaseName = serviceInstance.getDatabaseName();

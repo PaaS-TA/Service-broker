@@ -14,6 +14,7 @@ import org.openpaas.servicebroker.exception.ServiceInstanceUpdateNotSupportedExc
 import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
 import org.openpaas.servicebroker.model.DeleteServiceInstanceRequest;
 import org.openpaas.servicebroker.model.ServiceInstance;
+import org.openpaas.servicebroker.cubrid.model.CubridServiceInstance;
 import org.openpaas.servicebroker.model.UpdateServiceInstanceRequest;
 import org.openpaas.servicebroker.service.ServiceInstanceService;
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		// TODO Cubrid dashboard
 		//ServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
 		
-		ServiceInstance instance = new ServiceInstance();
+		CubridServiceInstance instance = new CubridServiceInstance();
 		instance.setServiceInstanceId(request.getServiceInstanceId());
 		instance.setPlanId(request.getPlanId());
 		do {
@@ -70,7 +71,7 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 
 	@Override
 	public ServiceInstance deleteServiceInstance(DeleteServiceInstanceRequest request) throws CubridServiceException {
-		ServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
+		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
 		cubridAdminService.deleteDatabase(instance);
 		cubridAdminService.delete(instance.getServiceInstanceId());
 		return instance;		
@@ -79,7 +80,7 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 	@Override
 	public ServiceInstance updateServiceInstance(UpdateServiceInstanceRequest request)
 			throws ServiceInstanceUpdateNotSupportedException, ServiceBrokerException, ServiceInstanceDoesNotExistException {
-		ServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
+		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
 		//cubridAdminService.delete(instance.getServiceInstanceId());
 		ServiceInstance updatedInstance = new ServiceInstance(request);
 		//cubridAdminService.save(updatedInstance);

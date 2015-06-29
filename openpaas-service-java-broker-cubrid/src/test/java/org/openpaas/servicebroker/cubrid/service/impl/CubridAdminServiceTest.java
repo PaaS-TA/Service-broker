@@ -17,6 +17,8 @@ import org.openpaas.servicebroker.cubrid.config.BrokerConfig;
 import org.openpaas.servicebroker.cubrid.config.CatalogConfig;
 import org.openpaas.servicebroker.cubrid.config.CubridConfig;*/
 import org.openpaas.servicebroker.cubrid.exception.CubridServiceException;
+import org.openpaas.servicebroker.cubrid.model.CubridServiceInstance;
+import org.openpaas.servicebroker.cubrid.model.CubridServiceInstanceBinding;
 import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.ServiceInstanceBinding;
 import org.openpaas.servicebroker.util.JSchUtil;
@@ -69,7 +71,7 @@ public class CubridAdminServiceTest {
 	
 	@Test
 	public void deleteDatabase() throws CubridServiceException {
-		ServiceInstance serviceInstance = new ServiceInstance();
+		CubridServiceInstance serviceInstance = new CubridServiceInstance();
 		serviceInstance.setDatabaseName("test_createdb_A");
 		
 		cubridAdminService.deleteDatabase(serviceInstance );
@@ -77,7 +79,7 @@ public class CubridAdminServiceTest {
 	
 	@Test
 	public void createDatabase() throws CubridServiceException {
-		ServiceInstance serviceInstance = new ServiceInstance();
+		CubridServiceInstance serviceInstance = new CubridServiceInstance();
 		serviceInstance.setServiceInstanceId("test_createdb_A");
 		serviceInstance.setDatabaseName("test_createdb_A");
 		serviceInstance.setPlanId("cubrid-plan-A");
@@ -131,7 +133,7 @@ public class CubridAdminServiceTest {
 	
 	@Test
 	public void isExistsService() {
-		ServiceInstance instance = new ServiceInstance();
+		CubridServiceInstance instance = new CubridServiceInstance();
 		
 		instance.setDatabaseName("test_db_name");
 		assertTrue(cubridAdminService.isExistsService(instance));
@@ -155,7 +157,7 @@ public class CubridAdminServiceTest {
 		
 		//jdbcTemplate.update("insert into service_instances (guid, plan_id, db_name) values (?, ?, ?)", service_instance_id, plan_id, db_name);
 		
-		ServiceInstance serviceInstance = cubridAdminService.findById(service_instance_id);
+		CubridServiceInstance serviceInstance = cubridAdminService.findById(service_instance_id);
 		/*
 		System.out.println(serviceInstance.getServiceInstanceId());
 		System.out.println(serviceInstance.getPlanId());
@@ -175,7 +177,7 @@ public class CubridAdminServiceTest {
 		String service_instance_id = "test_service_instance_id";
 		String db_user_name = "test_db_user_name";
 		
-		ServiceInstanceBinding serviceInstanceBinding = cubridAdminService.findBindById(service_instancne_binding_id);
+		CubridServiceInstanceBinding serviceInstanceBinding = cubridAdminService.findBindById(service_instancne_binding_id);
 		
 		assertEquals(service_instancne_binding_id, serviceInstanceBinding.getId());
 		assertEquals(service_instance_id, serviceInstanceBinding.getServiceInstanceId());

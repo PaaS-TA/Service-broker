@@ -1,4 +1,9 @@
-package org.openpaas.servicebroker.model;
+package org.openpaas.servicebroker.cubrid.model;
+
+import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
+import org.openpaas.servicebroker.model.DeleteServiceInstanceRequest;
+import org.openpaas.servicebroker.model.ServiceInstance;
+import org.openpaas.servicebroker.model.UpdateServiceInstanceRequest;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +17,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  *
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ServiceInstance {
+public class CubridServiceInstance extends ServiceInstance{
 
 	@JsonSerialize
 	@JsonProperty("service_instance_id")
@@ -39,9 +44,6 @@ public class ServiceInstance {
 	private String dashboardUrl;
 	
 	private String databaseName;
-
-	@SuppressWarnings("unused")
-	public ServiceInstance() {}
 	
 	/**
 	 * Create a ServiceInstance from a create request. If fields 
@@ -49,12 +51,8 @@ public class ServiceInstance {
 	 * ServiceInstance.
 	 * @param request containing details of ServiceInstance
 	 */
-	public ServiceInstance(CreateServiceInstanceRequest request) {
-		this.serviceDefinitionId = request.getServiceDefinitionId();
-		this.planId = request.getPlanId();
-		this.organizationGuid = request.getOrganizationGuid();
-		this.spaceGuid = request.getSpaceGuid();
-		this.serviceInstanceId = request.getServiceInstanceId();
+	public CubridServiceInstance(CreateServiceInstanceRequest request) {
+		super(request);
 	}
 	
 	/**
@@ -63,10 +61,8 @@ public class ServiceInstance {
 	 * ServiceInstance.
 	 * @param request containing details of ServiceInstance
 	 */
-	public ServiceInstance(DeleteServiceInstanceRequest request) { 
-		this.serviceInstanceId = request.getServiceInstanceId();
-		this.planId = request.getPlanId();
-		this.serviceDefinitionId = request.getServiceId();
+	public CubridServiceInstance(DeleteServiceInstanceRequest request) { 
+		super(request);
 	}
 	
 	/**
@@ -75,12 +71,15 @@ public class ServiceInstance {
 	 * ServiceInstance.
 	 * @param request containing details of ServiceInstance
 	 */
-	public ServiceInstance(UpdateServiceInstanceRequest request) { 
-		this.planId = request.getPlanId();
-		this.serviceInstanceId = request.getServiceInstanceId();
+	public CubridServiceInstance(UpdateServiceInstanceRequest request) { 
+		super(request);
 	}
 	
-	public ServiceInstance withDashboardUrl(String dashboardUrl) { 
+	public CubridServiceInstance() {
+		super(new CreateServiceInstanceRequest());
+	}
+
+	public CubridServiceInstance withDashboardUrl(String dashboardUrl) { 
 		this.dashboardUrl = dashboardUrl;
 		return this;
 	}
