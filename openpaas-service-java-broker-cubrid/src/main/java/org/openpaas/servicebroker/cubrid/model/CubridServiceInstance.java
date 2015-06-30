@@ -19,30 +19,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CubridServiceInstance extends ServiceInstance{
 
-	@JsonSerialize
-	@JsonProperty("service_instance_id")
-	private String serviceInstanceId;
-	
-	@JsonSerialize
-	@JsonProperty("service_id")
-	private String serviceDefinitionId;
-	
-	@JsonSerialize
-	@JsonProperty("plan_id")
-	private String planId;
-	
-	@JsonSerialize
-	@JsonProperty("organization_guid")
-	private String organizationGuid;
-	
-	@JsonSerialize
-	@JsonProperty("space_guid")
-	private String spaceGuid;
-	
-	@JsonSerialize
-	@JsonProperty("dashboard_url")
-	private String dashboardUrl;
-	
 	private String databaseName;
 	
 	/**
@@ -77,43 +53,6 @@ public class CubridServiceInstance extends ServiceInstance{
 	
 	public CubridServiceInstance() {
 		super(new CreateServiceInstanceRequest());
-	}
-
-	public CubridServiceInstance withDashboardUrl(String dashboardUrl) { 
-		this.dashboardUrl = dashboardUrl;
-		return this;
-	}
-
-	public void setServiceInstanceId(String serviceInstanceId) {
-		this.serviceInstanceId = serviceInstanceId;
-	}
-
-	public String getServiceInstanceId() {
-		return serviceInstanceId;
-	}
-
-	public String getServiceDefinitionId() {
-		return serviceDefinitionId;
-	}
-
-	public void setPlanId(String planId) {
-		this.planId = planId;
-	}
-	
-	public String getPlanId() {
-		return planId;
-	}
-
-	public String getOrganizationGuid() {
-		return organizationGuid;
-	}
-
-	public String getSpaceGuid() {
-		return spaceGuid;
-	}
-
-	public String getDashboardUrl() {
-		return dashboardUrl;
 	}
 
 	public String getDatabaseName() {
