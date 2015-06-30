@@ -468,7 +468,8 @@ public class CatalogRestTest {
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
 		} catch (ServiceBrokerException sbe) {
-			
+			System.out.println("ddddddddddddddddddddddddddddddddddddddd");
+			System.out.println(sbe.getMessage());
 			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
 			bException = true;
 			

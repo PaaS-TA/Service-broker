@@ -42,8 +42,8 @@ public class LoginService {
 		
 		
 		//POST 방식
-		HttpEntity<String> entity = new HttpEntity<String>(loginParameters, headers);
-		loginResponseHttp = HttpClientUtils.send(loginUri, entity, HttpMethod.POST);
+		HttpEntity<String> httpEntity = new HttpEntity<String>(loginParameters, headers);
+		loginResponseHttp = HttpClientUtils.send(loginUri, httpEntity, HttpMethod.POST);
 		try {
 		//API 플랫폼의 응답을 확인하기 위해 Json으로 변환
 			JsonNode loginResponseJson = JsonUtils.convertToJson(loginResponseHttp);

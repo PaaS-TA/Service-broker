@@ -65,7 +65,7 @@ public class ProvisionRestTest {
 	 * Provision data Validation
 	 * - valid data 
 	 */
-	@Test	
+//	@Test	
 	public void sendProvision_validData() {
 		
 		System.out.println("Start - valid data");
@@ -127,7 +127,7 @@ public class ProvisionRestTest {
 		String organization_guid = UUID.randomUUID().toString();
 		String space_guid = UUID.randomUUID().toString();
 		
-		ProvisionBody body = new ProvisionBody("", prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id_fail"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
@@ -144,7 +144,7 @@ public class ProvisionRestTest {
 			
 		} catch (ServiceBrokerException sbe) {
 			
-			assertEquals("No user", sbe.getMessage(), "401 Unauthorize");
+			assertEquals("ServiceDefinition does not exist: id = "+prop.getProperty("provision_service_id_fail"), sbe.getMessage(), "422 Unprocessable Entity");
 			bException = true;
 			
 		}
@@ -197,4 +197,47 @@ public class ProvisionRestTest {
 		
 		System.out.println("End - no mandatory service id");
 	}
+	
+	@Test	
+	public void sendProvision_duplicate_instanceID() {
+		
+		System.out.println("Start - duplicate instance id");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		
+		String instance_id = "instance_id";
+		String organization_guid = UUID.randomUUID().toString();
+		String space_guid = UUID.randomUUID().toString();
+		
+		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
+		ResponseEntity<String> response = null;
+
+		boolean bException = false;
+		
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+			System.out.println("url:"+url);
+			System.out.println("body:"+body);
+			
+			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+			
+		} catch (ServiceBrokerException sbe) {
+			
+			assertEquals("{}", sbe.getMessage(), "500 Internal Server Error");
+			bException = true;
+		}
+		
+		if (!bException) assertFalse("Success", true);
+		
+		System.out.println("End - duplicate instance id");
+	}
+	
+	
+	
 }

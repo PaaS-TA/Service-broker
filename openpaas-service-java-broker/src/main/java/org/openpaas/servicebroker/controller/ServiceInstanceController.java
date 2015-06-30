@@ -61,8 +61,10 @@ public class ServiceInstanceController extends BaseController {
 			throw new ServiceDefinitionDoesNotExistException(request.getServiceDefinitionId());
 		}
 		logger.debug("ServiceDefinitionDoesNotExistException");
+		
 		ServiceInstance instance = service.createServiceInstance(
 				request.withServiceDefinition(svc).and().withServiceInstanceId(serviceInstanceId));
+		
 		logger.debug("ServiceInstance Created: " + instance.getServiceInstanceId());
         return new ResponseEntity<CreateServiceInstanceResponse>(
         		new CreateServiceInstanceResponse(instance), 
@@ -114,10 +116,10 @@ public class ServiceInstanceController extends BaseController {
 	
 	@ExceptionHandler(ServiceInstanceExistsException.class)
 	@ResponseBody
-	public ResponseEntity<ErrorMessage> handleException(
+	public ResponseEntity<String> handleException(
 			ServiceInstanceExistsException ex, 
 			HttpServletResponse response) {
-	    return getErrorResponse(ex.getMessage(), HttpStatus.CONFLICT);
+	    return new ResponseEntity<String>("{}", HttpStatus.CONFLICT);
 	}
 
 	@ExceptionHandler(ServiceInstanceUpdateNotSupportedException.class)

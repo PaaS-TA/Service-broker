@@ -4,18 +4,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.openpaas.servicebroker.apiplatform.model.APIUser;
-import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.test.jdbc.JdbcTestUtils;
-
 
 @Repository
 public class APIServiceInstanceDAO {
@@ -65,13 +61,13 @@ public class APIServiceInstanceDAO {
 	return apiUser;
 	}
 	
-	public boolean serviceInstanceDuplicationCheck(String oranization_guid,String service_id,String plan_id){
+	public boolean serviceInstanceDuplicationCheck(String serviceInstanceId,String service_id,String plan_id){
 		logger.info("serviceInstanceDuplicationCheck() start");
 		
 		boolean duplicationCheck =true;
 		
 		String sql = "SELECT COUNT(*) FROM apiplatform_services "
-				+ "WHERE organization_guid='"+oranization_guid+"' AND service_id='"+service_id+"' AND plan_id='"+plan_id+"'";
+				+ "WHERE organization_guid='"+serviceInstanceId+"' AND service_id='"+service_id+"' AND plan_id='"+plan_id+"'";
 		int count=0;
 		
 		try {
@@ -107,13 +103,13 @@ public class APIServiceInstanceDAO {
 		return insertAPIUserResult;
 	}
 	
-	public boolean insertAPIServiceInstance(String oranization_guid, String instance_id,String space_guid,String service_id,String plan_id){
+	public boolean insertAPIServiceInstance(String oranization_guid, String serviceInstanceId,String space_guid,String service_id,String plan_id){
 		
 		boolean insertAPIServiceInstanceResult;
 		
 		logger.info("insertAPIUser() start");
 		String sql ="INSERT INTO APIPlatform_Services (organization_guid,instance_id,space_guid,service_id,plan_id,delyn,createtimestamp) VALUES "
-				+ "('"+oranization_guid+"','"+instance_id+"','"+space_guid+"','"+service_id+"','"+plan_id+"','N',utc_timestamp())";
+				+ "('"+oranization_guid+"','"+serviceInstanceId+"','"+space_guid+"','"+service_id+"','"+plan_id+"','N',utc_timestamp())";
 		
 		try {
 			jdbcTemplate.execute(sql);
@@ -128,6 +124,27 @@ public class APIServiceInstanceDAO {
 		return insertAPIServiceInstanceResult;
 	}
 	
+	public boolean serviceInstanceSubscriptionDBCheck(String serviceInstanceId,String service_id,String plan_id){
+		boolean subscriptionDBExists = true;
+		
+		String sql = "SELECT COUNT(*) FROM apiplatform_services "
+				+ "WHERE organization_guid='"+serviceInstanceId+"' AND service_id='"+service_id+"' AND plan_id='"+plan_id+"'";
+		int count=0;
+		
+		try {
+			count = jdbcTemplate.queryForInt(sql);
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Database Error :"+e.getMessage());
+		}
+		
+		if(count!=0){
+			subscriptionDBExists=false;
+		}
+		logger.info("serviceInstanceDuplicationCheck() start");
+		
+		return subscriptionDBExists;
+	}
 	
 	
 }
