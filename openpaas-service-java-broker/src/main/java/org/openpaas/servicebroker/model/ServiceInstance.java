@@ -87,12 +87,20 @@ public class ServiceInstance {
 		return serviceInstanceId;
 	}
 
+	public void setServiceInstanceId(String serviceInstanceId) {
+		this.serviceInstanceId = serviceInstanceId;
+	}
+
 	public String getServiceDefinitionId() {
 		return serviceDefinitionId;
 	}
 
 	public String getPlanId() {
 		return planId;
+	}
+
+	public void setPlanId(String planId) {
+		this.planId = planId;
 	}
 
 	public String getOrganizationGuid() {

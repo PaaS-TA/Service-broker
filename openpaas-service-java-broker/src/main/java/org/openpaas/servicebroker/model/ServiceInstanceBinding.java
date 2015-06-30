@@ -31,6 +31,10 @@ public class ServiceInstanceBinding {
 	public String getId() {
 		return id;
 	}
+	
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public String getServiceInstanceId() {
 		return serviceInstanceId;
@@ -38,6 +42,10 @@ public class ServiceInstanceBinding {
 
 	public Map<String, Object> getCredentials() {
 		return credentials;
+	}
+
+	public void setServiceInstanceId(String serviceInstanceId) {
+		this.serviceInstanceId = serviceInstanceId;
 	}
 
 	private void setCredentials(Map<String, Object> credentials) {
