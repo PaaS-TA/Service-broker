@@ -23,9 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Cubrid impl to manage service instances.  Creating a service does the following:
- * creates a new database,
- * saves the ServiceInstance info to the Cubrid repository.
  *  
  * @author
  *
@@ -84,8 +81,8 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		//cubridAdminService.delete(instance.getServiceInstanceId());
 		ServiceInstance updatedInstance = new ServiceInstance(request);
 		//cubridAdminService.save(updatedInstance);
-		if ( ("cubrid-plan-A".equals(instance.getPlanId()) && "cubrid-plan-B".equals(updatedInstance.getPlanId()))
-				|| ("cubrid-plan-C".equals(instance.getPlanId()) && "cubrid-plan-D".equals(updatedInstance.getPlanId())) ) {
+		if ( ("100mb-utf8".equals(instance.getPlanId()) && "200mb-utf8".equals(updatedInstance.getPlanId()))
+				|| ("100mb-euckr".equals(instance.getPlanId()) && "200mb-euckr".equals(updatedInstance.getPlanId())) ) {
 			cubridAdminService.addVolume(instance.getDatabaseName());
 			cubridAdminService.update(updatedInstance, updatedInstance);
 		} else {

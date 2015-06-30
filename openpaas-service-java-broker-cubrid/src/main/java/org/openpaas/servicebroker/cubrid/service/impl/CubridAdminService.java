@@ -48,25 +48,25 @@ public class CubridAdminService {
 		//Plan A
 		plan.put("vol", "100M");
 		plan.put("charset", "ko_KR.utf8");
-		this.plans.put("cubrid-plan-A", plan);
+		this.plans.put("100mb-utf8", plan);
 		
 		plan = new HashMap<String, String>();
 		//Plan B
 		plan.put("vol", "200M");
 		plan.put("charset", "ko_KR.utf8");
-		this.plans.put("cubrid-plan-B", plan);
+		this.plans.put("200mb-utf8", plan);
 		
 		plan = new HashMap<String, String>();
 		//Plan C
 		plan.put("vol", "100M");
 		plan.put("charset", "ko_KR.euckr");
-		this.plans.put("cubrid-plan-C", plan);
+		this.plans.put("100mb-euckr", plan);
 		
 		plan = new HashMap<String, String>();
 		//Plan D
 		plan.put("vol", "200M");
 		plan.put("charset", "ko_KR.euckr");
-		this.plans.put("cubrid-plan-D", plan);
+		this.plans.put("200mb-euckr", plan);
 		
 	}
 		
@@ -215,9 +215,12 @@ public class CubridAdminService {
 			List<String> commands = new ArrayList<>();
 			String planId = serviceInstance.getPlanId();
 			
+			@SuppressWarnings("unchecked")
 			Map<String, String> plan = (Map<String, String>) plans.get(planId);
 			
-			if (plan == null) plan = (Map<String, String>) plans.get("A");
+			if (plan == null) {
+				new CubridServiceException("Error : no plan");
+			}
 			
 			//1. create shell command(s)
 			//1-1. create directory for database

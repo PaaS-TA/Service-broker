@@ -1,6 +1,5 @@
 package org.openpaas.servicebroker.cubrid.config;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +19,7 @@ public class CatalogConfig {
 		return new Catalog( Arrays.asList(
 				new ServiceDefinition(
 						"cubrid", 
-						"Cubrid-DB", 
+						"CubridDB", 
 						"A simple cubrid implementation", 
 						true, 
 						true,
@@ -72,24 +71,24 @@ public class CatalogConfig {
 	private List<Plan> getPlans() {
 		
 		List<Plan> plans = Arrays.asList(
-				new Plan("cubrid-plan-A", 
-						"Cubrid-Plan-A", 
-						"This is a Cubrid plan A. 100 MB Database volume size and UTF-8 Charactor set.",
+				new Plan("100mb-utf8", 
+						"100mb-utf8", 
+						"This is a Cubrid plan. 100 MB Database volume size and UTF-8 Charactor set.",
 						getPlanMetadata("100 MB", "UTF-8"),
 						true),
-				new Plan("cubrid-plan-B", 
-						"Cubrid-Plan-B", 
-						"This is a Cubrid plan B. 200 MB Database volume size and UTF-8 Charactor set.",
+				new Plan("200mb-utf8", 
+						"200mb-utf8", 
+						"This is a Cubrid plan. 200 MB Database volume size and UTF-8 Charactor set.",
 						getPlanMetadata("200 MB", "UTF-8"),
 						true),
-				new Plan("cubrid-plan-C", 
-						"Cubrid-Plan-C", 
-						"This is a Cubrid plan C. 100 MB Database volume size and EUC-KR Charactor set.",
+				new Plan("100mb-euckr", 
+						"100mb-euckr", 
+						"This is a Cubrid plan. 100 MB Database volume size and EUC-KR Charactor set.",
 						getPlanMetadata("100 MB", "EUC-KR"),
 						true),
-				new Plan("cubrid-plan-D", 
-						"Cubrid-Plan-D", 
-						"This is a Cubrid plan D. 200 MB Database volume size and EUC-KR Charactor set.",
+				new Plan("200mb-euckr", 
+						"200mb-euckr", 
+						"This is a Cubrid plan. 200 MB Database volume size and EUC-KR Charactor set.",
 						getPlanMetadata("200 MB", "EUC-KR"),
 						true));
 		

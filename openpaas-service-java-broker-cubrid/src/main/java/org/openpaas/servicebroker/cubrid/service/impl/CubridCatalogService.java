@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * An implementation of the CatalogService that gets the catalog injected (ie configure 
  * in spring config)
  * 
- * @author sgreenberg@gopivotal.com
+ * @author 
  *
  */
 @Service

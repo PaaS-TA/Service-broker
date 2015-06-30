@@ -22,11 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * cubrid impl to bind services.  Binding a service does the following:
- * creates a new user in the database (currently uses a default pwd of "password"),
- * saves the ServiceInstanceBinding info to the Mongo repository.
+ * 
  *  
- * @author sgreenberg@gopivotal.com
+ * @author 
  *
  */
 @Service

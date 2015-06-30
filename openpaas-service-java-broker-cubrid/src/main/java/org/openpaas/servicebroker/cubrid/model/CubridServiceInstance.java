@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 /**
  * An instance of a ServiceDefinition.
  * 
- * @author sgreenberg@gopivotal.com
+ * @author 
  *
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
