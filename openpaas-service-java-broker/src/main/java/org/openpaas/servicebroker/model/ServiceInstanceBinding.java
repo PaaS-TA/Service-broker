@@ -3,6 +3,10 @@ package org.openpaas.servicebroker.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * A binding to a service instance
  * 
@@ -16,7 +20,10 @@ public class ServiceInstanceBinding {
 	private Map<String,Object> credentials = new HashMap<String,Object>();
 	private String syslogDrainUrl;
 	private String appGuid;
-
+	
+	@JsonIgnore
+	private HttpStatus httpStatus = HttpStatus.CREATED;
+	
 	public ServiceInstanceBinding(String id, 
 			String serviceInstanceId, 
 			Map<String,Object> credentials,
@@ -62,6 +69,14 @@ public class ServiceInstanceBinding {
 	
 	public String getAppGuid() {
 		return appGuid;
+	}
+	
+	public void setHttpStatusOK(){
+		this.httpStatus=HttpStatus.OK;
+	}
+	
+	public HttpStatus getHttpStatus(){
+		return httpStatus;
 	}
 	
 }
