@@ -2,32 +2,22 @@ package org.openpaas.servicebroker.apiplatform.test;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.ProvisionBody;
-import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 /**
@@ -65,7 +55,7 @@ public class ProvisionRestTest {
 	 * Provision data Validation
 	 * - valid data 
 	 */
-	@Test	
+//	@Test
 	public void sendProvision_validData() {
 		
 		System.out.println("Start - valid data");
@@ -96,8 +86,9 @@ public class ProvisionRestTest {
 			
 			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 			
-		} catch (ServiceBrokerException sbe) {
+		} catch (Exception sbe) {
 			
+			System.out.println(sbe.getMessage());
 			assertFalse("Error", true);
 			bException = true;
 			
@@ -113,7 +104,7 @@ public class ProvisionRestTest {
 	 * Provision data Validation 
 	 * - no Service id
 	 */
-	@Test	
+//	@Test	
 	public void sendProvision_noMandatory_serviceID() {
 		
 		System.out.println("Start - no mandatory service id");
@@ -142,7 +133,7 @@ public class ProvisionRestTest {
 			
 			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 			
-		} catch (ServiceBrokerException sbe) {
+		} catch (Exception sbe) {
 			
 			assertEquals("ServiceDefinition does not exist: id = "+prop.getProperty("provision_service_id_fail"), sbe.getMessage(), "422 Unprocessable Entity");
 			bException = true;
@@ -158,7 +149,7 @@ public class ProvisionRestTest {
 	 * Provision data Validation 
 	 * - fail Service id
 	 */
-	@Test	
+//	@Test
 	public void sendProvision_fail_serviceID() {
 		
 		System.out.println("Start - fail service id");
@@ -187,8 +178,8 @@ public class ProvisionRestTest {
 			
 			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 			
-		} catch (ServiceBrokerException sbe) {
-			
+		} catch (Exception sbe) {
+			System.out.println(sbe.getMessage());
 			assertTrue("Success", true);
 			bException = true;
 		}
@@ -202,85 +193,239 @@ public class ProvisionRestTest {
 	@Test	
 	public void sendProvision_duplicate_instance() {
 		
-		System.out.println("Start - duplicate instance id");
+		System.out.println("Start - duplicate instance");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
-		String instance_id = prop.getProperty("provison_duplicate_instance_id");
-		String organization_guid = prop.getProperty("provison_duplicate_org_id");
-		String space_guid = prop.getProperty("provison_duplicate_space_id");
+		String instance_id = prop.getProperty("provision_duplicate_instance_id");
+		String organization_guid = prop.getProperty("provision_duplicate_org_guid");
+		String space_guid = prop.getProperty("provision_duplicate_space_id");
 		String service_id= prop.getProperty("provision_duplicate_service_id");
+		String plan_id=prop.getProperty("provision_duplicate_plan_id");
 		
-		ProvisionBody body = new ProvisionBody(service_id, prop.getProperty("provision__duplicate_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(service_id,plan_id , organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
-
-		boolean bException = false;
 		
-		try {
 			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-			System.out.println("url:"+url);
-			System.out.println("body:"+body);
-			
-			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
-			
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals("{}", sbe.getMessage(), "500 Internal Server Error");
-			bException = true;
-		}
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+		System.out.println("url:"+url);
+		System.out.println("body:"+body);
 		
-		if (!bException) assertFalse("Success", true);
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+		System.out.println(response.getBody());
+		assertTrue(response.getBody().contains("dashboard_url"));
+		assertEquals(response.getStatusCode(), HttpStatus.OK);
 		
-		System.out.println("End - duplicate instance id");
+		System.out.println("End - duplicate instance");
 	}
 	
-	public void sendProvision_duplicate_instanceID_annotherService() {
+	//409 Conflict를 확인하기 위해 인스턴스 아이디는 동일하게 서비스 아이디는 다르게 요청을 보냄
+	@Test	
+	public void sendProvision_instance_different_service_id() {
 		
-		System.out.println("Start - duplicate instance id and annother service");
+		System.out.println("Start - duplicate instance and different service id");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
-		String instance_id = "instance_id";
-		String organization_guid = "organizationID";
-		String space_guid = "space_id";
-		String service_id= prop.getProperty("provision_service_id_annother");
+		String instance_id = prop.getProperty("provision_duplicate_instance_id");
+		String organization_guid = UUID.randomUUID().toString();
+		String space_guid = UUID.randomUUID().toString();
+		String service_id= prop.getProperty("provision_different_service_id");
+		String plan_id=prop.getProperty("provision_plan_id");
 		
-		ProvisionBody body = new ProvisionBody(service_id, prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(service_id,plan_id, organization_guid, space_guid);
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
+		ResponseEntity<String> response = null;
+		
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+		System.out.println("url:"+url);
+		System.out.println("body:"+body);
+		
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+		System.out.println(response.getBody());
+		assertEquals(response.getStatusCode(), HttpStatus.CONFLICT);
+		assertEquals(response.getBody(),"{}");
+		
+		System.out.println("End - duplicate instance and different service id");
+	}
+	
+//각각의 파라미터들이 빈값으로 요청되었을 때
+	@Test	
+	public void sendProvision_empty_parameters_instance_id() {
+		
+		System.out.println("Start - empty parameters_instance id");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		
+		String instance_id = "";
+		String organization_guid = UUID.randomUUID().toString();
+		String space_guid = UUID.randomUUID().toString();
+		String service_id= prop.getProperty("provision_different_service_id");
+		String plan_id= prop.getProperty("provision_duplicate_plan_id");
+		
+		ProvisionBody body = new ProvisionBody(service_id,plan_id, organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
 
-		boolean bException = false;
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+		System.out.println("url:"+url);
+		System.out.println("body:"+body);
 		
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-			System.out.println("url:"+url);
-			System.out.println("body:"+body);
-			
-			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
-			
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals("{}", sbe.getMessage(), "500 Internal Server Error");
-			bException = true;
-		}
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 		
-		if (!bException) assertFalse("Success", true);
-		
-		System.out.println("End - duplicate instance id and annother service");
-	
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+		System.out.println("End - empty parameters_instance id");
 	}
 	
+	@Test	
+	public void sendProvision_empty_parameters_organization_guid() {
+		
+		System.out.println("Start - empty parameters_organization id");
+		
+		String instance_id = prop.getProperty("provision_duplicate_instance_id");
+		String organization_guid ="";
+		String space_guid = UUID.randomUUID().toString();
+		String service_id= prop.getProperty("provision_different_service_id");
+		String plan_id=prop.getProperty("provision_duplicate_plan_id");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		
+
+		ProvisionBody body = new ProvisionBody(service_id,plan_id, organization_guid, space_guid);
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
+		ResponseEntity<String> response = null;
+
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+		System.out.println("url:"+url);
+		System.out.println("body:"+body);
+		
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+		
+		assertTrue(response.getBody().contains("Missing required fields: organizationGuid"));
+		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+	
+		System.out.println("End - empty parameters_organization id");
+	}
+	
+	@Test	
+	public void sendProvision_empty_parameters_service_id() {
+		
+		System.out.println("Start - empty parameters_service_id");
+		
+		String instance_id = prop.getProperty("provision_duplicate_instance_id");
+		String organization_guid =UUID.randomUUID().toString();
+		String space_guid = UUID.randomUUID().toString();
+		String service_id= "";
+		String plan_id=prop.getProperty("provision_duplicate_plan_id");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		
+
+		ProvisionBody body = new ProvisionBody(service_id,plan_id, organization_guid, space_guid);
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
+		ResponseEntity<String> response = null;
+
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+		System.out.println("url:"+url);
+		System.out.println("body:"+body);
+		
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+		System.out.println(response.getBody());
+		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+		assertTrue(response.getBody().contains("Missing required fields: serviceDefinitionId"));
+	
+		System.out.println("End - empty parameters_service_id");
+	}
+	
+	@Test	
+	public void sendProvision_empty_parameters_plan_id() {
+		
+		System.out.println("Start - empty parameters_plan_id");
+		
+		String instance_id = UUID.randomUUID().toString();
+		String organization_guid =UUID.randomUUID().toString();
+		String space_guid = UUID.randomUUID().toString();
+		String service_id= prop.getProperty("provision_duplicate_service_id");
+		String plan_id = "";
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		
+
+		ProvisionBody body = new ProvisionBody(service_id, plan_id, organization_guid, space_guid);
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
+		ResponseEntity<String> response = null;
+
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+		System.out.println("url:"+url);
+		System.out.println("body:"+body);
+		
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+		System.out.println(response.getBody());
+		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+		assertTrue(response.getBody().contains("Missing required fields: planId"));
+	
+		System.out.println("End - empty parameters_plan_id");
+	}
+	
+	//존재하지 않는 플랜 아이디를 요청한 경우
+	@Test	
+	public void sendProvision_fail_plan_id() {
+		
+		System.out.println("Start - fail Plan Id");
+		
+		String instance_id = UUID.randomUUID().toString();
+		String organization_guid =UUID.randomUUID().toString();
+		String space_guid = UUID.randomUUID().toString();
+		String service_id= prop.getProperty("provision_service_id");
+		String plan_id = prop.getProperty("provision_plan_id_fail");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		
+
+		ProvisionBody body = new ProvisionBody(service_id, plan_id, organization_guid, space_guid);
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
+		ResponseEntity<String> response = null;
+
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+		System.out.println("url:"+url);
+		System.out.println("body:"+body);
+		
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+		System.out.println(response.getBody());
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+		assertTrue(response.getBody().contains("Plan Name can be 'Unlimited' only"));
+	
+		System.out.println("End - fail Plan Id");
+	}
 	
 	//200
 	//201

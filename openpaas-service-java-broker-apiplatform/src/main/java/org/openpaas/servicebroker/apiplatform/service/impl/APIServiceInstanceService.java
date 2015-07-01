@@ -64,6 +64,14 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		String spaceGuid = instance.getSpaceGuid();
 		String serviceDefinitionId = instance.getServiceDefinitionId();
 		String planId = instance.getPlanId();
+		String planName = env.getProperty("APIPlatformApplicationPlan");
+		
+		if(!planId.split(" ")[2].equals(planName)){
+			logger.error("invalid plan requseted");
+			throw new ServiceBrokerException("Invalid Plan Name - Plan Name can be 'Unlimited' only");
+		}
+		
+		
 		String cookie = "";
 
 	//서비스 브로커의 DB에서 organizationGuid를 확인하여 API플랫폼 로그인 아이디와 비밀번호를 획득한다.
@@ -136,7 +144,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		headers.set("Cookie", cookie);
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		//Add an Application API를 보낸다.
-		String planName = env.getProperty("APIPlatformApplicationPlan");
+		
 		String addApplicationUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddAnApplication");
 		String addApplicationParameters = 
 				"action=addApplication&application="+serviceInstanceId+"&tier="+planName+"&description=&callbackUrl=";		
@@ -156,7 +164,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			try {
 				addApplicationResponseJson = JsonUtils.convertToJson(responseEntity);
 				ApiPlatformUtils.apiPlatformErrorMessageCheck(addApplicationResponseJson);
-				
+				applicationExsists = true;
 				//어플리케이션이 정상적으로 생성 되었다면 넘어간다.
 				logger.info("Application "+serviceInstanceId+" created");
 				
@@ -309,7 +317,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			}
 			else {
 				//DB에 저장된 서비스 인스턴스 정보에서 서비스와 org가 동일하나 플랜이 다른경우
-				logger.info("Service instance already exists. requested invalid Plan ID");
+				logger.info("Service instance already exists and invalid Plan ID requested");
 				throw new ServiceBrokerException("invalid Plan ID");
 			}
 
