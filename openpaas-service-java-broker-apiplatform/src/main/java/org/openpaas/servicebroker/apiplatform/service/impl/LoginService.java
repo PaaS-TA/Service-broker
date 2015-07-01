@@ -1,7 +1,6 @@
 package org.openpaas.servicebroker.apiplatform.service.impl;
 
 import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
-import org.openpaas.servicebroker.apiplatform.exception.APICatalogException;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
@@ -50,8 +49,7 @@ public class LoginService {
 			JsonNode loginResponseJson = JsonUtils.convertToJson(loginResponseHttp);
 			ApiPlatformUtils.apiPlatformErrorMessageCheck(loginResponseJson);
 		} catch (Exception e) {
-			
-			throw new ServiceBrokerException(e.getMessage());		
+			throw new ServiceBrokerException(e.getMessage());
 		}
 		
 		cookie = loginResponseHttp.getHeaders().getFirst("Set-Cookie");

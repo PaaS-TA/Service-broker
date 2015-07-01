@@ -26,7 +26,7 @@ public class ApiPlatformUtils {
 			
 			//Login API
 			else if(apiPlatformMessage.equals("Login failed.Please recheck the username and password and try again.")){
-				throw new ServiceBrokerException("Check the Username and Password");
+				throw new ServiceBrokerException("No User");
 			}
 			
 			//Add an Application API

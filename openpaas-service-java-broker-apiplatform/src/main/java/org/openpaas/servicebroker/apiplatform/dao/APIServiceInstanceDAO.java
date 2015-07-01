@@ -43,8 +43,6 @@ public class APIServiceInstanceDAO {
 				apiUser.setUser_id(rs.getString("user_id"));
 				apiUser.setUser_password(rs.getString("user_password"));
 				
-				System.out.println(rs.getString("organization_guid"));
-				
 				return apiUser;
 				}
 			};
@@ -85,7 +83,6 @@ public class APIServiceInstanceDAO {
 		String sql ="INSERT INTO apiplatform_users (organization_guid,user_id,user_password, createtimestamp) VALUES "
 				+ "('"+oranization_guid+"','"+user_id+"','"+user_password+"',utc_timestamp())";
 		
-
 		jdbcTemplate.execute(sql);
 
 		logger.info("insertAPIUser() finished");

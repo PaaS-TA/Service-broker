@@ -64,7 +64,8 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		String spaceGuid = instance.getSpaceGuid();
 		String serviceDefinitionId = instance.getServiceDefinitionId();
 		String planId = instance.getPlanId();
-		
+		String cookie = "";
+
 	//서비스 브로커의 DB에서 organizationGuid를 확인하여 API플랫폼 로그인 아이디와 비밀번호를 획득한다.
 		
 		APIUser userInfo=null;
@@ -99,8 +100,27 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 				logger.error("Insert API User Error");
 				throw new ServiceBrokerException("Database Error - Insert API User");	
 			}
-			
 			logger.info("APIUser insert finished");
+			
+			//생성한 user ID로 로그인하고 쿠키값을 변수에 저장한다.
+			cookie = loginService.getLogin(userId, userPassword);
+			logger.info("API Platform Login - UserID : "+userId);
+		}
+		else {
+			try {
+				cookie = loginService.getLogin(userId, userPassword);
+			} catch (Exception e) {
+				//DB에는 유저정보가 저장되어 있으나 API플랫폼에서는 유저가 삭제된 경우이다.
+				if(e.getMessage().equals("No User")){
+					//DB에 저장된 유저정보로 API플랫폼의 유저를 생성하고 로그인하여 쿠키값을 저장한다.
+					userSignup(userId,userPassword);
+					cookie = loginService.getLogin(userId, userPassword);
+					logger.info("API Platform Login - UserID : "+userId);
+				} else{
+					//로그인시 유저가 없는 경우를 제외한 나머지 예외가 발생시 처리한다.
+					throw new ServiceBrokerException(e.getMessage());	
+				}
+			}		
 		}
 		
 	//DB에서 요청된 서비스 인스턴스 Id의 중복여부를 확인하기 위해, 해당 서비스 인스턴스 ID를 Count한다. 
@@ -110,12 +130,6 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		boolean applicationExsists = false;
 		
 		logger.info("Add An Application API Start");
-	
-		
-		//AIP플랫폼에 로그인한다.
-		String cookie = "";
-		logger.info("API Platform Login - UserID : "+userId);
-		cookie = loginService.getLogin(userId, userPassword);
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Cookie", cookie);
@@ -157,7 +171,6 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 				}
 			}
 		}
-		
 		
 		else{
 			try {
@@ -376,9 +389,10 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			throw new APIServiceInstanceException(e.getMessage());
 		}
 		logger.debug("API Platform User created");
-		return duplication;		
+		return duplication;
 	}
-
+	
+	
 	
 	
 	
