@@ -56,17 +56,19 @@ public class ServiceInstanceController extends BaseController {
 		logger.debug("PUT: " + BASE_PATH + "/{instanceId}" 
 				+ ", createServiceInstance(), serviceInstanceId = " + serviceInstanceId);
 		ServiceDefinition svc = catalogService.getServiceDefinition(request.getServiceDefinitionId());
-		logger.debug("svc.........................."); 
+		logger.debug("svc..........................");
 		if (svc == null) {
 			throw new ServiceDefinitionDoesNotExistException(request.getServiceDefinitionId());
 		}
 		logger.debug("ServiceDefinitionDoesNotExistException");
+		
 		ServiceInstance instance = service.createServiceInstance(
 				request.withServiceDefinition(svc).and().withServiceInstanceId(serviceInstanceId));
+		
 		logger.debug("ServiceInstance Created: " + instance.getServiceInstanceId());
         return new ResponseEntity<CreateServiceInstanceResponse>(
         		new CreateServiceInstanceResponse(instance), 
-        		HttpStatus.CREATED);
+        		instance.getHttpStatus());
 	}
 	
 	@RequestMapping(value = BASE_PATH + "/{instanceId}", method = RequestMethod.DELETE)
@@ -114,10 +116,10 @@ public class ServiceInstanceController extends BaseController {
 	
 	@ExceptionHandler(ServiceInstanceExistsException.class)
 	@ResponseBody
-	public ResponseEntity<ErrorMessage> handleException(
+	public ResponseEntity<String> handleException(
 			ServiceInstanceExistsException ex, 
 			HttpServletResponse response) {
-	    return getErrorResponse(ex.getMessage(), HttpStatus.CONFLICT);
+	    return new ResponseEntity<String>("{}", HttpStatus.CONFLICT);
 	}
 
 	@ExceptionHandler(ServiceInstanceUpdateNotSupportedException.class)
@@ -128,5 +130,5 @@ public class ServiceInstanceController extends BaseController {
 		return getErrorResponse(ex.getMessage(),
 				HttpStatus.UNPROCESSABLE_ENTITY);
 	}
-
+	
 }

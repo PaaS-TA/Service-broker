@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.openpaas.servicebroker.apiplatform.common.HttpClientUtils;
-import org.openpaas.servicebroker.apiplatform.common.JsonUtils;
+import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
 import org.openpaas.servicebroker.apiplatform.common.StringUtils;
+import org.openpaas.servicebroker.common.HttpClientUtils;
+import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.model.Catalog;
 import org.openpaas.servicebroker.model.DashboardClient;
@@ -32,6 +33,10 @@ import org.springframework.stereotype.Service;
 
 
 
+
+
+
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
@@ -46,18 +51,19 @@ public class APICatalogService implements CatalogService {
 	@Autowired
 	private LoginService loginService;
 	
+	public ServiceDefinition svc;
+	
 	@Override
 	public Catalog getCatalog() throws ServiceBrokerException{
 		
 		return getCatalog(env.getProperty("CatalogLoginID"), env.getProperty("CatalogLoginPassword"));
 	}
 
-	public Catalog getCatalog(String username, String password) throws ServiceBrokerException{
+	public Catalog getCatalog(String userId, String userPassword) throws ServiceBrokerException{
 		
 		String cookie = "";
-		
-	// LoginService 클래스의  getLogin 메소드를 사용하고 리턴되는 statuscode 확인
-		cookie = loginService.getLogin(username, password);
+		//로그인을 통해 쿠키값을 가져온다.
+		cookie = loginService.getLogin(userId, userPassword);
 		logger.debug("Set Cookie");			
 
 	//get published APIs
@@ -67,30 +73,28 @@ public class APICatalogService implements CatalogService {
 		headers.set("Cookie", cookie);
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		
-		String uri = env.getProperty("URI.GetAllPaginatedPublishedAPIs");
-		String parameters ="action=getAllPaginatedPublishedAPIs&tenant=carbon.super&start=1&end=100";
-		
+		String getApisUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAllPaginatedPublishedAPIs");
+		String getApisParameters ="action=getAllPaginatedPublishedAPIs&tenant=carbon.super&start=1&end=100";
 		
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 
-		ResponseEntity<String> apiListHttpResponse;
-		JsonNode catalogOrg = null;
-		apiListHttpResponse = HttpClientUtils.send(uri+"?"+parameters, entity, HttpMethod.GET);
+		ResponseEntity<String> getApisResponseHttp;
+		
+		JsonNode getApisResponseJson = null;
+		
+		getApisResponseHttp = HttpClientUtils.send(getApisUri+"?"+getApisParameters, entity, HttpMethod.GET);
 		
 		try {
-			catalogOrg = JsonUtils.convertToJson(apiListHttpResponse);
+			getApisResponseJson = JsonUtils.convertToJson(getApisResponseHttp);
+			ApiPlatformUtils.apiPlatformErrorMessageCheck(getApisResponseJson);
 		} catch (Exception e) {			
 			throw new ServiceBrokerException(e.getMessage());
 		}
 
-		System.out.println("status:" + apiListHttpResponse.getStatusCode());
-		System.out.println("result:" + apiListHttpResponse.getBody());
-
-
 // ServiceDefinition initialization
 
 		List<ServiceDefinition> services = new ArrayList<ServiceDefinition>();
-		JsonNode apis = catalogOrg.get("apis");
+		JsonNode apis = getApisResponseJson.get("apis");
 
 // Make ServiceDefinitions
 
@@ -120,7 +124,7 @@ public class APICatalogService implements CatalogService {
 				metadata.put("displayName", api.get("name").asText());
 				metadata.put("imageUrl", api.get("thumbnailurl").asText());
 				metadata.put("longDescription", "longDescription");
-				metadata.put("providerDisplayName", env.getProperty("Service.Provider"));
+				metadata.put("providerDisplayName", api.get("provider").asText());
 				metadata.put("documentationUrl", "documentationUrl");
 				metadata.put("supportUrl", "supportUrl");
 				
@@ -141,8 +145,8 @@ public class APICatalogService implements CatalogService {
 				
 				//플랜 변수 정의
 				pId = api.get("name").asText() + " " + api.get("version").asText() + " " + env.getProperty("PLAN.Unlimited"); 
-				pName = env.getProperty("PLAN.Unlimited");
-				pDescription = env.getProperty("PLAN.Unlimited") + " Plan Description";
+				pName = env.getProperty("APIPLAN.Unlimited");
+				pDescription = env.getProperty("APIPLAN.Unlimited") + " Plan Description";
 				//플랜 메타데이터 정의
 				pMetadata = new HashMap<String,Object>();
 						
@@ -159,7 +163,7 @@ public class APICatalogService implements CatalogService {
 						
 				pMetadata.put("bullets",bullets);
 				pMetadata.put("costs",costs);
-				pMetadata.put("displayName", env.getProperty("PLAN.Unlimited"));
+				pMetadata.put("displayName", env.getProperty("APIPLAN.Unlimited"));
 				
 				free = true;
 				
@@ -167,7 +171,6 @@ public class APICatalogService implements CatalogService {
 				plans.add(plan);
 				
 			ServiceDefinition service = new ServiceDefinition(id, name, description, bindable, planUpdatable, plans, tags, metadata, requires, dashboardClient);
-			System.out.println(service.getId());
 			services.add(service);
 		}
 		
@@ -177,18 +180,16 @@ public class APICatalogService implements CatalogService {
 	}
 
 	@Override
-	public ServiceDefinition getServiceDefinition(String serviceId){
+	public ServiceDefinition getServiceDefinition(String serviceId) throws ServiceBrokerException{
 		logger.info("getServiceDefinition start");
-		System.out.println("API Catalog getServiceDefinition()");
-		
-		ServiceDefinition svc= new ServiceDefinition();
+
 		List<ServiceDefinition> serviceList;
 
 		Catalog catalog;
 		try {
 			catalog = getCatalog();
 		} catch (ServiceBrokerException e) {
-			throw new RuntimeException(e.getMessage());
+			throw new ServiceBrokerException(e.getMessage());
 		}
 		
 		serviceList = catalog.getServiceDefinitions();
@@ -202,13 +203,8 @@ public class APICatalogService implements CatalogService {
 				svc = findService;
 				return svc;
 			}
-		}				
+		}
 		logger.warn("could not find service");
-		//찾는 서비스가 없을 경우 처리 
-		//이 메소드에서 리턴값을 null로 보낼경우 ServiceInstanceController에서 예외를 발생시키지만
-		//적절한 예외 메시지를 보내기 위해 직접 예외를 던짐
-		
-		throw new RuntimeException("could not find service in API Platform");
+		return null;
 	}
-
 }
