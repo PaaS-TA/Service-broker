@@ -452,12 +452,14 @@ public class MysqlAdminService {
 		
 		if(planA.equals(planId)) totalConnections = planAconnections;
 		if(planB.equals(planId)) totalConnections = planBconnections;
-		if(!planA.equals(planId) && !planB.equals(planId)) throw new ServiceBrokerException("Not Exists Plan Id");
+		if(!planA.equals(planId) && !planB.equals(planId)) throw new ServiceBrokerException("");
 		
 		// ServiceInstanceBinding 정보를 조회한다.
 		List<Map<String,Object>> list = findBindByInstanceId(id);
 		// ServiceInstance의 총 Binding 건수 확인
 		totalUsers = list.size();
+		if(totalUsers <= 0) return;
+
 		// User당 connection 수 = Plan의 connection / 총 Binding 건수
 		userPerConnections = totalConnections / totalUsers;
 		// 미할당 connection = Plan의 connection % 총 Binding 건수

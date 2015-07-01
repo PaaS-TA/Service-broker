@@ -57,6 +57,7 @@ public class MysqlServiceInstanceBindingService implements ServiceInstanceBindin
 		
 		/* 최초 ServiceInstanceBinding 생성 요청시에는 해당 ServiceInstanceBinding가 존재하지 않아 해당 메소드를 주석처리 하였습니다.*/
 		//ServiceInstanceBinding binding = mysqlAdminService.findBindById(request.getBindingId());
+		ServiceInstanceBinding findBinding = mysqlAdminService.findBindById(request.getBindingId());
 		
 		// 요청 정보로부터 ServiceInstanceBinding 정보를 생성합니다.
 		ServiceInstanceBinding binding = mysqlAdminService.createServiceInstanceBindingByRequest(request);
@@ -66,10 +67,22 @@ public class MysqlServiceInstanceBindingService implements ServiceInstanceBindin
 			throw new ServiceInstanceBindingExistsException(binding);
 		}
 		*/
+		if(findBinding != null){
+			if(findBinding.getServiceInstanceId().equals(binding.getServiceInstanceId()) &&
+					findBinding.getId().equals(binding.getId())  &&
+					findBinding.getAppGuid().equals(binding.getAppGuid())){
+				findBinding = getBindingInfo(request, findBinding);
+				findBinding.setHttpStatusOK();
+				return findBinding;
+			}else{
+				throw new ServiceInstanceBindingExistsException(binding);
+			}
+			
+		}
 		
 		// 요청 정보로부터 ServiceInstance정보를 조회합니다.
 		ServiceInstance instance = mysqlAdminService.findById(request.getServiceInstanceId());
-		
+					
 		// ServiceInstance정보가 엇을경우 예외처리
 		if(instance == null) throw new ServiceBrokerException("Not Exists ServiceInstance");
 		
@@ -78,7 +91,8 @@ public class MysqlServiceInstanceBindingService implements ServiceInstanceBindin
 		// 사용자 아이디를 생성합니다.
 		String username = mysqlAdminService.getUsername(request.getBindingId());
 		// 사용자 비밀번호를 생성합니다.
-		String password = UUID.randomUUID().toString().replace("-", "");
+		//String password = UUID.randomUUID().toString().replace("-", "");
+		String password = mysqlAdminService.getUsername(request.getServiceInstanceId());
 		
 		/* 새로운 사용자명이 존재하는지 검증합니다.*/
 		if (mysqlAdminService.isExistsUser(username)) {
@@ -122,11 +136,11 @@ public class MysqlServiceInstanceBindingService implements ServiceInstanceBindin
 		
 		// ServiceInstanceBinding 정보를 조회합니다.
 		ServiceInstanceBinding binding = mysqlAdminService.findBindById(bindingId);
-		if(binding ==  null) throw new ServiceBrokerException("Not Exists ServiceInstanceBinding");
+		if(binding ==  null) return null;
 		
 		// ServiceInstance 정보를 조회합니다.
 		ServiceInstance instance = mysqlAdminService.findById(binding.getServiceInstanceId());
-		if(instance ==  null) throw new ServiceBrokerException("Not Exists ServiceInstance");
+		if(instance ==  null) return null;
 		
 		// bindingId로 사용자를 삭제합니다.
 		mysqlAdminService.deleteUser(binding.getServiceInstanceId(), bindingId);
@@ -145,5 +159,33 @@ public class MysqlServiceInstanceBindingService implements ServiceInstanceBindin
 	 */
 	protected ServiceInstanceBinding getServiceInstanceBinding(String id) {
 		return mysqlAdminService.findBindById(id);
+	}
+	
+	/**
+	 * Binding Info
+	 * @param request
+	 * @param instance
+	 * @return
+	 */
+	public ServiceInstanceBinding getBindingInfo(CreateServiceInstanceBindingRequest request, ServiceInstanceBinding instance){
+		// Database명을 조회합니다.
+		String database = mysqlAdminService.getDatabase(instance.getServiceInstanceId());
+		// 사용자 아이디를 생성합니다.
+		String username = mysqlAdminService.getUsername(request.getBindingId());
+		// 사용자 비밀번호를 생성합니다.
+		//String password = UUID.randomUUID().toString().replace("-", "");
+		String password = mysqlAdminService.getUsername(request.getServiceInstanceId());
+		
+		// 반환될 credentials 정보를 생성합니다.
+		Map<String,Object> credentials = new HashMap<String,Object>();
+		credentials.put("name", database);
+		credentials.put("hostname", env.getRequiredProperty("jdbc.host"));
+		credentials.put("port", env.getRequiredProperty("jdbc.port"));
+		credentials.put("username", username);
+		credentials.put("password", password);
+		credentials.put("uri", mysqlAdminService.getConnectionString(database, username, password,env.getRequiredProperty("jdbc.host")));
+		
+		return new ServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, mysqlAdminService.getDashboardUrl(database), request.getAppGuid());
+		
 	}
 }
