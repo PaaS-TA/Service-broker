@@ -1,5 +1,6 @@
 package org.openpaas.servicebroker.apiplatform.service.impl;
 
+import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
 import org.openpaas.servicebroker.apiplatform.exception.APICatalogException;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
@@ -45,15 +46,12 @@ public class LoginService {
 		HttpEntity<String> httpEntity = new HttpEntity<String>(loginParameters, headers);
 		loginResponseHttp = HttpClientUtils.send(loginUri, httpEntity, HttpMethod.POST);
 		try {
-		//API 플랫폼의 응답을 확인하기 위해 Json으로 변환
+		//API 플랫폼의 응답을 확인하기 위해 Json으로 변환하고 응답받은 메시지를 확인한다.
 			JsonNode loginResponseJson = JsonUtils.convertToJson(loginResponseHttp);
-			
-			if (loginResponseJson.get("error").asText() == "true") { 
-				
-				throw new APICatalogException(" " + loginResponseJson.get("message").asText());
-			}
+			ApiPlatformUtils.apiPlatformErrorMessageCheck(loginResponseJson);
 		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage());		
+			
+			throw new ServiceBrokerException(e.getMessage());		
 		}
 		
 		cookie = loginResponseHttp.getHeaders().getFirst("Set-Cookie");

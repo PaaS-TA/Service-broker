@@ -21,19 +21,18 @@ public class ApiPlatformUtils {
 			
 			//모든 API
 			if(apiPlatformMessage.equals("null is not supported")){
-				throw new ServiceBrokerException("Check! the HttpMethod or Media Type");
+				throw new ServiceBrokerException("Check the HttpMethod or Media Type");
 			}
 			
 			//Login API
 			else if(apiPlatformMessage.equals("Login failed.Please recheck the username and password and try again.")){
-				throw new ServiceBrokerException("Check! the Username and Password");
+				throw new ServiceBrokerException("Check the Username and Password");
 			}
 			
 			//Add an Application API
 			else if(json.get("message").asText().contains("A duplicate application already exists by the name")){			
 				
 				//API플랫폼 Add an Application 에러
-				//파라미터명이 잘못 되었을 때, "error": false, "status": null
 				//어플리케이션 이름이 중복될때, "error": false, "message":" A duplicate application already exists ..."			
 				
 				throw new ServiceBrokerException("Duplication");	
@@ -63,6 +62,7 @@ public class ApiPlatformUtils {
 		
 		//Add an Application API
 		//API플랫폼이 error : true를 응답하지는 않았지만, 어플리케이션 추가가 정상적으로 이루어지지 않았을 경우
+		//파라미터명(키값)이 잘못 되었을 때, "error": false, "status": null
 		if(json.has("status")&&!json.get("status").asText().equals("APPROVED")){
 			
 			throw new ServiceBrokerException("Add an Application Error");

@@ -49,127 +49,56 @@ public class APIServiceInstanceDAO {
 				}
 			};
 
-		try {
-			apiUser = (APIUser)jdbcTemplate.queryForObject(sql, mapper);
-			
-		} catch (EmptyResultDataAccessException e) {
-			
-			logger.info("Could not found User at APIPlatform Database");
-		}
-		
+		apiUser = (APIUser)jdbcTemplate.queryForObject(sql, mapper);
+
 		logger.info("getAPIUserByOrgID() finished");
+		
 	return apiUser;
 	}
 	
-	public boolean serviceInstanceDuplicationCheck(String organizationGuid,String serviceInstanceId, String service_id,String plan_id){
+	public int getServiceCount(String organizationGuid,String serviceInstanceId, String service_id,String plan_id){
 		logger.info("serviceInstanceDuplicationCheck() start");
-		
-		boolean duplication =false;
-		
+
 		String sql = "SELECT COUNT(*) FROM apiplatform_services "
 				+ "WHERE organization_guid='"+organizationGuid+"' AND instance_id='"+serviceInstanceId+"' AND service_id='"+service_id+"' AND plan_id='"+plan_id+"'";
-		int count=0;
 		
-		try {
-			count = jdbcTemplate.queryForInt(sql);
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Database Error :"+e.getMessage());
-		}
+		int count = jdbcTemplate.queryForInt(sql);
 		
-		if(count!=0){
-			duplication=true;
-		}
 		logger.info("serviceInstanceDuplicationCheck() finished");
-		return duplication;
+		return count;
 	}
 	
-	public boolean serviceInstanceIdDuplicationCheck(String serviceInstanceId){
+	public int getServiceInstanceIdCount(String serviceInstanceId){
 		logger.info("serviceInstanceIdDuplicationCheck() start");
-		
-		boolean duplication = false;
-		
+	
 		String sql = "SELECT COUNT(*) FROM apiplatform_services "
 				+ "WHERE instance_id='"+serviceInstanceId+"'";
-		int count=0;
+		int count = jdbcTemplate.queryForInt(sql);
 		
-		try {
-			count = jdbcTemplate.queryForInt(sql);
-		} catch (Exception e) {
-			e.printStackTrace();
-			
-			logger.error("Database Error :"+e.getMessage());
-		}
-		System.out.println(count);
-		if(count!=0){
-			duplication=true;
-		}
-		System.out.println(duplication);
 		logger.info("serviceInstanceIdDuplicationCheck() finished");
-		return duplication;
+		return count;
 	}
 	
-	public boolean insertAPIUser(String oranization_guid, String user_id, String user_password){
+	public void insertAPIUser(String oranization_guid, String user_id, String user_password){
 		
-		boolean insertAPIUserResult;
 		logger.info("insertAPIUser() start");
 		String sql ="INSERT INTO apiplatform_users (organization_guid,user_id,user_password, createtimestamp) VALUES "
 				+ "('"+oranization_guid+"','"+user_id+"','"+user_password+"',utc_timestamp())";
 		
-		try {
-			jdbcTemplate.execute(sql);
-		} catch (Exception e) {
-			e.printStackTrace();
-			insertAPIUserResult=false;
-			return insertAPIUserResult;
-		}
-		insertAPIUserResult=true;
+
+		jdbcTemplate.execute(sql);
+
 		logger.info("insertAPIUser() finished");
-		return insertAPIUserResult;
 	}
 	
-	public boolean insertAPIServiceInstance(String oranization_guid, String serviceInstanceId,String space_guid,String service_id,String plan_id){
-		
-		boolean insertAPIServiceInstanceResult;
+	public void insertAPIServiceInstance(String oranization_guid, String serviceInstanceId,String space_guid,String service_id,String plan_id){
 		
 		logger.info("insertAPIUser() start");
 		String sql ="INSERT INTO apiplatform_services (organization_guid,instance_id,space_guid,service_id,plan_id,delyn,createtimestamp) VALUES "
 				+ "('"+oranization_guid+"','"+serviceInstanceId+"','"+space_guid+"','"+service_id+"','"+plan_id+"','N',utc_timestamp())";
+	
+		jdbcTemplate.execute(sql);
 		
-		try {
-			jdbcTemplate.execute(sql);
-		} catch (Exception e) {
-			e.printStackTrace();
-			insertAPIServiceInstanceResult=false;
-			return insertAPIServiceInstanceResult;
-		}
-		
-		insertAPIServiceInstanceResult=true;
 		logger.info("insertAPIUser() finished");
-		return insertAPIServiceInstanceResult;
 	}
-	
-//	public boolean serviceInstanceSubscriptionDBCheck(String serviceInstanceId,String service_id,String plan_id){
-//		boolean subscriptionDBExists = true;
-//		
-//		String sql = "SELECT COUNT(*) FROM apiplatform_services "
-//				+ "WHERE instance_id='"+serviceInstanceId+"' AND service_id='"+service_id+"' AND plan_id='"+plan_id+"'";
-//		int count=0;
-//		
-//		try {
-//			count = jdbcTemplate.queryForInt(sql);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			logger.error("Database Error :"+e.getMessage());
-//		}
-//		
-//		if(count!=0){
-//			subscriptionDBExists=false;
-//		}
-//		logger.info("serviceInstanceDuplicationDBCheck() finished");
-//		
-//		return subscriptionDBExists;
-//	}
-	
-	
 }

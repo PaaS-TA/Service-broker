@@ -241,7 +241,7 @@ public class ProvisionRestTest {
 	
 	public void sendProvision_duplicate_instanceID_annotherService() {
 		
-		System.out.println("Start - duplicate instance id");
+		System.out.println("Start - duplicate instance id and annother service");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -249,8 +249,8 @@ public class ProvisionRestTest {
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
 		String instance_id = "instance_id";
-		String organization_guid = UUID.randomUUID().toString();
-		String space_guid = UUID.randomUUID().toString();
+		String organization_guid = "organizationID";
+		String space_guid = "space_id";
 		String service_id= prop.getProperty("provision_service_id_annother");
 		
 		ProvisionBody body = new ProvisionBody(service_id, prop.getProperty("provision_plan_id"), organization_guid, space_guid);
@@ -276,7 +276,16 @@ public class ProvisionRestTest {
 		
 		if (!bException) assertFalse("Success", true);
 		
-		System.out.println("End - duplicate instance id");
+		System.out.println("End - duplicate instance id and annother service");
 	
 	}
+	
+	
+	//200
+	//201
+	//409
+	
+	//파라미터 빈값으로 보내서 처리 각각
+	//API플랫폼 오류를 체크해서
+	//서비스 아이디 없거나 플랜아이디 없는 경우 각각
 }
