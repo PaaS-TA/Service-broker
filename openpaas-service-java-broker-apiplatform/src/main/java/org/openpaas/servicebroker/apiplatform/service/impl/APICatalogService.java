@@ -74,7 +74,7 @@ public class APICatalogService implements CatalogService {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		
 		String getApisUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAllPaginatedPublishedAPIs");
-		String getApisparameters ="action=getAllPaginatedPublishedAPIs&tenant=carbon.super&start=1&end=100";
+		String getApisParameters ="action=getAllPaginatedPublishedAPIs&tenant=carbon.super&start=1&end=100";
 		
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 
@@ -82,7 +82,7 @@ public class APICatalogService implements CatalogService {
 		
 		JsonNode getApisResponseJson = null;
 		
-		getApisResponseHttp = HttpClientUtils.send(getApisUri+"?"+getApisparameters, entity, HttpMethod.GET);
+		getApisResponseHttp = HttpClientUtils.send(getApisUri+"?"+getApisParameters, entity, HttpMethod.GET);
 		
 		try {
 			getApisResponseJson = JsonUtils.convertToJson(getApisResponseHttp);
@@ -189,7 +189,7 @@ public class APICatalogService implements CatalogService {
 		try {
 			catalog = getCatalog();
 		} catch (ServiceBrokerException e) {
-			throw new RuntimeException(e.getMessage());
+			throw new ServiceBrokerException(e.getMessage());
 		}
 		
 		serviceList = catalog.getServiceDefinitions();

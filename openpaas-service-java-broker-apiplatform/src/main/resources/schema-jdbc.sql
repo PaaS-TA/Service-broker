@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS APIPlatform_Users(
+CREATE TABLE IF NOT EXISTS apiplatform_users(
 organization_guid VARCHAR(255) NOT NULL,
 user_id VARCHAR(30) NOT NULL,
 user_password VARCHAR(255) NOT NULL,
@@ -7,7 +7,7 @@ PRIMARY KEY (organization_guid),
 UNIQUE (user_id),
 UNIQUE(organization_guid)
 );
-CREATE TABLE IF NOT EXISTS APIPlatform_Services(
+CREATE TABLE IF NOT EXISTS apiplatform_services(
 organization_guid VARCHAR(255) NOT NULL,
 instance_id VARCHAR(255) NOT NULL,
 space_guid VARCHAR(255) NOT NULL,

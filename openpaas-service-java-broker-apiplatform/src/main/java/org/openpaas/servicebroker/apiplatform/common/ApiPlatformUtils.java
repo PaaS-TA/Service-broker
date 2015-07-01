@@ -52,7 +52,7 @@ public class ApiPlatformUtils {
 			else if(apiPlatformMessage.contains("Error while adding the subscription for user")){
 
 				logger.info("API already subscribed");
-				throw new ServiceBrokerException("200 OK");
+				return;
 			}
 			
 			

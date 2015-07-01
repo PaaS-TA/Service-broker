@@ -68,7 +68,7 @@ public class ServiceInstanceController extends BaseController {
 		logger.debug("ServiceInstance Created: " + instance.getServiceInstanceId());
         return new ResponseEntity<CreateServiceInstanceResponse>(
         		new CreateServiceInstanceResponse(instance), 
-        		HttpStatus.CREATED);
+        		instance.getHttpStatus());
 	}
 	
 	@RequestMapping(value = BASE_PATH + "/{instanceId}", method = RequestMethod.DELETE)
@@ -130,5 +130,5 @@ public class ServiceInstanceController extends BaseController {
 		return getErrorResponse(ex.getMessage(),
 				HttpStatus.UNPROCESSABLE_ENTITY);
 	}
-
+	
 }

@@ -1,6 +1,9 @@
 package org.openpaas.servicebroker.model;
 
+import org.springframework.http.HttpStatus;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -37,6 +40,9 @@ public class ServiceInstance {
 	@JsonSerialize
 	@JsonProperty("dashboard_url")
 	private String dashboardUrl;
+	
+	@JsonIgnore
+	private HttpStatus httpStatus = HttpStatus.CREATED;
 
 	@SuppressWarnings("unused")
 	private ServiceInstance() {}
@@ -107,4 +113,11 @@ public class ServiceInstance {
 		return dashboardUrl;
 	}
 	
+	public void setHttpStatusOK(){
+		this.httpStatus=HttpStatus.OK;
+	}
+	
+	public HttpStatus getHttpStatus(){
+		return httpStatus;
+	}
 }
