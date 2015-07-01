@@ -198,8 +198,9 @@ public class ProvisionRestTest {
 		System.out.println("End - no mandatory service id");
 	}
 	
+	//모든 파라미터가이미 DB에 저장된 것과 같은 값으로 들어온 경우, 200 OK
 	@Test	
-	public void sendProvision_duplicate_instanceID() {
+	public void sendProvision_duplicate_instance() {
 		
 		System.out.println("Start - duplicate instance id");
 		
@@ -208,12 +209,12 @@ public class ProvisionRestTest {
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
-		String instance_id = "instance_id";
-		String organization_guid = UUID.randomUUID().toString();
-		String space_guid = UUID.randomUUID().toString();
-		String service_id= prop.getProperty("provision_service_id");
+		String instance_id = prop.getProperty("provison_duplicate_instance_id");
+		String organization_guid = prop.getProperty("provison_duplicate_org_id");
+		String space_guid = prop.getProperty("provison_duplicate_space_id");
+		String service_id= prop.getProperty("provision_duplicate_service_id");
 		
-		ProvisionBody body = new ProvisionBody(service_id, prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(service_id, prop.getProperty("provision__duplicate_plan_id"), organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;

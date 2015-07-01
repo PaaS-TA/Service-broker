@@ -68,19 +68,19 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 
 	//서비스 브로커의 DB에서 organizationGuid를 확인하여 API플랫폼 로그인 아이디와 비밀번호를 획득한다.
 		
-		APIUser userInfo=null;
+		APIUser userInfo = new APIUser();
 		try{
-			userInfo = dao.getAPIUserByOrgID(organizationGuid);		
+			userInfo = dao.getAPIUserByOrgID(organizationGuid);
 		} catch(EmptyResultDataAccessException e){
 			logger.info("Could not found User at APIPlatform Database");
 		}
-		
 		String userId = userInfo.getUser_id();
 		String userPassword = userInfo.getUser_password();
+		logger.info("User Id : "+userId);
 		
 	//API플랫폼에 등록되지 않은 유저일때, 유저아이디를 생성하여 등록한다.
 		boolean userIdDuplication;
-
+		
 		if(userId==null){
 			logger.info("not registered API Platform User");
 			userPassword=env.getProperty("UserSignupPassword");
@@ -106,6 +106,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			cookie = loginService.getLogin(userId, userPassword);
 			logger.info("API Platform Login - UserID : "+userId);
 		}
+		//요청받은 organizationGuid와 매칭되는 API플랫폼 유저정보를 DB에서 찾은 경우이다.
 		else {
 			try {
 				cookie = loginService.getLogin(userId, userPassword);
