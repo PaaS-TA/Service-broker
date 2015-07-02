@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 public class HttpClientUtils {
@@ -16,6 +17,13 @@ public class HttpClientUtils {
 	static public ResponseEntity<String> send(String uri, HttpEntity<String> entity,HttpMethod httpMethod) throws ServiceBrokerException {
 
 		RestTemplate client = new RestTemplate();
+		
+		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+		requestFactory.setConnectTimeout(0);
+		requestFactory.setReadTimeout(0);
+		
+		client.setRequestFactory(requestFactory);
+		
 		ResponseEntity<String> httpResponse=null;
 		try {
 			httpResponse = client.exchange(uri, httpMethod, entity, String.class);		
