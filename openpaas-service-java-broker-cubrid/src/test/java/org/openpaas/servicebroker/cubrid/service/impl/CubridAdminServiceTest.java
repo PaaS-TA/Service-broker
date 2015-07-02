@@ -132,7 +132,7 @@ public class CubridAdminServiceTest {
 	}*/
 	
 	@Test
-	public void isExistsService() {
+	public void isExistsService() throws CubridServiceException {
 		CubridServiceInstance instance = new CubridServiceInstance();
 		
 		instance.setDatabaseName("test_db_name");
@@ -143,14 +143,14 @@ public class CubridAdminServiceTest {
 	}
 	
 	@Test
-	public void isExistsUser() {
+	public void isExistsUser() throws CubridServiceException {
 		
 		assertTrue(cubridAdminService.isExistsUser("test_db_name", "test_db_user_name"));
 		assertFalse(cubridAdminService.isExistsUser("test_db_name", "test_db_user_name_not_exist"));
 	}
 	
 	@Test
-	public void findById() {
+	public void findById() throws CubridServiceException {
 		String service_instance_id = "test_service_instance_id";
 		String plan_id = "test_plan_id";
 		String db_name = "test_db_name";
@@ -172,7 +172,7 @@ public class CubridAdminServiceTest {
 	}
 	
 	@Test
-	public void findBindById() {
+	public void findBindById() throws CubridServiceException {
 		String service_instancne_binding_id = "test_service_instance_binding_id";
 		String service_instance_id = "test_service_instance_id";
 		String db_user_name = "test_db_user_name";
