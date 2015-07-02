@@ -129,7 +129,7 @@ public class MysqlServiceInstanceService implements ServiceInstanceService {
 		ServiceInstance instance = mysqlAdminService.findById(request.getServiceInstanceId());
 		
 		// ServiceInstance가 없을경우 예외처리
-		if(instance == null) throw new ServiceInstanceDoesNotExistException("Something went wrong.");
+		if(instance == null) throw new ServiceInstanceDoesNotExistException(request.getServiceInstanceId());
 		
 		// 요청 정보로부터 새로운 ServiceInstance정보를 생성합니다.
 		ServiceInstance updatedInstance = new ServiceInstance(request);
@@ -152,7 +152,7 @@ public class MysqlServiceInstanceService implements ServiceInstanceService {
 			try {
 				mysqlAdminService.setUserConnections(updatedInstance.getPlanId(), instance.getServiceInstanceId());
 			} catch (Exception e) {
-				throw new ServiceInstanceUpdateNotSupportedException("Something went wrong.");
+				throw new ServiceInstanceUpdateNotSupportedException(updatedInstance.getPlanId());
 			}
 			
 			// ServiceInstance의 Plan 정보를 수정합니다.
