@@ -114,7 +114,7 @@ public class MysqlServiceInstanceBindingService implements ServiceInstanceBindin
 		credentials.put("username", username);
 		credentials.put("password", password);
 		credentials.put("uri", mysqlAdminService.getConnectionString(database, username, password,env.getRequiredProperty("jdbc.host")));
-		binding = new ServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, mysqlAdminService.getDashboardUrl(database), request.getAppGuid());
+		binding = new ServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, null, request.getAppGuid());
 		
 		// Binding 정보를 저장합니다.
 		mysqlAdminService.saveBind(binding);
@@ -185,7 +185,7 @@ public class MysqlServiceInstanceBindingService implements ServiceInstanceBindin
 		credentials.put("password", password);
 		credentials.put("uri", mysqlAdminService.getConnectionString(database, username, password,env.getRequiredProperty("jdbc.host")));
 		
-		return new ServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, mysqlAdminService.getDashboardUrl(database), request.getAppGuid());
+		return new ServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, null, request.getAppGuid());
 		
 	}
 }

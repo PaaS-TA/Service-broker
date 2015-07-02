@@ -280,7 +280,7 @@ public class MysqlAdminService {
 	public boolean updateUserConnections(String database, String userId, String connections){
 		System.out.println("MysqlAdminService.updateUserConnections");
 		try {
-			jdbcTemplate.execute("GRANT USAGE ON " + database + ".* TO '" + userId + "'@'%' WITH MAX_QUERIES_PER_HOUR " + connections);
+			jdbcTemplate.execute("GRANT USAGE ON " + database + ".* TO '" + userId + "'@'%' WITH MAX_USER_CONNECTIONS " + connections);
 		} catch (Exception e) {
 			return false;
 		}
@@ -393,11 +393,9 @@ public class MysqlAdminService {
 	 * @return
 	 */
 	public String getConnectionString(String database, String username, String password, String hostName) {
-		//mysql://b5d435f40dd2b2:ebfc00ac@us-cdbr-east-03.cleardb.com:3306/ad_c6f4446532610ab?user=Herong&password=TopSecret
+		//mysql://ns4VKg4Xtoy5mNCo:KyNRTVYPJyoqG1xo@10.30.40.163:3306/cf_dd2e0ffe_2bab_4308_b191_7d8814b16933
 		StringBuilder builder = new StringBuilder();
-		builder.append("jdbc:mysql://"+hostName+":3306/"+database+"?");
-		builder.append("user="+username);
-		builder.append("&password=" + password);
+		builder.append("mysql://"+username+":"+password+"@"+hostName+":3306/"+database);
 		return builder.toString();
 	}
 	

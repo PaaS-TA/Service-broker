@@ -19,7 +19,7 @@ public class CatalogConfig {
 		return new Catalog( Arrays.asList(
 				new ServiceDefinition(
 					"96b9e707-0e2b-47e3-a21a-fd01a8eb0452", 
-					"Mysql DB", 
+					"Mysql-DB", 
 					"A simple mysql implementation", 
 					true, 
 					true,
@@ -27,11 +27,11 @@ public class CatalogConfig {
 							new Plan("411d0c3e-b086-4a24-b041-0aeef1a819d1", 
 									"Mysql-Plan1-10con", 
 									"This is a mysql plan1.  10 user connections",
-									getPlanMetadata("A")),
+									getPlanMetadata("A"),true),
 							new Plan("4a932d9d-9bc5-4a86-937f-e2c14bb9f497", 
 									"Mysql-Plan2-100con", 
 									"This is a mysql plan2.  100 user connections",
-									getPlanMetadata("B"))),
+									getPlanMetadata("B"),false)),
 					Arrays.asList("mysql", "document"),
 					getServiceDefinitionMetadata(),
 					null,

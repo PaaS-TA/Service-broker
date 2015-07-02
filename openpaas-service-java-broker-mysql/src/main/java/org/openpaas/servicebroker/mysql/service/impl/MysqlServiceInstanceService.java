@@ -50,7 +50,7 @@ public class MysqlServiceInstanceService implements ServiceInstanceService {
 	public ServiceInstance createServiceInstance(CreateServiceInstanceRequest request) 
 			throws ServiceInstanceExistsException, ServiceBrokerException {
 		System.out.println("MysqlServiceInstanceService CLASS createServiceInstance");
-		logger.debug("MysqlServiceInstanceService CLASS createServiceInstance");
+		logger.debug("loggerMysqlServiceInstanceService CLASS createServiceInstance");
 		
 		/* 최초 ServiceInstance 생성 요청시에는 해당 ServiceInstance가 존재하지 않아 해당 메소드를 주석처리 하였습니다.*/
 		//ServiceInstance instance = mysqlAdminService.findById(request.getServiceInstanceId());
