@@ -42,7 +42,7 @@ public class MysqlAdminService {
 	
 	public static final String SERVICE_INSTANCES_ADD = "insert into broker.service_instances("+SERVICE_INSTANCES_FILDS+") values(?,?,?,?,?) "+ SERVICE_INSTANCES_UPSERT_FILDS;
 	
-	public static final String SERVICE_INSTANCES_UPDATE_FILDS = "UPDATE broker.service_instances SET instance_id = ?, service_id = ?, plan_id = ?, organization_guid = ?, space_guid = ?";
+	public static final String SERVICE_INSTANCES_UPDATE_FILDS = "UPDATE broker.service_instances SET service_id = ?, plan_id = ?, organization_guid = ?, space_guid = ? where instance_id = ?";
 	
 	public static final String SERVICE_BINDING_FILDS ="binding_id, instance_id, app_id, username, password";
 	
@@ -260,11 +260,11 @@ public class MysqlAdminService {
 		try{
 			System.out.println("MysqlAdminService.updatePlan");
 			jdbcTemplate.update(SERVICE_INSTANCES_UPDATE_FILDS,
-					instance.getServiceInstanceId(),
 					instance.getServiceDefinitionId(),
 					request.getPlanId(),
 					instance.getOrganizationGuid(),
-					instance.getSpaceGuid());
+					instance.getSpaceGuid(),
+					instance.getServiceInstanceId());
 		} catch (Exception e) {
 			throw handleException(e);
 		}
