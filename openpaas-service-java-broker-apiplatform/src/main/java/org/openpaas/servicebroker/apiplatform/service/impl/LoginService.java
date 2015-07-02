@@ -29,11 +29,11 @@ public class LoginService {
 	@Autowired
 	private Environment env;
 	
-	public String getLogin(String username, String password) throws ServiceBrokerException{
+	public String getLogin(String userId, String userPassword) throws ServiceBrokerException{
 		
 		String cookie = "";
 		String loginUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.Login");
-		String loginParameters = "action=login&username="+username+"&password="+password;
+		String loginParameters = "action=login&username="+userId+"&password="+userPassword;
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);

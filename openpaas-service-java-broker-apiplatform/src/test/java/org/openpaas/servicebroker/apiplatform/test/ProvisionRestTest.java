@@ -55,7 +55,7 @@ public class ProvisionRestTest {
 	 * Provision data Validation
 	 * - valid data 
 	 */
-//	@Test
+	@Test
 	public void sendProvision_validData() {
 		
 		System.out.println("Start - valid data");
@@ -76,25 +76,14 @@ public class ProvisionRestTest {
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
 
-		boolean bException = false;
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+		System.out.println("url:"+url);
+		System.out.println("body:"+body);
 		
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-			System.out.println("url:"+url);
-			System.out.println("body:"+body);
-			
-			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
-			
-		} catch (Exception sbe) {
-			
-			System.out.println(sbe.getMessage());
-			assertFalse("Error", true);
-			bException = true;
-			
-		}
-		
-		if (!bException) assertTrue("Success", true);
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+	
+		assertTrue(response.getBody().contains("dashboard_url"));
+		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		
 		System.out.println("End - valid data");
 	}
@@ -104,46 +93,37 @@ public class ProvisionRestTest {
 	 * Provision data Validation 
 	 * - no Service id
 	 */
-//	@Test	
-	public void sendProvision_noMandatory_serviceID() {
-		
-		System.out.println("Start - no mandatory service id");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		String instance_id = UUID.randomUUID().toString();
-		String organization_guid = UUID.randomUUID().toString();
-		String space_guid = UUID.randomUUID().toString();
-		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id_fail"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
-		
-		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
-		ResponseEntity<String> response = null;
-
-		boolean bException = false;
-		
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-			System.out.println("url:"+url);
-			System.out.println("body:"+body);
-			
-			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
-			
-		} catch (Exception sbe) {
-			
-			assertEquals("ServiceDefinition does not exist: id = "+prop.getProperty("provision_service_id_fail"), sbe.getMessage(), "422 Unprocessable Entity");
-			bException = true;
-			
-		}
-		
-		if (!bException) assertTrue("Success", true);
-		
-		System.out.println("End - no mandatory service id");
-	}
+//	@Test
+//	public void sendProvision_noMandatory_serviceID() {
+//		
+//		System.out.println("Start - no mandatory service id");
+//		
+//		HttpHeaders headers = new HttpHeaders();	
+//		headers.setContentType(MediaType.APPLICATION_JSON);
+//		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+//		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+//		
+//		String instance_id = UUID.randomUUID().toString();
+//		String organization_guid = UUID.randomUUID().toString();
+//		String space_guid = UUID.randomUUID().toString();
+//		
+//		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id_annother"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+//		
+//		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
+//		ResponseEntity<String> response = null;
+//
+//
+//		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+//		System.out.println("url:"+url);
+//		System.out.println("body:"+body);
+//		
+//		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+//			
+//		assertTrue(response.getBody().contains("ServiceDefinition does not exist: id"));
+//		assertEquals(response.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
+//		
+//		System.out.println("End - no mandatory service id");
+//	}
 
 	/**
 	 * Provision data Validation 
@@ -168,25 +148,16 @@ public class ProvisionRestTest {
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
 
-		boolean bException = false;
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+		System.out.println("url:"+url);
+		System.out.println("body:"+body);
 		
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-			System.out.println("url:"+url);
-			System.out.println("body:"+body);
-			
-			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
-			
-		} catch (Exception sbe) {
-			System.out.println(sbe.getMessage());
-			assertTrue("Success", true);
-			bException = true;
-		}
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+
+		assertTrue(response.getBody().contains("ServiceDefinition does not exist: id"));
+		assertEquals(response.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
 		
-		if (!bException) assertFalse("Success", true);
-		
-		System.out.println("End - no mandatory service id");
+		System.out.println("End - fail service id");
 	}
 	
 	//모든 파라미터가이미 DB에 저장된 것과 같은 값으로 들어온 경우, 200 OK
@@ -259,6 +230,7 @@ public class ProvisionRestTest {
 	}
 	
 //각각의 파라미터들이 빈값으로 요청되었을 때
+	//인스턴스 아이디로 빈값이 들어왔을때
 	@Test	
 	public void sendProvision_empty_parameters_instance_id() {
 		
@@ -290,7 +262,7 @@ public class ProvisionRestTest {
 
 		System.out.println("End - empty parameters_instance id");
 	}
-	
+	//org아이디로 빈값이 들어왔을때
 	@Test	
 	public void sendProvision_empty_parameters_organization_guid() {
 		
@@ -324,7 +296,7 @@ public class ProvisionRestTest {
 	
 		System.out.println("End - empty parameters_organization id");
 	}
-	
+	//서비스 아이디로 빈값이 들어왔을때
 	@Test	
 	public void sendProvision_empty_parameters_service_id() {
 		
@@ -358,7 +330,8 @@ public class ProvisionRestTest {
 	
 		System.out.println("End - empty parameters_service_id");
 	}
-	
+
+	//플랜아이디로 빈값이 들어왔을때
 	@Test	
 	public void sendProvision_empty_parameters_plan_id() {
 		
@@ -421,17 +394,13 @@ public class ProvisionRestTest {
 		
 		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 		System.out.println(response.getBody());
+		
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-		assertTrue(response.getBody().contains("Plan Name can be 'Unlimited' only"));
+		assertTrue(response.getBody().contains("Invalid Plan Name - Plan Name must be 'Unlimited'"));
 	
 		System.out.println("End - fail Plan Id");
 	}
 	
-	//200
-	//201
-	//409
 	
-	//파라미터 빈값으로 보내서 처리 각각
-	//API플랫폼 오류를 체크해서
-	//서비스 아이디 없거나 플랜아이디 없는 경우 각각
+	//인스턴스 아이디가 같고 org아이디가 다른케이스
 }

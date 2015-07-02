@@ -2,11 +2,10 @@ package org.openpaas.servicebroker.apiplatform.service.impl;
 
 import java.util.UUID;
 
-
-
 import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
 import org.openpaas.servicebroker.apiplatform.dao.APIServiceInstanceDAO;
 import org.openpaas.servicebroker.apiplatform.exception.APIServiceInstanceException;
+import org.openpaas.servicebroker.apiplatform.model.APIServiceInstance;
 import org.openpaas.servicebroker.apiplatform.model.APIUser;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
@@ -34,6 +33,9 @@ import org.springframework.stereotype.Service;
 
 
 
+
+
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
@@ -54,9 +56,9 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 	APICatalogService apiCatalogService;
 
 	@Override
-	public ServiceInstance createServiceInstance(CreateServiceInstanceRequest createServiceInstaceRequest) throws ServiceInstanceExistsException, ServiceBrokerException 
+	public ServiceInstance createServiceInstance(CreateServiceInstanceRequest request) throws ServiceInstanceExistsException, ServiceBrokerException 
 	{
-		ServiceInstance instance = new ServiceInstance(createServiceInstaceRequest);
+		ServiceInstance instance = new ServiceInstance(request);
 		logger.info("create ServiceInstance");
 		
 		String organizationGuid =instance.getOrganizationGuid();
@@ -66,13 +68,17 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		String planId = instance.getPlanId();
 		String planName = env.getProperty("APIPlatformApplicationPlan");
 		
-		if(!planId.split(" ")[2].equals(planName)){
-			logger.error("invalid plan requseted");
-			throw new ServiceBrokerException("Invalid Plan Name - Plan Name can be 'Unlimited' only");
-		}
-		
+		String serviceName = serviceDefinitionId.split(" ")[0];
+		String serviceVersion = serviceDefinitionId.split(" ")[1];
+		String serviceProvider = apiCatalogService.svc.getMetadata().get("providerDisplayName").toString();
 		
 		String cookie = "";
+		
+	//플랜명이 unlimited가 맞는지 확인한다.
+		if(!planId.split(" ")[2].equals(planName)){
+			logger.error("invalid plan requseted");
+			throw new ServiceBrokerException("Invalid Plan Name - Plan Name must be 'Unlimited'");
+		}
 
 	//서비스 브로커의 DB에서 organizationGuid를 확인하여 API플랫폼 로그인 아이디와 비밀번호를 획득한다.
 		
@@ -80,23 +86,28 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		try{
 			userInfo = dao.getAPIUserByOrgID(organizationGuid);
 		} catch(EmptyResultDataAccessException e){
-			logger.info("Could not found User at APIPlatform Database");
+			//새로운 유저인 경우, API User DB에 유저정보가 없기 때문에 DAO에서 예외를 던진다.
+			logger.info("not found User at APIPlatform Database");
+		} catch (Exception e){
+			//다른 DB에러에 대한 예외를 처리한다.
+			logger.error("APIPlatform Database Error - getAPIUserByOrgID");
+			throw new ServiceBrokerException(e.getMessage());
 		}
+		
 		String userId = userInfo.getUser_id();
 		String userPassword = userInfo.getUser_password();
 		logger.info("User Id : "+userId);
 		
 	//API플랫폼에 등록되지 않은 유저일때, 유저아이디를 생성하여 등록한다.
 		boolean userIdDuplication;
-		
 		if(userId==null){
 			logger.info("not registered API Platform User");
 			userPassword=env.getProperty("UserSignupPassword");
 			
 			//API플랫폼에서 유저아이디의 중복여부를 확인하여, 중복인 경우 유저아이디를 재생성하여 등록한다.
 			do{
-				userId=makeUserId();
-				userIdDuplication=userSignup(userId,userPassword);
+				userId = makeUserId();
+				userIdDuplication = userSignup(userId,userPassword);
 				logger.info("API Platform User Duplication Check");
 			} while(userIdDuplication);
 			logger.info("API Platform User Created userId : "+userId);
@@ -132,10 +143,40 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			}		
 		}
 		
-	//DB에서 요청된 서비스 인스턴스 Id의 중복여부를 확인하기 위해, 해당 서비스 인스턴스 ID를 Count한다. 
-		int instanceIdCount=dao.getServiceInstanceIdCount(serviceInstanceId);
 		
-	//Add An Application API를 사용한다. error:false와 status: APPROVED가 리턴되어야 정상
+	//해당 인스턴스 아이디로 DB에 저장된 정보가 있는지 확인한다.
+		boolean instanceExsistsAtDB;
+		APIServiceInstance apiServiceInstacne = new APIServiceInstance();
+		try {
+			apiServiceInstacne=dao.getAPIServiceByInstanceID(serviceInstanceId);
+			instanceExsistsAtDB = true;
+		} catch (EmptyResultDataAccessException e) {
+			//EmptyResultDataAccessException이 던져지는 경우는 DB에 해당 인스턴스 아이디가 없다는 의미이므로instanceExsistsAtDB 값을 false로 변경한다.
+			instanceExsistsAtDB = false;
+			logger.info("not found Service at APIPlatform Database");
+			
+		} catch (Exception e){
+			//다른 DB에러에 대한 예외를 처리한다.
+			logger.error("APIPlatform Database Error - getAPIServiceByInstanceID");
+			throw new ServiceBrokerException(e.getMessage());
+		}
+				
+	//해당 인스턴스 아이디로 DB에 저장된 서비스와 요청이들어온 서비스가 다를 경우, 409 예외를 발생시킨다.
+		if(instanceExsistsAtDB){
+			if(!apiServiceInstacne.getService_id().equals(serviceDefinitionId)){
+				
+				logger.info("Instance :"+serviceInstanceId+" has a service :"+serviceName+" not "+apiServiceInstacne.getService_id().split(" ")[0]);
+				throw new ServiceInstanceExistsException(instance);
+			}
+			else if(!apiServiceInstacne.getPlan_id().equals(planId)){
+				logger.info("invalid Plan Id");
+				throw new ServiceBrokerException("invalid Plan Id");
+			}
+		}
+		
+		
+		
+	//Add an Application API를 사용한다. error:false와 status: APPROVED가 리턴되어야 정상
 		boolean applicationExsists = false;
 		
 		logger.info("Add An Application API Start");
@@ -147,51 +188,31 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		
 		String addApplicationUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddAnApplication");
 		String addApplicationParameters = 
-				"action=addApplication&application="+serviceInstanceId+"&tier="+planName+"&description=&callbackUrl=";		
+				"action=addApplication&application="+serviceInstanceId+"&tier="+env.getProperty("APIPlatformApplicationPlan")+"&description=&callbackUrl=";		
 		HttpEntity<String> httpEntity = new HttpEntity<String>(addApplicationParameters, headers);
-		
-/*		인스턴스 아이디를 이름으로 하는 API플랫폼 어플리케이션을 생성하는 API를 보낸다. 응답되는 에러메세지를 통해 해당 어플리케이션의 존재여부를 확인한다.
-		어플리케이션이 생성되어있다면, API플랫폼이 에러메시지를 보낼 것이고, 생성되어 있지 않다면 생성을 해야하기 때문에 어떤 경우인지를 구분하지 않고
-		 먼저 Add an Application API를 보낸다. */
+
 		ResponseEntity<String> responseEntity = HttpClientUtils.send(addApplicationUri, httpEntity, HttpMethod.POST);
 		
 		JsonNode addApplicationResponseJson = null;
 
-		
-	//인스턴스 아이디가 DB에 존재하는 경우와 하지 않는 경우로 분기를 나누어 진행한다. 
-		//인스턴스 아이디가 존재하는 경우이다.
-		if(instanceIdCount!=0){
-			try {
-				addApplicationResponseJson = JsonUtils.convertToJson(responseEntity);
-				ApiPlatformUtils.apiPlatformErrorMessageCheck(addApplicationResponseJson);
+		try {
+			addApplicationResponseJson = JsonUtils.convertToJson(responseEntity);
+			ApiPlatformUtils.apiPlatformErrorMessageCheck(addApplicationResponseJson);
+			applicationExsists = true;
+			//어플리케이션이 정상적으로 생성 되었다면 넘어간다.
+			logger.info("Application "+serviceInstanceId+" created");		
+		} catch (ServiceBrokerException e) {
+			if(e.getMessage().equals("Duplication")){
+				//어플리케이션이 이미 존재하는 경우이므로 applicatioExsists를 true로 변경한다.
+				logger.info("application already exists");
 				applicationExsists = true;
-				//어플리케이션이 정상적으로 생성 되었다면 넘어간다.
-				logger.info("Application "+serviceInstanceId+" created");
-				
-			} catch (ServiceBrokerException e) {
-				if(e.getMessage().equals("Duplication")){
-					//해당 어플리케이션 명이 존재하는 경우이다. 이후의 분기를 나누기 위해 applicationExsists값을 변경한다.
-					logger.info("application already exists");
-					applicationExsists = true;
-				} else{
-					//그밖의 예외처리
-					logger.error("API Platform response error - Add an Application");
-					throw new ServiceBrokerException(e.getMessage());
-				}
-			}
-		}
-		
-		else{
-			try {
-				addApplicationResponseJson = JsonUtils.convertToJson(responseEntity);
-				ApiPlatformUtils.apiPlatformErrorMessageCheck(addApplicationResponseJson);
-				applicationExsists = true;
-			} catch (ServiceBrokerException e) {
+			} else{
+				//그밖의 예외처리
 				logger.error("API Platform response error - Add an Application");
 				throw new ServiceBrokerException(e.getMessage());
 			}
-			logger.info("Application "+serviceInstanceId+" created");		
 		}
+		
 		logger.info("API Platform Application added");
 		
 	//Generate Key API를 사용하여 API플랫폼 어플리케이션의 키값을 생성한다.
@@ -220,110 +241,47 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		logger.info("API Platform Key generated finished");
 		
 
-	//Add Subscription API를 사용하여 API플랫폼 어플리케이션에 API를 사용등록한다.	
-		
-		//Add Subscription API 사용에 필요한 값들을 찾아 변수에 담는다.
-		String serviceName = serviceDefinitionId.split(" ")[0];
-		String serviceVersion = serviceDefinitionId.split(" ")[1];
-		String serviceProvider = apiCatalogService.svc.getMetadata().get("providerDisplayName").toString();
-		
-		//인스턴스 아이디가 이미 존재하고 해당 인스턴스 아이디로 API플랫폼의 어플리케이션이 존재하는 경우에는 사용등록된 서비스를 먼저 확인한다.
+	//Add Subscription API를 사용하여 API플랫폼 어플리케이션에 API를 사용등록한다.
+
 		boolean subscriptionExists=false;
-		if(instanceIdCount!=0&&applicationExsists){
+		logger.info("API Platform Add a Subscription started");
+		String addSubscriptionUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddSubscription");
+		String addSubscriptionParameters = 
+				"action=addAPISubscription&name="+serviceName+"&version="+serviceVersion+"&provider="+serviceProvider+"&tier="+planName+"&applicationName="+serviceInstanceId;
+		
+		headers.set("Cookie", cookie);
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		httpEntity = new HttpEntity<String>(addSubscriptionParameters, headers);
+
+		ResponseEntity<String> addSubscriptionResponseHttp = HttpClientUtils.send(addSubscriptionUri, httpEntity, HttpMethod.POST);
+		
+		JsonNode addSubscriptionResponseJson = null;
+
+		try {
 			
-			//Get APIs By Application API를 사용해 해당 어플리케이션에 사용등록된 API를 확인한다.
-			logger.info("Get APIs By Application API started");
-			String getAPIsByApplicationUri =  env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAPIsByApplication");
-			String getAPIsByApplicationParameters = "action=getSubscriptionByApplication&app="+serviceInstanceId;
-			
-			headers.set("Cookie", cookie);
-			headers.setContentType(MediaType.APPLICATION_JSON);
-			
-			httpEntity = new HttpEntity<String>("", headers);
-			
-			responseEntity = HttpClientUtils.send(getAPIsByApplicationUri+"?"+getAPIsByApplicationParameters, httpEntity, HttpMethod.GET);
-			
-			JsonNode getAPIsByApplicationJson =null;
-			
-			try {
-				getAPIsByApplicationJson = JsonUtils.convertToJson(responseEntity);
-				ApiPlatformUtils.apiPlatformErrorMessageCheck(getAPIsByApplicationJson);
-			} catch (ServiceBrokerException e) {
-				logger.error("API Platform response error - Get APIs By Application");
-				throw new ServiceBrokerException(e.getMessage());
+			addSubscriptionResponseJson = JsonUtils.convertToJson(addSubscriptionResponseHttp);
+			ApiPlatformUtils.apiPlatformErrorMessageCheck(addSubscriptionResponseJson);
+			//사용등록이 정상적으로 이루어진 경우
+			subscriptionExists = true;		
+		} catch (ServiceBrokerException e){
+			if(e.getMessage().equals("Duplication"))
+			{	//이미 사용등록이 되어있는 경우
+				subscriptionExists = true;
+				logger.info("API already subscribed");
 			}
-			logger.info("Get APIs By Application API finished");
-			
-			JsonNode apis = getAPIsByApplicationJson.get("apis");
-
-			
-			//현재 인스턴스 생성 요청이 들어온 서비스와 어플리케이션에 사용등록이 확인 될 경우, DB확인 단계로 넘어간다.
-			for (JsonNode api : apis){
-				if(api.get("apiName").asText().equals(serviceName)){
-					logger.info("Service already subscribed - Service Name : "+serviceName);
-					subscriptionExists=true;
-					break;
-				}
-			}	
-			//현재 인스턴스 생성 요청이 들어온 서비스와 어플리케이션에 사용등록이 되지 않은 경우, 409 예외를 발생시킨다.
-			if(!subscriptionExists){
-				logger.info("not subscribed Service - Application Name : "+serviceInstanceId+", Service Name : "+serviceName);
-				throw new ServiceInstanceExistsException(instance);
-			}
-		}
-
-		//인스턴스 아이디와 동일한 어플리케이션이 존재하지 않는 경우이다. 일반적인 경우이다.
-		else {
-	
-			logger.info("API Platform Add a Subscription started");
-			String addSubscriptionUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddSubscription");
-			String addSubscriptionParameters = 
-					"action=addAPISubscription&name="+serviceName+"&version="+serviceVersion+"&provider="+serviceProvider+"&tier="+planName+"&applicationName="+serviceInstanceId;
-			
-			headers.set("Cookie", cookie);
-			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-			httpEntity = new HttpEntity<String>(addSubscriptionParameters, headers);
-
-			ResponseEntity<String> addSubscriptionResponseHttp = HttpClientUtils.send(addSubscriptionUri, httpEntity, HttpMethod.POST);
-			
-			JsonNode addSubscriptionResponseJson = null;
-	
-			try {
-				addSubscriptionResponseJson = JsonUtils.convertToJson(addSubscriptionResponseHttp);
-				ApiPlatformUtils.apiPlatformErrorMessageCheck(addSubscriptionResponseJson);
-			} catch (ServiceBrokerException e){
+			else{
 				logger.error("API Platform response error - Add a Subscription");
 				throw new ServiceBrokerException(e.getMessage());
 			}
-			logger.info("API Platform Subscription finished");
 		}
+		logger.info("API Platform Subscription finished");
 		
 
-		//요청한 서비스가 instanceID와 같은 이름의 어플리케이션에 정확히 사용등록이 되어있을 경우
-		if(subscriptionExists){
-			//DB에서 서비스 인스턴스의 중복여부를 체크한다. subscriptionExists
-			
-			int serviceCount= dao.getServiceCount(organizationGuid,serviceInstanceId,serviceDefinitionId,planId);
-			
-			if(serviceCount!=0)
-			{
-				//orgID,인스턴스ID,서비스ID,플랜ID가 모두 정상적으로 DB에 저장되어 있는 경우이다.
-				//API플랫폼에서 어플리케이션 생성과 API사용등록, DB저장 정보까지 해당 파라미터로 정상적으로 이루어져있음을 확인하였고
-				//해당 정보로 DB에도 정상적으로 저장되어 있음을 확인했기 때문에 status를 200 OK로 보낸다. 
-
-				logger.info("Service instance already exists");
-				instance.setHttpStatusOK();
-				return instance;
-			}
-			else {
-				//DB에 저장된 서비스 인스턴스 정보에서 서비스와 org가 동일하나 플랜이 다른경우
-				logger.info("Service instance already exists and invalid Plan ID requested");
-				throw new ServiceBrokerException("invalid Plan ID");
-			}
-
-		}
-		else if(instanceIdCount!=0){
-			throw new ServiceBrokerException("Instance ID duplicate");
+		//인스턴스ID가 존재하고 해당 어플리케이션, 서비스가 모두 존재하는 경우
+		if(instanceExsistsAtDB&&applicationExsists&&subscriptionExists){
+			logger.info("Service instance already exists");
+			instance.setHttpStatusOK();
+			return instance;
 		}
 		
 		else {	
@@ -333,7 +291,6 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			} catch (Exception e) {
 				logger.error("API Service Instance insert failed");
 				throw new APIServiceInstanceException("Database Error: API ServiceInstance insert");		
-				
 			}
 			logger.info("API Service Instance insert finished");
 		}
@@ -356,7 +313,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 	}
 	
 //API플랫폼의 유저를 생성하고  아이디 중복여부를 판단
-	private boolean userSignup(String userId, String userPassword) throws ServiceBrokerException{
+	public boolean userSignup(String userId, String userPassword) throws ServiceBrokerException{
 		logger.info("API Platform UserSignup started");
 		String cookie = "";
 		boolean duplication= false;
@@ -366,11 +323,11 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		
 		String signupUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.UserSignup");
-		String parameters = "action=addUser&username="+userId+"&password="+userPassword+"&allFieldsValues=";		
+		String signupParameters = "action=addUser&username="+userId+"&password="+userPassword+"&allFieldsValues=";		
 		
-		HttpEntity<String> entity = new HttpEntity<String>(parameters, headers);
+		HttpEntity<String> httpEntity = new HttpEntity<String>(signupParameters, headers);
 
-		ResponseEntity<String> responseEntity = HttpClientUtils.send(signupUri, entity, HttpMethod.POST);
+		ResponseEntity<String> responseEntity = HttpClientUtils.send(signupUri, httpEntity, HttpMethod.POST);
 		
 		JsonNode userSignupResponseJson = null;
 		
@@ -389,7 +346,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 				}
 				else{
 					logger.error("API Platform response error - User Signup");
-					throw new APIServiceInstanceException(userSignupResponseJson.get("message").asText());
+					throw new ServiceBrokerException(userSignupResponseJson.get("message").asText());
 				}
 			}
 			
@@ -401,11 +358,6 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		return duplication;
 	}
 	
-	
-	
-	
-	
-	
 	@Override
 	public ServiceInstance deleteServiceInstance(DeleteServiceInstanceRequest arg0) throws ServiceBrokerException 
 	{
@@ -414,9 +366,37 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 	}
 
 	@Override
-	public ServiceInstance getServiceInstance(String arg0) 
+	public ServiceInstance getServiceInstance(String serviceInstanceId) throws ServiceBrokerException
 	{
-		return null;
+		APIServiceInstance apiServiceInstance = new APIServiceInstance();		
+		CreateServiceInstanceRequest request = new CreateServiceInstanceRequest();
+		ServiceInstance serviceInstance;
+		
+		try {
+			apiServiceInstance=dao.getAPIServiceByInstanceID(serviceInstanceId);
+			logger.info("get API Service Instance success");
+			String organizationId =apiServiceInstance.getOrganization_id();
+			String spaceId = apiServiceInstance.getSpace_guid();
+			String serviceId = apiServiceInstance.getService_id();
+			String planId = apiServiceInstance.getPlan_id();
+			
+			request = new CreateServiceInstanceRequest(serviceId,planId,organizationId,spaceId);
+			
+		} catch (EmptyResultDataAccessException e) {			
+			//DB에서 인스턴스 아이디를 찾을 수 없으면 null을 리턴한다.
+			return null;
+		} catch (Exception e){
+			
+			logger.error("getServiceInstance() Error");
+			throw new ServiceBrokerException(e.getMessage());
+		}
+		
+		
+		serviceInstance = new ServiceInstance(request);
+		logger.info("get Service Instance completed");
+		System.out.println(serviceInstance.getServiceDefinitionId()+" "+serviceInstance.getPlanId());
+		
+		return serviceInstance;
 	}
 
 	@Override

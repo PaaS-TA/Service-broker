@@ -34,7 +34,6 @@ public class ApiPlatformUtils {
 				
 				//API플랫폼 Add an Application 에러
 				//어플리케이션 이름이 중복될때, "error": false, "message":" A duplicate application already exists ..."			
-				
 				throw new ServiceBrokerException("Duplication");	
 			}
 			
@@ -54,7 +53,11 @@ public class ApiPlatformUtils {
 				return;
 			}
 			
-			
+			//Get published APIs by application
+			//어플리케이션이 생성되어 있지 않은 경우
+			else if(json.get("apis").asText().equals("[]")){
+				throw new ServiceBrokerException("No Application or Subscription");
+			}
 			else {
 				throw new ServiceBrokerException(json.get("message").asText());
 			}

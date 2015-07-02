@@ -31,7 +31,7 @@ public interface ServiceInstanceService {
 	 * @param serviceInstanceId The id of the serviceInstance
 	 * @return The ServiceInstance with the given id or null if one does not exist
 	 */
-	ServiceInstance getServiceInstance(String serviceInstanceId);
+	ServiceInstance getServiceInstance(String serviceInstanceId) throws ServiceBrokerException;
 	
 	/**
 	 * Delete and return the instance if it exists.
