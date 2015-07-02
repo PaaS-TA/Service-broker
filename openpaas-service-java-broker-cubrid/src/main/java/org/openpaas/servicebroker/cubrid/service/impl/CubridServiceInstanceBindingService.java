@@ -44,18 +44,24 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 	public ServiceInstanceBinding createServiceInstanceBinding(
 			CreateServiceInstanceBindingRequest request)
 			throws ServiceInstanceBindingExistsException, ServiceBrokerException {
+		logger.info("=====> CubridServiceInstanceBindingService CLASS createServiceInstanceBinding");
 		
-		logger.debug("CubridServiceInstanceBindingService CLASS createServiceInstanceBinding");
 		CubridServiceInstanceBinding binding = cubridAdminService.findBindById(request.getBindingId());
+		
+		logger.debug("binding :{} ", (binding == null ? "null.": "not null.") );
+		
 		if (binding != null) {
 			throw new ServiceInstanceBindingExistsException(binding);
 		}
-		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
 		
+		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
 		String database = instance.getDatabaseName();
+		
 		// TODO Password Generator
 		String password = getPassword();
 		String username = null;
+
+		// Username Generator (Unique)
 		do {
 			username = getUsername();
 		} while(cubridAdminService.isExistsUser(database, username));
@@ -64,11 +70,9 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 		
 		Map<String,Object> credentials = new HashMap<String,Object>();
 		credentials.put("uri", cubridAdminService.getConnectionString(database, username, password));
-		credentials.put("hostname", cubridAdminService.getConnectionString(database, username, password));
 		credentials.put("username", username);
 		credentials.put("password", password);
-		System.out.println(request.getBindingId());
-		System.out.println(instance.getServiceInstanceId());
+		
 		binding = new CubridServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, null, request.getAppGuid());
 		binding.setDatabaseUserName(username);
 		cubridAdminService.saveBind(binding);
@@ -76,20 +80,26 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 		return binding;
 	}
 
-	protected CubridServiceInstanceBinding getServiceInstanceBinding(String id) {
+	protected CubridServiceInstanceBinding getServiceInstanceBinding(String id) throws ServiceBrokerException {
 		return cubridAdminService.findBindById(id);
 	}
  
 	@Override
 	public ServiceInstanceBinding deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request)
 			throws ServiceBrokerException {
+		logger.info("=====> CubridServiceInstanceBindingService CLASS deleteServiceInstanceBinding");
+		
 		String bindingId = request.getBindingId();
 		CubridServiceInstanceBinding binding = getServiceInstanceBinding(bindingId);
-		CubridServiceInstance instance = cubridAdminService.findById(binding.getServiceInstanceId());
+		
+		logger.debug("binding : {}", (binding == null ? "null.": "not null.") );
+		
 		if (binding!= null) {
+			CubridServiceInstance instance = cubridAdminService.findById(binding.getServiceInstanceId());
 			cubridAdminService.deleteUser(instance.getDatabaseName(), binding.getDatabaseUserName());
 			cubridAdminService.deleteBind(bindingId);
 		}
+		
 		return binding;
 	}
 	

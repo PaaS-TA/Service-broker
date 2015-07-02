@@ -4,6 +4,7 @@ package org.openpaas.servicebroker.util;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,6 +107,8 @@ public class JSchUtil {
 
 	public Map<String, List<String>> shell(List<String> commands) {
 		
+		int exitStatus = 1;
+		
 		commands.add("exit");
 		
 		StringBuilder sb = new StringBuilder();
@@ -144,6 +147,8 @@ public class JSchUtil {
                     if (in.available() > 0)
                         continue;
                     if (isDebugMode) System.out.println("exit-status: " + channel.getExitStatus());
+                    
+                    exitStatus = channel.getExitStatus();
                     break;
                 }
                  
@@ -158,7 +163,7 @@ public class JSchUtil {
 			e.printStackTrace();
 		}
 		
-		return getResults(commands, sb.toString().split("\n"));
+		return getResults(commands, sb.toString().split("\n"), exitStatus);
 	}
 	
 	public List<String> exec(String command) {
@@ -197,7 +202,7 @@ public class JSchUtil {
 		
 	}
 	
-	public Map<String, List<String>> getResults(List<String> commands, String[] results) {
+	public Map<String, List<String>> getResults(List<String> commands, String[] results, int exitStatus) {
 		Map<String, List<String>> rsMap = new HashMap<String, List<String>>();
 		List<String> rsList = null;
 		
@@ -226,6 +231,8 @@ public class JSchUtil {
 			
 			i++;
 		}
+		
+		rsMap.put("exitStatus", Arrays.asList(""+exitStatus));
 		
 		return rsMap;
 	}

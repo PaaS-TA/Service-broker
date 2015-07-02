@@ -43,18 +43,42 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 	@Override
 	public ServiceInstance createServiceInstance(CreateServiceInstanceRequest request) 
 			throws ServiceInstanceExistsException, ServiceBrokerException {
-		System.out.println("CubridServiceInstanceService CLASS createServiceInstance");
-		logger.debug("CubridServiceInstanceService CLASS createServiceInstance");
-		// TODO Cubrid dashboard
-		//ServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
+		logger.info("=====> CubridServiceInstanceService CLASS createServiceInstance");
 		
-		CubridServiceInstance instance = new CubridServiceInstance();
+		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
+		
+		logger.debug("instance : {}", (instance == null ? "null.": "not null.") );
+		
+		if (instance != null) {
+			
+			String as_is_id = instance.getServiceInstanceId();
+			String as_is_plan = instance.getPlanId();
+			String to_be_id = request.getServiceInstanceId();
+			String to_be_plan = request.getPlanId();
+			
+			logger.debug("as-is : id=" + as_is_id + ", plan=" + as_is_plan);
+			logger.debug("to-be : id=" + to_be_id + ", plan=" + to_be_plan);
+			
+			if( as_is_id.equals(to_be_id) && as_is_plan.equals(to_be_plan) ) {
+				instance.setHttpStatusOK();
+				return instance;
+			} else {
+				throw new ServiceInstanceExistsException(instance);
+			}
+		}
+		
+		instance = new CubridServiceInstance();
 		instance.setServiceInstanceId(request.getServiceInstanceId());
 		instance.setPlanId(request.getPlanId());
+		
 		do {
 			instance.setDatabaseName(getDatabaseName());
 		} while(cubridAdminService.isExistsService(instance));
-		cubridAdminService.createDatabase(instance);
+		
+		if (!cubridAdminService.createDatabase(instance)) {
+			throw new ServiceBrokerException("Failed to create new DB instance.");
+		}
+		
 		cubridAdminService.save(instance);
 		
 		return instance;
@@ -63,26 +87,47 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 
 	@Override
 	public ServiceInstance getServiceInstance(String id) {
-		return cubridAdminService.findById(id);
+		ServiceInstance instance = null;
+		try {
+			instance = cubridAdminService.findById(id);
+		} catch (CubridServiceException e) {
+			e.printStackTrace();
+		}
+		return instance;
 	}
 
 	@Override
 	public ServiceInstance deleteServiceInstance(DeleteServiceInstanceRequest request) throws CubridServiceException {
+		logger.info("=====> CubridServiceInstanceService CLASS deleteServiceInstance");
+		
 		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
-		cubridAdminService.deleteDatabase(instance);
-		cubridAdminService.delete(instance.getServiceInstanceId());
+		
+		logger.debug("instance : {}", (instance == null ? "null.": "not null.") );
+		
+		if (instance != null) {
+			cubridAdminService.deleteDatabase(instance);
+			cubridAdminService.delete(instance.getServiceInstanceId());
+		}
+		
 		return instance;		
 	}
 
 	@Override
 	public ServiceInstance updateServiceInstance(UpdateServiceInstanceRequest request)
 			throws ServiceInstanceUpdateNotSupportedException, ServiceBrokerException, ServiceInstanceDoesNotExistException {
+		logger.info("=====> CubridServiceInstanceService CLASS updateServiceInstance");
+		
 		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
-		//cubridAdminService.delete(instance.getServiceInstanceId());
 		ServiceInstance updatedInstance = new ServiceInstance(request);
-		//cubridAdminService.save(updatedInstance);
-		if ( ("100mb-utf8".equals(instance.getPlanId()) && "200mb-utf8".equals(updatedInstance.getPlanId()))
-				|| ("100mb-euckr".equals(instance.getPlanId()) && "200mb-euckr".equals(updatedInstance.getPlanId())) ) {
+		
+		String as_is = instance.getPlanId();
+		String to_be = updatedInstance.getPlanId();
+		
+		logger.debug("as-is : {}, to be : {}", instance.getPlanId(), updatedInstance.getPlanId());
+		
+		if ( ("100mb-utf8".equals(as_is) && "200mb-utf8".equals(to_be)) ||
+				("100mb-euckr".equals(as_is) && "200mb-euckr".equals(to_be)) ) {
+			
 			cubridAdminService.addVolume(instance.getDatabaseName());
 			cubridAdminService.update(updatedInstance, updatedInstance);
 		} else {

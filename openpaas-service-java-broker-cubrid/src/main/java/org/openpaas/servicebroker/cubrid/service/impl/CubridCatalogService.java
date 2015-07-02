@@ -41,7 +41,6 @@ public class CubridCatalogService implements CatalogService {
 
 	@Override
 	public ServiceDefinition getServiceDefinition(String serviceId) {
-		System.out.println("getServiceDefinition serviceId = " + serviceId);
 		return serviceDefs.get(serviceId);
 	}
 
