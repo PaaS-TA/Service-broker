@@ -8,10 +8,24 @@ import java.util.Properties;
 
 
 
+
+
+
+
+
+
+
+
+
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
+import org.openpaas.servicebroker.common.BindingBody;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
+import org.openpaas.servicebroker.common.ProvisionBody;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +38,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class BindingRestTest {
 	
 	private static Properties prop = new Properties();
@@ -49,80 +64,18 @@ public class BindingRestTest {
 		
 	}
 	
-	/**
-	 * 사용자 ID, 비밀번호가 없을 경우
-	 */
-	@Test	
-	public void getCatalogTest_noUser() {
-		
-		System.out.println("Start - no user");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-
-		boolean bException = false;
-		
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals("No user", sbe.getMessage(), "401 Unauthorized");
-			bException = true;
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - no user");
+	public void createProvision(){
+		System.out.println("sendProvision_Provision_create");
+		//sendProvision_Provision_delete();
+		//sendProvision_Provision_create();
 	}
-
 	/**
-	 * 사용자 ID, 비밀번호가 틀린 경우
+	 * POST요청
 	 */
 	@Test	
-	public void getCatalogTest_invalidUser() {
+	public void sendProvision_AA_methodPOST() {
 		
-		System.out.println("Start - invalid user");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id_fail") +":" + prop.getProperty("auth_password_fail")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-
-		boolean bException = false;
-		
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
-			
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "401 Unauthorized");
-			bException = true;
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - invalid user");
-	}
-
-	/**
-	 * �궗�슜�옄 ID, 鍮꾨�踰덊샇媛� �젙�긽�쟻�쑝濡� �엯�젰�릺�뿀�쓣 寃쎌슦
-	 */
-	@Test	
-	public void getCatalogTest_correctUser() {
-		
-		System.out.println("Start - correct user");
+		System.out.println("Start - POST");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -131,67 +84,39 @@ public class BindingRestTest {
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;
 		
+		boolean bException = false;
+
 		try {
 			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("binding_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			url = url.replace("#BINDING_ID", prop.getProperty("broker.apitest.info.bindingIdA"));
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
 			
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
 		} catch (ServiceBrokerException sbe) {
 			
-			assertFalse(sbe.getMessage(), true);
-			
-		}
-		
-		assertTrue("Success", true);
-		
-		System.out.println("End - correct user");
-	}
-
-	/**
-	 * Version�씠 �옒紐� �엯�젰�릺�뿀�쓣 寃쎌슦
-	 */
-	@Test	
-	public void getCatalogTest_incorrectAPIVersion() {
-		
-		System.out.println("Start - incorrect API Version");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version_fail"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-
-		boolean bException = false;
-		
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
-			
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "412 Precondition Failed");
+			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
 			bException = true;
+			
 		}
 		
 		if (!bException) assertFalse("Error", true);
 		
-		System.out.println("End - incorrect API Version");
+		System.out.println("End - POST");
 	}
 
+
 	/**
-	 * Catalog �젙蹂대�� �젙�긽�쟻�쑝濡� 媛��졇�샂
-	 * Mandatory 遺�遺꾩씠 �떎 �뱾�뼱媛� �엳�뒗吏� �솗�씤
+	 * OPTIONS요청
 	 */
 	@Test	
-	public void getCatalogTest_validCatalog() {
+	public void sendProvision_AB_methodOPTIONS() {
 		
-		System.out.println("Start - valid catalog");
+		System.out.println("Start - OPTIONS");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -200,30 +125,315 @@ public class BindingRestTest {
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;
 		
+		boolean bException = false;
+
 		try {
 			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("binding_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			url = url.replace("#BINDING_ID", prop.getProperty("broker.apitest.info.bindingIdA"));
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.OPTIONS);
 			
 			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-			
-			JsonNode json = JsonUtils.convertToJson(response);
-			
-			if (!checkValidCatalogJson(json)) throw new ServiceBrokerException("validation check is fail.");
-			
-			
+
 		} catch (ServiceBrokerException sbe) {
 			
 			assertFalse(sbe.getMessage(), true);
+			bException = true;
 			
+		}
+		
+		if (!bException) assertTrue("Success", true);
+		
+		System.out.println("End - OPTIONS");
+	}
+
+	/**
+	 * HEAD요청
+	 */
+	@Test	
+	public void sendProvision_AC_methodHEAD() {
+		
+		System.out.println("Start - HEAD");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ResponseEntity<String> response = null;
+		
+		boolean bException = false;
+
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("binding_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			url = url.replace("#BINDING_ID", prop.getProperty("broker.apitest.info.bindingIdA"));
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.HEAD);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) { 
+			
+			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
+			bException = true;
+			
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - HEAD");
+	}
+	
+	/**
+	 * HEAD요청
+	 */
+	@Test	
+	public void sendProvision_AD_methodPATCH() {
+		
+		System.out.println("Start - HEAD");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ResponseEntity<String> response = null;
+		
+		boolean bException = false;
+
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("binding_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			url = url.replace("#BINDING_ID", prop.getProperty("broker.apitest.info.bindingIdA"));
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.PATCH);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) { 
+			
+			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
+			bException = true;
+			
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - HEAD");
+	}
+	
+	/**
+	 * Binding_create
+	 */
+	@Test	
+	public void sendProvision_BA_Binding_create() {
+		
+		System.out.println("Start - Binding_create");
+		
+		sendProvision_Provision_delete();
+		sendProvision_Provision_create();
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		//HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		BindingBody bindingbody = new BindingBody(prop.getProperty("broker.apitest.info.serviceId"), 
+				prop.getProperty("broker.apitest.info.planIdA"), 
+				prop.getProperty("broker.apitest.info.appGuidA"));
+		
+		HttpEntity<BindingBody> entity = new HttpEntity<BindingBody>(bindingbody, headers);
+		ResponseEntity<String> response = null;
+		
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("binding_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			url = url.replace("#BINDING_ID", prop.getProperty("broker.apitest.info.bindingIdA"));
+			
+			response = HttpClientUtils.sendBinding(url, entity, HttpMethod.PUT);
+			
+			if (response.getStatusCode() != HttpStatus.CREATED) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) { 
+			
+			assertFalse(sbe.getMessage(), true);
 		}
 		
 		assertTrue("Success", true);
 		
-		System.out.println("End - valid catalog");
+		System.out.println("End - Binding_create");
 	}
+	
+	/**
+	 * Binding_create
+	 */
+	@Test	
+	public void sendProvision_BB_Binding_create_same_info() {
+		
+		System.out.println("Start - Binding_create");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		//HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		BindingBody bindingbody = new BindingBody(prop.getProperty("broker.apitest.info.serviceId"), 
+				prop.getProperty("broker.apitest.info.planIdA"), 
+				prop.getProperty("broker.apitest.info.appGuidA"));
+		
+		HttpEntity<BindingBody> entity = new HttpEntity<BindingBody>(bindingbody, headers);
+		ResponseEntity<String> response = null;
+		
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("binding_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			url = url.replace("#BINDING_ID", prop.getProperty("broker.apitest.info.bindingIdA"));
+			
+			response = HttpClientUtils.sendBinding(url, entity, HttpMethod.PUT);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 
+		} catch (ServiceBrokerException sbe) { 
+			
+			assertFalse(sbe.getMessage(), true);
+		}
+		
+		assertTrue("Success", true);
+		
+		System.out.println("End - Binding_create");
+	}
+	
+	/**
+	 * Binding_create
+	 */
+	@Test	
+	public void sendProvision_BC_Binding_create_invalid_info() {
+		
+		System.out.println("Start - Binding_create");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		//HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		BindingBody bindingbody = new BindingBody(prop.getProperty("broker.apitest.info.serviceId"), 
+				prop.getProperty("broker.apitest.info.planIdC"), 
+				prop.getProperty("broker.apitest.info.appGuidB"));
+		
+		HttpEntity<BindingBody> entity = new HttpEntity<BindingBody>(bindingbody, headers);
+		ResponseEntity<String> response = null;
+		boolean bException = false;
+		
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("binding_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			url = url.replace("#BINDING_ID", prop.getProperty("broker.apitest.info.bindingIdA"));
+			
+			response = HttpClientUtils.sendBinding(url, entity, HttpMethod.PUT);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) { 
+			assertEquals(sbe.getMessage(), "409 Conflict");
+			bException = true;
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - Binding_create");
+	}
+	
+	/**
+	 * Binding_create
+	 */
+	@Test	
+	public void sendProvision_CA_Binding_delete() {
+		
+		System.out.println("Start - Binding_create");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		
+		ResponseEntity<String> response = null;
+		
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("binding_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			url = url.replace("#BINDING_ID", prop.getProperty("broker.apitest.info.bindingIdA"));
+			url = url + "?service_id=" + prop.getProperty("broker.apitest.info.serviceId") + "&plan_id=" + prop.getProperty("broker.apitest.info.planIdA");
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.DELETE);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) { 
+			
+			assertFalse(sbe.getMessage(), true);
+		}
+		
+		assertTrue("Success", true);
+		
+		System.out.println("End - Binding_create");
+	}
+	
+	/**
+	 * Binding_create
+	 */
+	@Test	
+	public void sendProvision_CB_Binding_delete_non_bindingId() {
+		
+		System.out.println("Start - Binding_create");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		
+		ResponseEntity<String> response = null;
+		boolean bException = false;
+		
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("binding_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			url = url.replace("#BINDING_ID", prop.getProperty("broker.apitest.info.bindingIdD"));
+			url = url + "?service_id=" + prop.getProperty("broker.apitest.info.serviceId") + "&plan_id=" + prop.getProperty("broker.apitest.info.planIdA");
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.DELETE);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) { 
+			assertEquals(sbe.getMessage(), "410 Gone");
+			bException = true;
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - Binding_create");
+	}
+	
 	private boolean checkValidCatalogJson(JsonNode json) {
 		boolean bResult = true;
 
@@ -278,51 +488,39 @@ public class BindingRestTest {
 	}
 	
 	
-	/**
-	 * POST濡� �슂泥�
-	 */
-	@Test	
-	public void getCatalogTest_methodPOST() {
+	private void sendProvision_Provision_create() {
 		
-		System.out.println("Start - POST");
+		System.out.println("Start - Provision_create");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		//HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("broker.apitest.info.serviceId"), 
+				prop.getProperty("broker.apitest.info.planIdA"), 
+				prop.getProperty("broker.apitest.info.organizationGuid"), 
+				prop.getProperty("broker.apitest.info.spaceGuid"));
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);
 		ResponseEntity<String> response = null;
 		
-		boolean bException = false;
-
 		try {
 			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
 			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
+			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+			
 		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
 		}
 		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - POST");
+		System.out.println("End - Provision_create");
 	}
-
-
-	/**
-	 * PUT�쑝濡� �슂泥�
-	 */
-	@Test	
-	public void getCatalogTest_methodPUT() {
-		
-		System.out.println("Start - POST");
+	
+	private void sendProvision_Provision_delete(){
+		System.out.println("Start - Provision_delete");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -331,180 +529,17 @@ public class BindingRestTest {
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;
 		
-		boolean bException = false;
-
 		try {
 			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.PUT);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - PUT");
-	}
-
-	/**
-	 * DELETE濡� �슂泥�
-	 */
-	@Test	
-	public void getCatalogTest_methodDELETE() {
-		
-		System.out.println("Start - POST");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			url = url + "?service_id=" + prop.getProperty("broker.apitest.info.serviceId") + "&plan_id=" + prop.getProperty("broker.apitest.info.planIdA");
 			
 			response = HttpClientUtils.send(url, entity, HttpMethod.DELETE);
 			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
 		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
 		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - DELETE");
-	}
-
-	/**
-	 * PATCH濡� �슂泥�
-	 */
-	@Test	
-	public void getCatalogTest_methodPATCH() {
-		
-		System.out.println("Start - PATCH");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.PATCH);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			System.out.println("sbe.getMessage():::" + sbe.getMessage()+":::");
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-			sbe.printStackTrace();
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - PATCH");
-	}
-	
-	
-	/**
-	 * OPTIONS濡� �슂泥�
-	 */
-	@Test	
-	public void getCatalogTest_methodOPTIONS() {
-		
-		System.out.println("Start - OPTIONS");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.OPTIONS);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertFalse(sbe.getMessage(), true);
-			bException = true;
-			
-			sbe.printStackTrace();
-			
-		}
-		
-		if (!bException) assertTrue("Success", true);
-		
-		System.out.println("End - OPTIONS");
-	}
-
-	/**
-	 * HEAD濡� �슂泥�
-	 */
-	@Test	
-	public void getCatalogTest_methodHEAD() {
-		
-		System.out.println("Start - HEAD");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.HEAD);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) { 
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-			sbe.printStackTrace();
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - HEAD");
+		System.out.println("End - Provision_delete");
 	}
 }

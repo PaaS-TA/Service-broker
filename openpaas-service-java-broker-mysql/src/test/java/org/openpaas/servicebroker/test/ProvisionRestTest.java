@@ -11,6 +11,12 @@ import java.util.Properties;
 
 
 
+
+
+
+
+
+
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -18,6 +24,7 @@ import org.junit.runners.MethodSorters;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.common.ProvisionBody;
+import org.openpaas.servicebroker.common.UpdateProvisionBody;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -61,7 +68,7 @@ public class ProvisionRestTest {
 	 * POST요청
 	 */
 	@Test	
-	public void sendProvision_A_methodPOST() {
+	public void sendProvision_AA_methodPOST() {
 		
 		System.out.println("Start - POST");
 		
@@ -101,7 +108,7 @@ public class ProvisionRestTest {
 	 * OPTIONS요청
 	 */
 	@Test	
-	public void sendProvision_B_methodOPTIONS() {
+	public void sendProvision_AB_methodOPTIONS() {
 		
 		System.out.println("Start - OPTIONS");
 		
@@ -129,8 +136,6 @@ public class ProvisionRestTest {
 			assertFalse(sbe.getMessage(), true);
 			bException = true;
 			
-			sbe.printStackTrace();
-			
 		}
 		
 		if (!bException) assertTrue("Success", true);
@@ -142,7 +147,7 @@ public class ProvisionRestTest {
 	 * HEAD요청
 	 */
 	@Test	
-	public void sendProvision_C_methodHEAD() {
+	public void sendProvision_AC_methodHEAD() {
 		
 		System.out.println("Start - HEAD");
 		
@@ -170,8 +175,6 @@ public class ProvisionRestTest {
 			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
 			bException = true;
 			
-			sbe.printStackTrace();
-			
 		}
 		
 		if (!bException) assertFalse("Error", true);
@@ -180,13 +183,54 @@ public class ProvisionRestTest {
 	}
 	
 	/**
-	 * Provision
-	 * Mandatory 
+	 *  필수값 누락 체크 : service_id 누락
 	 */
 	@Test	
-	public void sendProvision_D_Provision_validData() {
+	public void sendProvision_AD_provision_mandatory_check() {
 		
-		System.out.println("Start - valid catalog");
+		System.out.println("Start - provision_mandatory_check");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		//HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ProvisionBody body = new ProvisionBody("", 
+				prop.getProperty("broker.apitest.info.planIdA"), 
+				prop.getProperty("broker.apitest.info.organizationGuid"), 
+				prop.getProperty("broker.apitest.info.spaceGuid"));
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);
+		ResponseEntity<String> response = null;
+		
+		boolean bException = false;
+		
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			
+			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+			
+		} catch (ServiceBrokerException sbe) {
+			
+			assertEquals(sbe.getMessage(), "422 Unprocessable Entity");
+			bException = true;
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - provision_mandatory_check");
+	}
+
+	/**
+	 * Provision_create
+	 */
+	@Test	
+	public void sendProvision_BA_Provision_create() {
+		
+		System.out.println("Start - Provision_create");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -209,7 +253,7 @@ public class ProvisionRestTest {
 			
 			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 			
-			if (response.getStatusCode() != HttpStatus.OK && response.getStatusCode() != HttpStatus.CREATED) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+			if (response.getStatusCode() != HttpStatus.CREATED) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 			
 			JsonNode json = JsonUtils.convertToJson(response);
 			
@@ -217,82 +261,211 @@ public class ProvisionRestTest {
 			
 			
 		} catch (ServiceBrokerException sbe) {
-			
+			deleteProvision(prop.getProperty("broker.apitest.info.intanceId"));
 			assertFalse(sbe.getMessage(), true);
 		}
 		
 		assertTrue("Success", true);
 		
-		deleteProvision(prop.getProperty("broker.apitest.info.intanceId"));
-		
-		System.out.println("End - valid catalog");
-	}
-
-	private boolean checkValidCatalogJson(JsonNode json) {
-		boolean bResult = true;
-
-		try {
-			if (StringUtils.isEmpty(json.get("dashboard_url").asText())) {
-				System.err.println("dashboard_url is empty.");
-				bResult = false;
-			}
-			/*for(JsonNode item: json.get("services")) {
-				if (StringUtils.isEmpty(item.get("id").asText())) {
-					System.err.println("service ID is empty.");
-					bResult = false;
-				}
-				if (StringUtils.isEmpty(item.get("name").asText())) {
-					System.err.println("service NAME is empty.");
-					bResult = false;
-				}
-				if (StringUtils.isEmpty(item.get("description").asText())) {
-					System.err.println("service DESCRIPTION is empty.");
-					bResult = false;
-				}
-				if (!item.get("bindable").isBoolean()) {
-					System.err.println("service BINABLE is not a boolean.");
-					bResult = false;
-				}
-				
-				if (item.get("plans").isArray() && item.get("plans").size() > 0) {
-					
-					for(JsonNode plan: item.get("plans")) {
-						if (StringUtils.isEmpty(plan.get("id").asText())) {
-							System.err.println("plan ID is empty.");
-							bResult = false;
-						}
-						if (StringUtils.isEmpty(plan.get("name").asText())) {
-							System.err.println("plan NAME is empty.");
-							bResult = false;
-						}
-						if (StringUtils.isEmpty(plan.get("description").asText())) {
-							System.err.println("plan DESCRIPTION is empty.");
-							bResult = false;
-						}
-					}				
-				} else {
-					System.err.println("service PLANS is empty.");
-					bResult = false;
-				}
-			}*/
-			
-		} catch (Exception ex) {
-			System.err.println("Catch exception: " + ex.getMessage());
-			ex.printStackTrace();
-			bResult = false;
-		}
-		
-		return bResult;
+		System.out.println("End - Provision_create");
 	}
 	
-	private void deleteProvision(String instanceId){
-		System.out.println("Start - delete Provision");
+	/**
+	 * Provision_same_info_create
+	 */
+	@Test	
+	public void sendProvision_BB_Provision_same_info_create() {
+		
+		System.out.println("Start - Provision_same_info_create");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		//HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("broker.apitest.info.serviceId"), 
+				prop.getProperty("broker.apitest.info.planIdA"), 
+				prop.getProperty("broker.apitest.info.organizationGuid"), 
+				prop.getProperty("broker.apitest.info.spaceGuid"));
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);
+		ResponseEntity<String> response = null;
+		
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			
+			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+			
+			JsonNode json = JsonUtils.convertToJson(response);
+			
+			if (!checkValidCatalogJson(json)) throw new ServiceBrokerException("validation check is fail.");
+			
+			
+		} catch (ServiceBrokerException sbe) {
+			assertFalse(sbe.getMessage(), true);
+		}
+		
+		assertTrue("Success", true);
+		
+		System.out.println("End - Provision_same_info_create");
+	}
+	
+	/**
+	 * Provision_chang
+	 */
+	@Test	
+	public void sendProvision_CA_Provision_chang() {
+		
+		System.out.println("Start - Provision_chang");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		UpdateProvisionBody body = new UpdateProvisionBody(prop.getProperty("broker.apitest.info.planIdB"));
+		
+		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);
+		ResponseEntity<String> response = null;
+		
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			
+			response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+			
+			
+		} catch (ServiceBrokerException sbe) {
+			assertFalse(sbe.getMessage(), true);
+		}
+		
+		assertTrue("Success", true);
+		
+		System.out.println("End - Provision_chang");
+	}
+	
+	/**
+	 * Provision_chang_invalid_planId
+	 */
+	@Test	
+	public void sendProvision_CB_Provision_chang_invalid_planId() {
+		
+		System.out.println("Start - Provision_chang_invalid_planId");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		UpdateProvisionBody body = new UpdateProvisionBody(prop.getProperty("broker.apitest.info.planIdC"));
+		
+		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);
+		ResponseEntity<String> response = null;
+		boolean bException = false;
+		
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			
+			response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+			
+			
+		} catch (ServiceBrokerException sbe) {
+			assertEquals(sbe.getMessage(), "422 Unprocessable Entity");
+			bException = true;
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - Provision_chang_invalid_planId");
+	}
+	
+	/**
+	 * Provision_delete
+	 */
+	@Test
+	public void sendProvision_DA_Provision_delete(){
+		System.out.println("Start - Provision_delete");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ResponseEntity<String> response = null;
+		
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
+			url = url + "?service_id=" + prop.getProperty("broker.apitest.info.serviceId") + "&plan_id=" + prop.getProperty("broker.apitest.info.planIdA");
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.DELETE);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+			
+		} catch (ServiceBrokerException sbe) {
+			
+			assertFalse("Error", true);
+			
+		}
+		
+		System.out.println("End - Provision_delete");
+	}
+	
+	/**
+	 * Provision_delete_non_instanceId
+	 */
+	@Test
+	public void sendProvision_DB_Provision_delete_non_instanceId(){
+		System.out.println("Start - Provision_delete_non_instanceId");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ResponseEntity<String> response = null;
+		boolean bException = false;
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
+			
+			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.non.intanceId"));
+			url = url + "?service_id=" + prop.getProperty("broker.apitest.info.serviceId") + "&plan_id=" + prop.getProperty("broker.apitest.info.planIdA");
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.DELETE);
+			
+			if (response.getStatusCode() != HttpStatus.GONE) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+			
+		} catch (ServiceBrokerException sbe) {
+			assertEquals(sbe.getMessage(), "410 Gone");
+			bException = true;
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - Provision_delete_non_instanceId");
+	}
+	
+	private void deleteProvision(String instanceId){
+		System.out.println("Start - deleteProvision");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		ProvisionBody body = new ProvisionBody(prop.getProperty("broker.apitest.info.serviceId"), 
 				prop.getProperty("broker.apitest.info.planIdA"), 
 				prop.getProperty("broker.apitest.info.organizationGuid"), 
@@ -312,13 +485,28 @@ public class ProvisionRestTest {
 			
 			if (response.getStatusCode() != HttpStatus.OK && response.getStatusCode() != HttpStatus.GONE) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
 			
-			JsonNode json = JsonUtils.convertToJson(response);
-			
 		} catch (ServiceBrokerException sbe) {
 			sbe.printStackTrace();
 		}
 		
-		System.out.println("End - delete Provision");
+		System.out.println("End - deleteProvision");
 	}
 	
+	private boolean checkValidCatalogJson(JsonNode json) {
+		boolean bResult = true;
+
+		try {
+			if (StringUtils.isEmpty(json.get("dashboard_url").asText())) {
+				System.err.println("dashboard_url is empty.");
+				bResult = false;
+			}
+			
+		} catch (Exception ex) {
+			System.err.println("Catch exception: " + ex.getMessage());
+			ex.printStackTrace();
+			bResult = false;
+		}
+		
+		return bResult;
+	}
 }
