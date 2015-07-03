@@ -59,10 +59,10 @@ public class MysqlAdminService {
 	public static final String SERVICE_BINDING_FIND_USERNAME_BY_BINDING_ID = "select username from broker.service_binding where binding_id = ?";
 	
 	// Plan별 MAX_USER_CONNECTIONS 정보
-	private static String planA = "411d0c3e-b086-4a24-b041-0aeef1a819d1";
-	private static int planAconnections = 10;
-	private static String planB = "4a932d9d-9bc5-4a86-937f-e2c14bb9f497";
-	private static int planBconnections = 100;
+	public static String planA = "411d0c3e-b086-4a24-b041-0aeef1a819d1";
+	public static int planAconnections = 10;
+	public static String planB = "4a932d9d-9bc5-4a86-937f-e2c14bb9f497";
+	public static int planBconnections = 100;
 	
 	static String DATABASE_PREFIX = "cf_";
 	
@@ -457,6 +457,7 @@ public class MysqlAdminService {
 		// ServiceInstance의 총 Binding 건수 확인
 		totalUsers = list.size();
 		if(totalUsers <= 0) return;
+		if(totalConnections<totalUsers) throw new ServiceBrokerException("It may not exceed the specified plan.(Not assign Max User Connection)");
 
 		// User당 connection 수 = Plan의 connection / 총 Binding 건수
 		userPerConnections = totalConnections / totalUsers;
@@ -477,6 +478,27 @@ public class MysqlAdminService {
 				//System.out.println(tmp.get("instance_id")+"/"+tmp.get("binding_id")+"/"+userPerConnections);
 			}
 		}
+	}
+	
+	// User MAX_USER_CONNECTIONS 설정 조정
+	public boolean checkUserConnections(String planId, String id) throws ServiceBrokerException{
+			
+		/* Plan 정보 설정 */
+		int totalConnections = 0;
+		int totalUsers;
+		
+		if(planA.equals(planId)) totalConnections = planAconnections;
+		if(planB.equals(planId)) totalConnections = planBconnections;
+		if(!planA.equals(planId) && !planB.equals(planId)) throw new ServiceBrokerException("");
+		
+		// ServiceInstanceBinding 정보를 조회한다.
+		List<Map<String,Object>> list = findBindByInstanceId(id);
+		// ServiceInstance의 총 Binding 건수 확인
+		totalUsers = list.size();
+		
+		if(totalConnections <= totalUsers) return true;
+		
+		return false;
 	}
 	
 	private static final class ServiceInstanceRowMapper implements RowMapper<ServiceInstance> {

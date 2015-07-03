@@ -152,7 +152,7 @@ public class MysqlServiceInstanceService implements ServiceInstanceService {
 			try {
 				mysqlAdminService.setUserConnections(updatedInstance.getPlanId(), instance.getServiceInstanceId());
 			} catch (Exception e) {
-				throw new ServiceInstanceUpdateNotSupportedException(updatedInstance.getPlanId());
+				throw new ServiceInstanceUpdateNotSupportedException(e.getMessage());
 			}
 			
 			// ServiceInstance의 Plan 정보를 수정합니다.

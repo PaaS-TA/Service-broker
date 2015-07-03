@@ -103,6 +103,9 @@ public class MysqlServiceInstanceBindingService implements ServiceInstanceBindin
 			mysqlAdminService.deleteUser(username);
 		}
 		
+		if(mysqlAdminService.checkUserConnections(instance.getPlanId(), instance.getServiceInstanceId())){
+			throw new ServiceBrokerException("It may not exceed the specified plan.(Not assign Max User Connection)");
+		}
 		// 새로운 사용자를 생성합니다.
 		mysqlAdminService.createUser(database, username, password);
 		
