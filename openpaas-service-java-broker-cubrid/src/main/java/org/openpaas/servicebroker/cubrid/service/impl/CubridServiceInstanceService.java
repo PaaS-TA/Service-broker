@@ -47,7 +47,7 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		
 		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
 		
-		logger.debug("instance : {}", (instance == null ? "null.": "not null.") );
+		logger.debug("instance : {}", (instance == null ? "Not exist": "Exist") );
 		
 		if (instance != null) {
 			
@@ -56,8 +56,8 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 			String to_be_id = request.getServiceInstanceId();
 			String to_be_plan = request.getPlanId();
 			
-			logger.debug("as-is : id=" + as_is_id + ", plan=" + as_is_plan);
-			logger.debug("to-be : id=" + to_be_id + ", plan=" + to_be_plan);
+			logger.debug("as-is : Instance ID = {}, Plan = {}", as_is_id, as_is_plan);
+			logger.debug("to-be : Instance ID = {}, Plan = {}", to_be_id, to_be_plan);
 			
 			if( as_is_id.equals(to_be_id) && as_is_plan.equals(to_be_plan) ) {
 				instance.setHttpStatusOK();
@@ -102,7 +102,7 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		
 		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
 		
-		logger.debug("instance : {}", (instance == null ? "null.": "not null.") );
+		logger.debug("instance : {}", (instance == null ? "Not exist": "Exist") );
 		
 		if (instance != null) {
 			cubridAdminService.deleteDatabase(instance);

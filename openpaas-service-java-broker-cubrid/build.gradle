@@ -50,7 +50,8 @@ dependencies {
 	testCompile("org.cloudfoundry:spring-boot-cf-service-broker-tests:${springBootCfServiceBrokerVersion}")
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
     testCompile("com.jayway.jsonpath:json-path:${jsonPathVersion}")
-       
+    testCompile("org.apache.httpcomponents:httpclient:4.4.1")
+    
     compile("org.apache.commons:commons-dbcp2")
     //runtime "mysql:mysql-connector-java:5.1.27"
     runtime "com.github.jinahya:cubrid-jdbc-driver-9.2.0.0155:1.0"

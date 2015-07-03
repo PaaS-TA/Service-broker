@@ -75,7 +75,9 @@ public class CubridAdminService {
 	public boolean isExistsService(CubridServiceInstance instance) throws CubridServiceException {
 		try {
 			List<Map<String,Object>> databases = jdbcTemplate.queryForList("SELECT * FROM service_instances WHERE db_name = '"+instance.getDatabaseName()+"'");
+			
 			return databases.size() > 0 ? true : false;
+			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
 		} catch (DataAccessException e) {
@@ -90,6 +92,7 @@ public class CubridAdminService {
 					+ "WHERE A.guid = B.service_instance_id AND B.db_user_name = '"+username+"' AND A.db_name = '"+databaseName+"'");
 
 			return users.size() > 0 ? true : false;
+			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
 		} catch (DataAccessException e) {
@@ -118,6 +121,7 @@ public class CubridAdminService {
 			}
 
 			return serviceInstance;
+			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
 		} catch (DataAccessException e) {
@@ -145,6 +149,7 @@ public class CubridAdminService {
 			}
 
 			return serviceInstanceBinding;
+			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
 		} catch (DataAccessException e) {
@@ -165,7 +170,9 @@ public class CubridAdminService {
 
 	public void deleteBind(String id) throws CubridServiceException{
 		try {
+			
 			jdbcTemplate.update("DELETE FROM service_instance_bindings WHERE guid = ?", id);
+			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
 		} catch (DataAccessException e) {
@@ -175,8 +182,10 @@ public class CubridAdminService {
 
 	public void save(CubridServiceInstance serviceInstance) throws CubridServiceException {
 		try {
+			
 			jdbcTemplate.update("INSERT INTO service_instances (guid, plan_id, db_name) values (?, ?, ?)", 
 					serviceInstance.getServiceInstanceId(), serviceInstance.getPlanId(), serviceInstance.getDatabaseName());
+			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
 		} catch (DataAccessException e) {
@@ -186,8 +195,10 @@ public class CubridAdminService {
 
 	public void saveBind(CubridServiceInstanceBinding serviceInstanceBinding) throws CubridServiceException{
 		try {		
+			
 			jdbcTemplate.update("INSERT INTO service_instance_bindings (guid, service_instance_id, db_user_name) values (?, ?, ?)",
 					serviceInstanceBinding.getId(), serviceInstanceBinding.getServiceInstanceId(), serviceInstanceBinding.getDatabaseUserName());
+			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
 		} catch (DataAccessException e) {
@@ -197,8 +208,10 @@ public class CubridAdminService {
 
 	public void update(ServiceInstance instance, ServiceInstance updateInstance) throws CubridServiceException{
 		try {
+			
 			jdbcTemplate.update("UPDATE service_instances SET plan_id = ? WHERE guid = ?", 
 					updateInstance.getPlanId(), instance.getServiceInstanceId());
+			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
 		} catch (DataAccessException e) {
@@ -207,6 +220,7 @@ public class CubridAdminService {
 	}
 
 	public void addVolume(String databaseName) throws CubridServiceException{
+		
 		String command = "cubrid addvoldb -p data --db-volume-size=100MB " + databaseName;
 		jsch.shell(command);
 
@@ -257,6 +271,7 @@ public class CubridAdminService {
 		commands.add("cubrid server start " + databaseName);
 
 		//2. execute command(s)
+		//return ==> map key: command, val: result
 		Map<String, List<String>> rs = jsch.shell(commands);
 		
 		return "0".equals(rs.get("exitStatus").get(0)) ? true : false;

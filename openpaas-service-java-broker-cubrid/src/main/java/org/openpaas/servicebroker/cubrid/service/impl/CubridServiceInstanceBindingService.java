@@ -48,10 +48,24 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 		
 		CubridServiceInstanceBinding binding = cubridAdminService.findBindById(request.getBindingId());
 		
-		logger.debug("binding :{} ", (binding == null ? "null.": "not null.") );
+		logger.debug("binding : {} ", (binding == null ? "Not exist": "Exist") );
 		
 		if (binding != null) {
-			throw new ServiceInstanceBindingExistsException(binding);
+			
+			String as_is_bindId = binding.getId();
+			String as_is_instanceId = binding.getServiceInstanceId();
+			String to_be_bindId = request.getBindingId();
+			String to_be_instanceId = request.getServiceInstanceId();
+			
+			logger.debug("as-is : Binding ID = {}, Instance ID = {}", as_is_bindId, as_is_instanceId);
+			logger.debug("to-be : Binding ID = {}, Instance ID = {}", to_be_bindId, to_be_instanceId);
+			
+			if( as_is_bindId.equals(to_be_bindId) && as_is_instanceId.equals(to_be_instanceId) ) {
+				binding.setHttpStatusOK();
+				return binding;
+			} else {
+				throw new ServiceInstanceBindingExistsException(binding);
+			}
 		}
 		
 		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
@@ -92,9 +106,9 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 		String bindingId = request.getBindingId();
 		CubridServiceInstanceBinding binding = getServiceInstanceBinding(bindingId);
 		
-		logger.debug("binding : {}", (binding == null ? "null.": "not null.") );
+		logger.debug("binding : {}", (binding == null ? "Not exist": "Exist") );
 		
-		if (binding!= null) {
+		if (binding != null) {
 			CubridServiceInstance instance = cubridAdminService.findById(binding.getServiceInstanceId());
 			cubridAdminService.deleteUser(instance.getDatabaseName(), binding.getDatabaseUserName());
 			cubridAdminService.deleteBind(bindingId);
