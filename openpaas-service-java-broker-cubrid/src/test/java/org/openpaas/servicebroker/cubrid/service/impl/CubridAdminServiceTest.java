@@ -72,7 +72,7 @@ public class CubridAdminServiceTest {
 	@Test
 	public void deleteDatabase() throws CubridServiceException {
 		CubridServiceInstance serviceInstance = new CubridServiceInstance();
-		serviceInstance.setDatabaseName("test_createdb_A");
+		serviceInstance.setDatabaseName("87e6aeb685613f06");
 		
 		cubridAdminService.deleteDatabase(serviceInstance );
 	}
