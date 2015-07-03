@@ -64,7 +64,7 @@ public class MysqlAdminService {
 	public static String planB = "4a932d9d-9bc5-4a86-937f-e2c14bb9f497";
 	public static int planBconnections = 100;
 	
-	static String DATABASE_PREFIX = "cf_";
+	static String DATABASE_PREFIX = "op_";
 	
 	private Logger logger = LoggerFactory.getLogger(MysqlAdminService.class);
 	
