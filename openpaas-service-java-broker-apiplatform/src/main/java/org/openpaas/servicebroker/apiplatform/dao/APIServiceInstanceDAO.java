@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
 
 @Repository
 public class APIServiceInstanceDAO {
@@ -30,10 +30,10 @@ public class APIServiceInstanceDAO {
 	@Autowired
 	private Environment env;
 	
-	public APIUser getAPIUserByOrgID(String oranization_guid){
+	public APIUser getAPIUserByOrgID(String oranizationGuid){
 		logger.info("getAPIUserByOrgID() start");
-		logger.debug("oranization_guid : "+oranization_guid);
-		String sql = "SELECT * FROM apiplatform_users WHERE organization_guid='"+oranization_guid+"'";
+		logger.debug("oranization_guid : "+oranizationGuid);
+		String sql = "SELECT * FROM apiplatform_users WHERE organization_guid='"+oranizationGuid+"'";
 		
 		APIUser apiUser = new APIUser();
 		
@@ -55,10 +55,10 @@ public class APIServiceInstanceDAO {
 	return apiUser;
 	}
 	
-	public APIServiceInstance getAPIServiceByInstanceID(String instanceId){
+	public APIServiceInstance getAPIServiceByInstanceID(String serviceInstanceId){
 		logger.info("getServiceByInstanceID() start");
-		logger.debug("instance_id : "+instanceId);
-		String sql = "SELECT * FROM apiplatform_services WHERE instance_id='"+instanceId+"'";
+		logger.debug("instance_id : "+serviceInstanceId);
+		String sql = "SELECT * FROM apiplatform_services WHERE instance_id='"+serviceInstanceId+"' AND delyn = 'N'";
 		
 		APIServiceInstance apiService = new APIServiceInstance();
 		
@@ -82,9 +82,9 @@ public class APIServiceInstanceDAO {
 	return apiService;
 	}
 	//
-	public APIUser getAPIUserByInstanceId(String instanceId){
-		logger.debug("instanceId : "+instanceId);
-		String sql = "SELECT * FROM apiplatform_users WHERE instance_id='"+instanceId+"'";
+	public APIUser getAPIUserByInstanceId(String serviceInstanceId){
+		logger.debug("instanceId : "+serviceInstanceId);
+		String sql = "SELECT * FROM apiplatform_users WHERE instance_id='"+serviceInstanceId+"'";
 		
 		APIUser apiUser = new APIUser();
 		
@@ -104,25 +104,69 @@ public class APIServiceInstanceDAO {
 		return apiUser;
 	}
 	
-	public void insertAPIUser(String oranization_guid, String user_id, String user_password){
+	public APIServiceInstance getAPIInfoByInstanceID(String serviceInstanceId){
+		logger.info("getServiceByInstanceID() start");
+		logger.debug("instance_id : "+serviceInstanceId);
+		String sql = 
+				"SELECT s.organization_guid,s.instance_id,s.space_guid,s.service_id,s.plan_id,u.user_id,u.user_password FROM apiplatform_services s "
+				+ "INNER JOIN apiplatform_users u ON u.organization_guid = s.organization_guid WHERE instance_id= '"+serviceInstanceId+"' AND delyn = 'N' ";
+		
+		APIServiceInstance apiService = new APIServiceInstance();
+		
+		RowMapper mapper = new RowMapper(){
+			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+				APIServiceInstance apiService = new APIServiceInstance();
+				apiService.setInstance_id(rs.getString("instance_id"));
+				apiService.setOrganization_id(rs.getString("organization_guid"));
+				apiService.setSpace_guid(rs.getString("space_guid"));
+				apiService.setService_id(rs.getString("service_id"));
+				apiService.setPlan_id(rs.getString("plan_id"));
+				apiService.setUser_id(rs.getString("user_id"));
+				apiService.setUser_password(rs.getString("user_password"));
+				
+				return apiService;
+				}
+			};
+
+			apiService = (APIServiceInstance)jdbcTemplate.queryForObject(sql, mapper);
+
+		logger.info("getAPIServiceByInstanceID() finished");
+		
+	return apiService;
+	}
+	
+	
+	
+	
+	public void insertAPIUser(String oranizationGuid, String userId, String userPassword){
 		
 		logger.info("insertAPIUser() start");
 		String sql ="INSERT INTO apiplatform_users (organization_guid,user_id,user_password, createtimestamp) VALUES "
-				+ "('"+oranization_guid+"','"+user_id+"','"+user_password+"',utc_timestamp())";
+				+ "('"+oranizationGuid+"','"+userId+"','"+userPassword+"',utc_timestamp())";
 		
 		jdbcTemplate.execute(sql);
 
 		logger.info("insertAPIUser() finished");
 	}
 	
-	public void insertAPIServiceInstance(String oranization_guid, String serviceInstanceId,String space_guid,String service_id,String plan_id){
+	public void insertAPIServiceInstance(String oranizationGuid, String serviceInstanceId,String spaceGuid,String serviceId,String planId){
 		
 		logger.info("insertAPIUser() start");
 		String sql ="INSERT INTO apiplatform_services (organization_guid,instance_id,space_guid,service_id,plan_id,delyn,createtimestamp) VALUES "
-				+ "('"+oranization_guid+"','"+serviceInstanceId+"','"+space_guid+"','"+service_id+"','"+plan_id+"','N',utc_timestamp())";
+				+ "('"+oranizationGuid+"','"+serviceInstanceId+"','"+spaceGuid+"','"+serviceId+"','"+planId+"','N',utc_timestamp())";
 	
 		jdbcTemplate.execute(sql);
 		
 		logger.info("insertAPIUser() finished");
+	}
+	
+	public void updateAPIServiceInstance(String serviceInstanceId, String planId){
+		
+		logger.info("updateAPIUser() start");
+		String sql ="UPDATE apiplatform_services SET plan_id = '"+planId+"' WHERE instance_id = '"+serviceInstanceId+"'";
+
+		jdbcTemplate.update(sql);
+		
+		logger.info("updateAPIUser() finished");
 	}
 }

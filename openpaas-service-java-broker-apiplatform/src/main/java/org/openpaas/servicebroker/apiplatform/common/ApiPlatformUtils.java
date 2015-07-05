@@ -13,7 +13,7 @@ public class ApiPlatformUtils {
 	static public void apiPlatformErrorMessageCheck(JsonNode json) throws ServiceBrokerException{
 		
 		//API 플랫폼이 error : true를 응답한 경우
-		if (json.get("error").asText().equals("true")) { 
+		if (json.has("error")&&json.get("error").asText().equals("true")) { 
 			
 			String apiPlatformMessage = json.get("message").asText();
 			
@@ -41,8 +41,7 @@ public class ApiPlatformUtils {
 			//이미 키생성이 완료된 어플리케이션의 이름을 Generate Key API의 파라미터로 넣은 경우	
 			else if(apiPlatformMessage.equals("Error occurred while executing the action generateApplicationKey")){
 
-				logger.info("Key already generated");
-				return;
+				throw new ServiceBrokerException("Key already generated");
 			}
 			
 			//Add a Subscription
@@ -70,5 +69,6 @@ public class ApiPlatformUtils {
 			
 			throw new ServiceBrokerException("Add an Application Error");
 		}
+		
 	}
 }

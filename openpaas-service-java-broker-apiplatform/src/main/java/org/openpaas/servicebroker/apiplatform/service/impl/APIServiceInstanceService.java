@@ -30,12 +30,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-
-
-
-
-
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
@@ -64,13 +58,17 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		String organizationGuid =instance.getOrganizationGuid();
 		String serviceInstanceId = instance.getServiceInstanceId();
 		String spaceGuid = instance.getSpaceGuid();
-		String serviceDefinitionId = instance.getServiceDefinitionId();
+		String serviceId = instance.getServiceDefinitionId();
 		String planId = instance.getPlanId();
 		String planName = env.getProperty("APIPlatformApplicationPlan");
 		
-		String serviceName = serviceDefinitionId.split(" ")[0];
-		String serviceVersion = serviceDefinitionId.split(" ")[1];
+		String serviceName = serviceId.split(" ")[0];
+		String serviceVersion = serviceId.split(" ")[1];
 		String serviceProvider = apiCatalogService.svc.getMetadata().get("providerDisplayName").toString();
+		
+		HttpEntity<String> httpEntity;
+		ResponseEntity<String> responseEntity;
+		HttpHeaders headers;
 		
 		String cookie = "";
 		
@@ -163,7 +161,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 				
 	//해당 인스턴스 아이디로 DB에 저장된 서비스와 요청이들어온 서비스가 다를 경우, 409 예외를 발생시킨다.
 		if(instanceExsistsAtDB){
-			if(!apiServiceInstacne.getService_id().equals(serviceDefinitionId)){
+			if(!apiServiceInstacne.getService_id().equals(serviceId)){
 				
 				logger.info("Instance :"+serviceInstanceId+" has a service :"+serviceName+" not "+apiServiceInstacne.getService_id().split(" ")[0]);
 				throw new ServiceInstanceExistsException(instance);
@@ -181,7 +179,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		
 		logger.info("Add An Application API Start");
 		
-		HttpHeaders headers = new HttpHeaders();
+		headers = new HttpHeaders();
 		headers.set("Cookie", cookie);
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		//Add an Application API를 보낸다.
@@ -189,9 +187,9 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		String addApplicationUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddAnApplication");
 		String addApplicationParameters = 
 				"action=addApplication&application="+serviceInstanceId+"&tier="+env.getProperty("APIPlatformApplicationPlan")+"&description=&callbackUrl=";		
-		HttpEntity<String> httpEntity = new HttpEntity<String>(addApplicationParameters, headers);
+		httpEntity = new HttpEntity<String>(addApplicationParameters, headers);
 
-		ResponseEntity<String> responseEntity = HttpClientUtils.send(addApplicationUri, httpEntity, HttpMethod.POST);
+		responseEntity = HttpClientUtils.send(addApplicationUri, httpEntity, HttpMethod.POST);
 		
 		JsonNode addApplicationResponseJson = null;
 
@@ -216,30 +214,37 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		logger.info("API Platform Application added");
 		
 	//Generate Key API를 사용하여 API플랫폼 어플리케이션의 키값을 생성한다.
-		logger.info("API Platform Generate Key Started");
-		logger.info("ServiceInstanceID: "+serviceInstanceId);
+		logger.info("API Platform Generate Key Started. Application : "+serviceInstanceId);
+		//두가지 키타입으로 키를 생성해야하기 때문에 두번 실행한다.
+		for(int i=1;i<3;i++) {	
+			logger.info("API Platform Generate Key Started - KEYTYPE : "+env.getProperty("Keytype"+i));
+			headers.set("Cookie", cookie);
+			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+			String generateKeyUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GenerateAnApplicationKey");
+			String generateKeyParameters = 
+					"action=generateApplicationKey&application="+serviceInstanceId+"&keytype="+env.getProperty("Keytype"+i)+"&callbackUrl=&authorizedDomains=ALL&validityTime=360000";
 		
-		headers.set("Cookie", cookie);
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		String generateKeyUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GenerateAnApplicationKey");
-		String generateKeyParameters = 
-				"action=generateApplicationKey&application="+serviceInstanceId+"&keytype=PRODUCTION&callbackUrl=&authorizedDomains=ALL&validityTime=360000";
+			httpEntity = new HttpEntity<String>(generateKeyParameters, headers);
+			responseEntity = HttpClientUtils.send(generateKeyUri, httpEntity, HttpMethod.POST);
 	
-		httpEntity = new HttpEntity<String>(generateKeyParameters, headers);
-		
-		responseEntity = HttpClientUtils.send(generateKeyUri, httpEntity, HttpMethod.POST);
-
-		JsonNode generateKeyResponseJson = null;
-		
-		try {
-			generateKeyResponseJson = JsonUtils.convertToJson(responseEntity);
-			ApiPlatformUtils.apiPlatformErrorMessageCheck(generateKeyResponseJson);
-		} catch (ServiceBrokerException e) {
-			logger.error("API Platform response error - Generate Key");
-			throw new ServiceBrokerException(e.getMessage());
+			JsonNode generateKeyResponseJson = null;
+			
+			try {
+				generateKeyResponseJson = JsonUtils.convertToJson(responseEntity);
+				ApiPlatformUtils.apiPlatformErrorMessageCheck(generateKeyResponseJson);
+				logger.debug(env.getProperty("Keytype"+i)+" Key generated. Application : "+serviceInstanceId);
+			} catch (ServiceBrokerException e) {
+				if(e.getMessage().equals("Key already generated"))
+				{
+					logger.debug(env.getProperty("Keytype"+i)+" Key already generated");
+				} else {
+					logger.error("API Platform response error - Generate Key KEYTYPE : "+env.getProperty("Keytype"+i));
+					throw new ServiceBrokerException(e.getMessage());					
+				}
+				logger.info("API Platform Generate Key finished - KEYTYPE : "+env.getProperty("Keytype"+i));
+			}
 		}
-		logger.info("API Platform Key generated finished");
-		
+		logger.info("API Platform Generate Key Started. Application : "+serviceInstanceId);
 
 	//Add Subscription API를 사용하여 API플랫폼 어플리케이션에 API를 사용등록한다.
 
@@ -287,7 +292,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		else {	
 		//API서비스 인스턴스 정보를 API플랫폼 DB에 저장한다.
 			try {
-				dao.insertAPIServiceInstance(organizationGuid,serviceInstanceId,spaceGuid,serviceDefinitionId,planId);
+				dao.insertAPIServiceInstance(organizationGuid,serviceInstanceId,spaceGuid,serviceId,planId);
 			} catch (Exception e) {
 				logger.error("API Service Instance insert failed");
 				throw new APIServiceInstanceException("Database Error: API ServiceInstance insert");		
@@ -374,7 +379,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		
 		try {
 			apiServiceInstance=dao.getAPIServiceByInstanceID(serviceInstanceId);
-			logger.info("get API Service Instance success");
+			logger.debug("get API Service Instance success");
 			String organizationId =apiServiceInstance.getOrganization_id();
 			String spaceId = apiServiceInstance.getSpace_guid();
 			String serviceId = apiServiceInstance.getService_id();
@@ -383,11 +388,10 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			request = new CreateServiceInstanceRequest(serviceId,planId,organizationId,spaceId);
 			
 		} catch (EmptyResultDataAccessException e) {			
-			//DB에서 인스턴스 아이디를 찾을 수 없으면 null을 리턴한다.
+			logger.error("not found infomation about instance ID : "+serviceInstanceId+". Try again, after Provision");
 			return null;
 		} catch (Exception e){
-			
-			logger.error("getServiceInstance() Error");
+			logger.error("Database Error - getServiceInstanceByInstanceID()");
 			throw new ServiceBrokerException(e.getMessage());
 		}
 		
@@ -399,12 +403,146 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		return serviceInstance;
 	}
 
+//서비스 인스턴스의 플랜정보를 업데이트 한다.
 	@Override
-	public ServiceInstance updateServiceInstance(UpdateServiceInstanceRequest arg0) throws ServiceInstanceUpdateNotSupportedException,
+	public ServiceInstance updateServiceInstance(UpdateServiceInstanceRequest request) throws ServiceInstanceUpdateNotSupportedException,
 			ServiceBrokerException, ServiceInstanceDoesNotExistException 
 	{
+		String serviceInstanceId = request.getServiceInstanceId();
+		String planId = request.getPlanId();
+		String planName = planId.split(" ")[2];
+		System.out.println(planName);
+		APIServiceInstance apiServiceInstance = null;
 		
-		return null;
+	//요청된 서비스 인스턴스에 대해 DB에 저장된 정보를 가져온다.
+		try {
+			apiServiceInstance =dao.getAPIInfoByInstanceID(serviceInstanceId);			
+		} catch (EmptyResultDataAccessException e) {
+			logger.error("not found InstanceID : "+serviceInstanceId);
+			throw new ServiceInstanceDoesNotExistException(serviceInstanceId);
+		} catch (Exception e) {
+			logger.error("Database Error - getAPIInfoByInstanceID");
+			throw new ServiceBrokerException(e.getMessage());
+		}
+		
+		if(apiServiceInstance.getPlan_id().equals(planId)){
+			logger.debug("already setted plan requseted");
+			throw new ServiceBrokerException("Plan : ["+planName+"] already setted");
+		}
+		
+	//플랜의 업데이트 가능 여부를 확인한다.
+		String planUpdatable;
+		planUpdatable = env.getProperty("PlanUpdatable");
+		
+		//서비스 브로커의 플랜 업데이트 설정이 되어있지 않다면, 예외를 발생시킨다. 		
+		if (!planUpdatable.equals("yes")){
+			logger.info("Service Broker plan update not allowed");
+			throw new ServiceInstanceUpdateNotSupportedException("Service Plan not updatable. Service Broker Updatable setting : ["+planUpdatable+"]");	
+		}
+	
+	//업데이트 요청이 들어온 플랜명이 사용가능한 플랜명인지 확인한다.
+		boolean planAvailable = false;
+		String nextPlan = null;
+		int i =1;
+		do{
+			if(env.getProperty("APIPlatformTier"+i)!=null&&env.getProperty("APIPlatformTier"+i).equals(planName)){
+				planAvailable =true;
+				logger.debug("Plan : ["+planName+"] availbale");
+			}
+			else {
+				System.out.println(env.getProperty("APIPlatformTier"+i));
+				i++;
+				nextPlan= env.getProperty("APIPlatformTier"+i);
+			}
+		} while(planAvailable==false&&nextPlan!=null);
+		
+		if(!planAvailable){
+			logger.error("not supported Plan :"+planName);
+			throw new ServiceBrokerException("Plan : ["+planName+"] not supported");
+		}
+		
+	//플랜 업데이트를 가능하도록 설정했을때, API플랫폼 어플리케이션의 티어값을 업데이트한다.
+		//요청된 인스턴스에 대한 API플랫폼 유저아이디와 패스워드로 API플랫폼에 로그인한다.
+		String userId = apiServiceInstance.getUser_id();
+		String userPassword = apiServiceInstance.getUser_password();
+		String cookie = "";
+		cookie = loginService.getLogin(userId, userPassword);	
+
+		//Update an Application API를 사용한다.
+		HttpEntity<String> httpEntity;
+		ResponseEntity<String> responseEntity;
+		HttpHeaders headers = new HttpHeaders();
+		
+		headers.set("Cookie", cookie);
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		
+		String updateApplicationUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.UpdateApplication");
+		String updateApplicationParameters = "action=updateApplication&applicationOld="+serviceInstanceId+"&applicationNew="+serviceInstanceId+"&callbackUrlNew=&descriptionNew=&tier="+planName;
+		
+		httpEntity = new HttpEntity<String>(updateApplicationParameters, headers);
+		responseEntity = HttpClientUtils.send(updateApplicationUri, httpEntity, HttpMethod.POST);
+		
+		JsonNode updateApplicationResponseJson = null;
+		
+		try {
+			updateApplicationResponseJson =JsonUtils.convertToJson(responseEntity);
+			ApiPlatformUtils.apiPlatformErrorMessageCheck(updateApplicationResponseJson);
+			logger.debug("");
+		} catch (Exception e) {
+			throw new ServiceBrokerException(e.getMessage());
+		}
+		
+		//Update an Application API는 에러메시지를 보내지 않기 때문에 Get Apllications API를 사용하여 API플랫폼에서 플랜업데이트가 정상적으로 이루어졌는지 확인한다. 
+		String getApplicationsUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetApplications");
+		
+		httpEntity = new HttpEntity<String>("", headers);
+		responseEntity = HttpClientUtils.send(getApplicationsUri, httpEntity, HttpMethod.POST);
+		
+		JsonNode getApplicationsResponseJson = null;
+		
+		try {
+			getApplicationsResponseJson =JsonUtils.convertToJson(responseEntity);
+			ApiPlatformUtils.apiPlatformErrorMessageCheck(getApplicationsResponseJson);
+			logger.debug("Get Applications completed");
+		} catch (Exception e) {
+			throw new ServiceBrokerException(e.getMessage());
+		}
+		//Json객체를 통해 API플랫폼에 등록된 어플리케이션과 플랜값이 업데이트를 요청한 어플리케이션, 플랜값과 일치하는지 확인한다.
+		JsonNode applications =getApplicationsResponseJson.get("applications");
+		String applicationName = null;
+		String applicationTier=null;
+		boolean updateSuccess =false;
+		for(JsonNode application: applications){
+			applicationName = application.get("name").asText();
+			applicationTier = application.get("tier").asText();
+			if(applicationName.equals(serviceInstanceId)&&applicationTier.equals(planName)){
+				updateSuccess = true;
+				break;
+			}
+		}
+		
+		if(updateSuccess){
+			try {
+				dao.updateAPIServiceInstance(serviceInstanceId, planId);
+				logger.debug("updateAPIServiceInstance() completed. InstanceID : "+serviceInstanceId+" Plan : "+planId);
+			} catch (Exception e) {
+				logger.error("Database Error - updateAPIServiceInstance");
+				throw new ServiceBrokerException("Database Error - updateAPIServiceInstance");
+			}
+			
+			String oldPlanName = apiServiceInstance.getPlan_id().split(" ")[2];
+			logger.info("Plan changed. InstanceID : ["+serviceInstanceId+"] Plan ["+oldPlanName+"] to ["+planName+"]");
+		}
+		else {
+			//API플랫폼에 해당 어플리케이션이 존재하지 않거나 요청된 플랜명을 API플랫폼의 티어에서 찾을 수 없는 경우이다.
+			logger.error("Application does not exists or Invalid Tier. User Id :["+userId+"], Application : ["+serviceInstanceId+"], Tier : ["+planName+"]");
+			throw new ServiceBrokerException("Update failed caused by API Platform");
+		}
+	//DB의 인스턴스 정보를 수정한다.
+
+		ServiceInstance instance = new ServiceInstance(request);
+		logger.info("Update ServiceInstance completed. InstanceID : "+serviceInstanceId+" Plan : "+planId);
+		return instance;
 	}
 
 }
