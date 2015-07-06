@@ -379,13 +379,14 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		APIServiceInstance apiServiceInstance = new APIServiceInstance();		
 		CreateServiceInstanceRequest request = new CreateServiceInstanceRequest();
 		ServiceInstance serviceInstance;
+		String serviceId = null;
 		
 		try {
 			apiServiceInstance=dao.getAPIServiceByInstanceID(serviceInstanceId);
 			logger.debug("get API Service Instance success");
 			String organizationId =apiServiceInstance.getOrganization_id();
 			String spaceId = apiServiceInstance.getSpace_guid();
-			String serviceId = apiServiceInstance.getService_id();
+			serviceId = apiServiceInstance.getService_id();
 			String planId = apiServiceInstance.getPlan_id();
 			
 			request = new CreateServiceInstanceRequest(serviceId,planId,organizationId,spaceId);
@@ -400,8 +401,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		
 		
 		serviceInstance = new ServiceInstance(request);
-		logger.info("get Service Instance completed");
-		System.out.println(serviceInstance.getServiceDefinitionId()+" "+serviceInstance.getPlanId());
+		logger.info("get Service Instance completed InstanceId : ["+serviceInstanceId+"] ServiceId : "+serviceId+"]");
 		
 		return serviceInstance;
 	}
