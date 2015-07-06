@@ -367,10 +367,10 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 	}
 	
 	@Override
-	public ServiceInstance deleteServiceInstance(DeleteServiceInstanceRequest arg0) throws ServiceBrokerException 
+	public ServiceInstance deleteServiceInstance(DeleteServiceInstanceRequest request) throws ServiceBrokerException 
 	{
 
-		return null;
+		return new ServiceInstance(request);
 	}
 
 	@Override

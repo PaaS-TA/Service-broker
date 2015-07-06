@@ -438,13 +438,16 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 
 	@Override
 	public ServiceInstanceBinding deleteServiceInstanceBinding(
-			DeleteServiceInstanceBindingRequest arg0)
+			DeleteServiceInstanceBindingRequest request)
 			throws ServiceBrokerException {
 		
-		
-		
-		
-		return null;
+		String bindingId = request.getBindingId();
+		String serviceInstanceId = request.getServiceId();
+		Map<String,Object> credentials = new LinkedHashMap<String, Object>();
+		String syslogDrainUrl = null;
+		String appGuid = "dummy";
+		//TODO appGuid를 브로커에서 가지고 있어야 하는지.
+		return new ServiceInstanceBinding(bindingId, serviceInstanceId, credentials, syslogDrainUrl, appGuid);
 	}
 
 	
