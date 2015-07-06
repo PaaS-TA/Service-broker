@@ -147,26 +147,36 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		logger.info("API Platform List Subscriptions finished. Application : "+serviceInstanceId);
 		
 	//응답받은 json객체에서 키값들을 받아 변수에 담는다.
+		boolean applicationExists = false;
 		JsonNode applications = getApplicationResponseJson.get("subscriptions");
 		for(JsonNode application :applications){
 			if(application.get("name").asText().equals(serviceInstanceId)){
 				//TODO 어플리케이션과 사용등록된 API가 모두 subscriptions필드로 나오기때문에 확인이 필요함
 				//어플리케이션의 키값들을 변수에 담는다.
+				logger.debug("Application Exists. Application Name : "+serviceInstanceId);
 				prodConsumerKey = application.get("prodConsumerKey").asText();
 				prodConsumerSecret = application.get("prodConsumerSecret").asText();
 				sandConsumerKey = application.get("sandboxConsumerKey").asText();
 				sandConsumerSecret = application.get("sandboxConsumerSecret").asText();
+				applicationExists = true;
 				break;
 			}
 		}
-		//consumer key와 consumer secret이 각각 두가지 키타입으로 총 4개가 생성되어 있지 않으면 예외를 발생시킨다.
-		if(prodConsumerKey.equals("null")||prodConsumerSecret.equals("null")||sandConsumerKey.equals("null")||sandConsumerSecret.equals("null")){
-			logger.error("Key not generated. UsernId : "+userId+", Application : "+serviceInstanceId);
-			throw new ServiceBrokerException("Credential not found : "+serviceInstanceId+", Try again, after provisioning");
-		} else {			
-			logger.info("get Application Credentials completed. UserId : "+userId+", Application : "+serviceInstanceId);
+		//어플리케이션이 존재하지 않으므로 예외를 발생시킨다.
+		if(!applicationExists){
+			logger.error("UserID : "+userId+", ApplicationName : "+serviceInstanceId+" dose not exist.");
+			throw new ServiceBrokerException("API Platform Application dose not exist. UserID : "+userId+", ApplicationName : "+serviceInstanceId);
 		}
-		
+		else{
+			//consumer key와 consumer secret이 각각 두가지 키타입으로 총 4개가 생성되어 있지 않으면 예외를 발생시킨다.
+			if(prodConsumerKey.equals("null")||"null".equals(prodConsumerSecret)||"null".equals(sandConsumerKey)||"null".equals(sandConsumerSecret)){
+				logger.error("Key not generated. UsernId : "+userId+", Application : "+serviceInstanceId);
+				throw new ServiceBrokerException("Credential not found. Application : "+serviceInstanceId+", Try again, after provisioning");
+			} else {			
+				logger.info("get Application Credentials completed. UserId : "+userId+", Application : "+serviceInstanceId);
+			}
+		}
+
 	//API의 공급자 정보를 가져오기 위해 Get Published APIs by Application API를 사용한다.
 		String listAPIsUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAPIsByApplication");
 		String listAPIsParameters = "action=getSubscriptionByApplication&app="+serviceInstanceId;		
@@ -239,9 +249,33 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			resourceList.add(i,resourcePath);
 			i++;
 		}
-		System.out.println(resourceList.size());
-	// Get API Information Detail API를 사용한다.
 		
+	// Get API Information Detail API를 사용한다.
+		List<JsonNode> apiList = new ArrayList<JsonNode>();
+		String basePath = null;
+		JsonNode  getAPIInfoDetailResponseJson = null;
+		for(i=0;i<resourceList.size();i++){
+			String getAPIInfoDetailUrl = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAPIDetailInformation")
+					+serviceProvider+"/"+serviceName+"/"+serviceVersion+"/"+resourceList.get(i);
+			
+			httpEntity = new HttpEntity<String>("", headers);
+			responseEntity = HttpClientUtils.send(getAPIInfoDetailUrl, httpEntity, HttpMethod.GET);
+
+			try {
+				getAPIInfoDetailResponseJson =JsonUtils.convertToJson(responseEntity);
+				ApiPlatformUtils.apiPlatformErrorMessageCheck(getAPIInfoDetailResponseJson);
+			} catch (ServiceBrokerException e) {
+				throw new ServiceBrokerException(e.getMessage());
+			}
+			
+			apis = getAPIInfoDetailResponseJson.get("apis");
+			apiList.add(apis);
+		}
+		
+		basePath = getAPIInfoDetailResponseJson.get("basePath").asText();
+		
+		
+/*		
 		List<Map> resourceMapList = new ArrayList<Map>();
 		Map<String, Object> resourceMap = null;
 		for(i=0;i<resourceList.size();i++){
@@ -300,14 +334,18 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			resourceMap.put("methods", methodList);
 			resourceMapList.add(resourceMap);
 		}
-
+*/
+		credentials.put("uri", basePath);
 		credentials.put("username", userId);
 		credentials.put("password", userPassword);
+		credentials.put("host","");
+		credentials.put("port","");
+		credentials.put("database","");
 		credentials.put("prodConsumerKey", prodConsumerKey);
 		credentials.put("prodConsumerSecret", prodConsumerSecret);
 		credentials.put("sandConsumerKey", sandConsumerKey);
 		credentials.put("sandConsumerSecret", sandConsumerSecret);
-		credentials.put("resources", resourceMapList);
+		credentials.put("apis", apiList);
 		
 		
 		ServiceInstanceBinding serviceInstanceBinding = new ServiceInstanceBinding(bindingId, serviceId, credentials, syslogDrainUrl, appGuid);

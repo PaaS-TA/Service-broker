@@ -71,12 +71,48 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		HttpHeaders headers;
 		
 		String cookie = "";
-		
+				
 	//플랜명이 unlimited가 맞는지 확인한다.
 		if(!planId.split(" ")[2].equals(planName)){
 			logger.error("invalid plan requseted");
 			throw new ServiceBrokerException("Invalid Plan Name - Plan Name must be 'Unlimited'");
 		}
+		
+	//해당 인스턴스 아이디로 DB에 저장된 정보가 있는지 확인한다.
+		boolean instanceExsistsAtDB;
+		APIServiceInstance apiServiceInstacne = new APIServiceInstance();
+		try {
+			apiServiceInstacne=dao.getAPIServiceByInstanceID(serviceInstanceId);
+			instanceExsistsAtDB = true;
+			//인스턴스 아이디에 대한 org 아이디가 DB의 org아이디와 요청된 org아이디가 다른 경우이다.
+			if(!apiServiceInstacne.getOrganization_id().equals(organizationGuid)){
+				logger.error("incorrect orgID requested. OrgId :["+organizationGuid+"]");
+				throw new ServiceBrokerException("incorrect OrgId : ["+organizationGuid+"], correct orgId is ["+apiServiceInstacne.getOrganization_id()+"]");			
+			}
+		} catch (EmptyResultDataAccessException e) {
+			//EmptyResultDataAccessException이 던져지는 경우는 DB에 해당 인스턴스 아이디가 없다는 의미이므로instanceExsistsAtDB 값을 false로 변경한다.
+			instanceExsistsAtDB = false;
+			logger.debug("not found Service at APIPlatform Database");
+			
+		} catch (Exception e){
+			//다른 DB에러에 대한 예외를 처리한다.
+			logger.error("APIPlatform Database Error - getAPIServiceByInstanceID");
+			throw new ServiceBrokerException(e.getMessage());
+		}
+				
+	//해당 인스턴스 아이디로 DB에 저장된 서비스와 요청이들어온 서비스가 다를 경우, 409 예외를 발생시킨다.
+		if(instanceExsistsAtDB){
+			if(!apiServiceInstacne.getService_id().equals(serviceId)){
+				
+				logger.info("Instance :"+serviceInstanceId+" has a service :"+serviceName+" not "+apiServiceInstacne.getService_id().split(" ")[0]);
+				throw new ServiceInstanceExistsException(instance);
+			}
+			else if(!apiServiceInstacne.getPlan_id().equals(planId)){
+				logger.info("invalid Plan Id");
+				throw new ServiceBrokerException("invalid Plan Id");
+			}
+		}	
+		
 
 	//서비스 브로커의 DB에서 organizationGuid를 확인하여 API플랫폼 로그인 아이디와 비밀번호를 획득한다.
 		
@@ -141,39 +177,6 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			}		
 		}
 		
-		
-	//해당 인스턴스 아이디로 DB에 저장된 정보가 있는지 확인한다.
-		boolean instanceExsistsAtDB;
-		APIServiceInstance apiServiceInstacne = new APIServiceInstance();
-		try {
-			apiServiceInstacne=dao.getAPIServiceByInstanceID(serviceInstanceId);
-			instanceExsistsAtDB = true;
-		} catch (EmptyResultDataAccessException e) {
-			//EmptyResultDataAccessException이 던져지는 경우는 DB에 해당 인스턴스 아이디가 없다는 의미이므로instanceExsistsAtDB 값을 false로 변경한다.
-			instanceExsistsAtDB = false;
-			logger.info("not found Service at APIPlatform Database");
-			
-		} catch (Exception e){
-			//다른 DB에러에 대한 예외를 처리한다.
-			logger.error("APIPlatform Database Error - getAPIServiceByInstanceID");
-			throw new ServiceBrokerException(e.getMessage());
-		}
-				
-	//해당 인스턴스 아이디로 DB에 저장된 서비스와 요청이들어온 서비스가 다를 경우, 409 예외를 발생시킨다.
-		if(instanceExsistsAtDB){
-			if(!apiServiceInstacne.getService_id().equals(serviceId)){
-				
-				logger.info("Instance :"+serviceInstanceId+" has a service :"+serviceName+" not "+apiServiceInstacne.getService_id().split(" ")[0]);
-				throw new ServiceInstanceExistsException(instance);
-			}
-			else if(!apiServiceInstacne.getPlan_id().equals(planId)){
-				logger.info("invalid Plan Id");
-				throw new ServiceBrokerException("invalid Plan Id");
-			}
-		}
-		
-		
-		
 	//Add an Application API를 사용한다. error:false와 status: APPROVED가 리턴되어야 정상
 		boolean applicationExsists = false;
 		
@@ -217,7 +220,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		logger.info("API Platform Generate Key Started. Application : "+serviceInstanceId);
 		//두가지 키타입으로 키를 생성해야하기 때문에 두번 실행한다.
 		for(int i=1;i<3;i++) {	
-			logger.info("API Platform Generate Key Started - KEYTYPE : "+env.getProperty("Keytype"+i));
+			logger.debug("API Platform Generate Key Started - KEYTYPE : "+env.getProperty("Keytype"+i));
 			headers.set("Cookie", cookie);
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 			String generateKeyUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GenerateAnApplicationKey");
@@ -241,10 +244,10 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 					logger.error("API Platform response error - Generate Key KEYTYPE : "+env.getProperty("Keytype"+i));
 					throw new ServiceBrokerException(e.getMessage());					
 				}
-				logger.info("API Platform Generate Key finished - KEYTYPE : "+env.getProperty("Keytype"+i));
+				logger.debug("API Platform Generate Key finished - KEYTYPE : "+env.getProperty("Keytype"+i));
 			}
 		}
-		logger.info("API Platform Generate Key Started. Application : "+serviceInstanceId);
+		logger.info("API Platform Generate Key finished. Application : "+serviceInstanceId);
 
 	//Add Subscription API를 사용하여 API플랫폼 어플리케이션에 API를 사용등록한다.
 
@@ -429,8 +432,8 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			logger.debug("already setted plan requseted");
 			throw new ServiceBrokerException("Plan : ["+planName+"] already setted");
 		}
-		
-	//플랜의 업데이트 가능 여부를 확인한다.
+/*		
+//	플랜의 업데이트 가능 여부를 확인한다.
 		String planUpdatable;
 		planUpdatable = env.getProperty("PlanUpdatable");
 		
@@ -440,6 +443,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			throw new ServiceInstanceUpdateNotSupportedException("Service Plan not updatable. Service Broker Updatable setting : ["+planUpdatable+"]");	
 		}
 	
+*/	
 	//업데이트 요청이 들어온 플랜명이 사용가능한 플랜명인지 확인한다.
 		boolean planAvailable = false;
 		String nextPlan = null;

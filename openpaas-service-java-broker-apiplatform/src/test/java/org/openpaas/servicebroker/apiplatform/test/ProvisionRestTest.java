@@ -403,4 +403,38 @@ public class ProvisionRestTest {
 	
 	
 	//인스턴스 아이디가 같고 org아이디가 다른케이스
+	@Test	
+	public void sendProvision_intance_id_different_org() {
+		
+		System.out.println("Start - intance_id_different_org");
+		
+		String instance_id = "instance_id";
+		String organization_guid =UUID.randomUUID().toString();
+		String space_guid = UUID.randomUUID().toString();
+		String service_id= prop.getProperty("provision_service_id");
+		String plan_id = prop.getProperty("provision_plan_id");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+
+		ProvisionBody body = new ProvisionBody(service_id, plan_id, organization_guid, space_guid);
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
+		ResponseEntity<String> response = null;
+
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+		System.out.println("url:"+url);
+		System.out.println("body:"+body);
+		
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+		System.out.println(response.getBody());
+		
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+		assertTrue(response.getBody().contains("incorrect OrgId : ["+organization_guid+"]"));
+	
+		System.out.println("End - intance_id_different_org");
+	}
+	
 }

@@ -63,5 +63,21 @@ public class HttpClientUtils {
 		logger.info("Http Response");
 		return httpResponse;
 	}
+	
+	static public ResponseEntity<String> sendBinding(String uri, HttpEntity<BindingBody> entity,HttpMethod httpMethod) {
+
+		RestTemplate client = new RestTemplate();
+		
+		client.setErrorHandler(new DefaultResponseErrorHandler(){
+		    protected boolean hasError(HttpStatus statusCode) {
+		        return false;
+		    }});
+		
+		ResponseEntity<String> httpResponse=null;
+		
+		httpResponse = client.exchange(uri, httpMethod, entity, String.class);		
+
+		return httpResponse;
+	}
 
 }
