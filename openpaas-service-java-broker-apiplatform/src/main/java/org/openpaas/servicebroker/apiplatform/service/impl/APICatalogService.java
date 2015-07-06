@@ -2,6 +2,7 @@ package org.openpaas.servicebroker.apiplatform.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 
 
 
@@ -120,7 +122,7 @@ public class APICatalogService implements CatalogService {
 			plans = new ArrayList<Plan>();
 			tags = new ArrayList<String>();
 
-			metadata = new HashMap<String,Object>();
+			metadata = new LinkedHashMap<String,Object>();
 				metadata.put("displayName", api.get("name").asText());
 				metadata.put("imageUrl", api.get("thumbnailurl").asText());
 				metadata.put("longDescription", "longDescription");
@@ -148,21 +150,25 @@ public class APICatalogService implements CatalogService {
 				pName = env.getProperty("APIPLAN.Unlimited");
 				pDescription = env.getProperty("APIPLAN.Unlimited") + " Plan Description";
 				//플랜 메타데이터 정의
-				pMetadata = new HashMap<String,Object>();
-						
-						List<String> bullets = new ArrayList<String>();
-							bullets.add(0, "test value");
-				
-						List<Object> costs= new ArrayList<Object>();
-							HashMap<String, Object> cost = new HashMap<String, Object>();
-								HashMap<String,Float> amount = new HashMap<String,Float>();
-								amount.put("KRW", (float) 0);
-							cost.put("amount", amount);
-							cost.put("unit", " ");
-						costs.add(cost);
-						
-				pMetadata.put("bullets",bullets);
-				pMetadata.put("costs",costs);
+				pMetadata = new LinkedHashMap<String,Object>();
+//						
+//						List<String> bullets = new ArrayList<String>();
+//							bullets.add(0, "test value");
+//				
+//						List<Object> costs= new ArrayList<Object>();
+//							Map<String, Object> cost = new HashMap<String, Object>();
+//								Map<String,Float> amount = new HashMap<String,Float>();
+//								amount.put("KRW", (float) 0);
+//							cost.put("amount", amount);
+//							cost.put("unit", " ");
+//						costs.add(cost);
+//						
+//				pMetadata.put("bullets",bullets);
+//				pMetadata.put("costs",costs);
+//				pMetadata.put("displayName", env.getProperty("APIPLAN.Unlimited"));
+//				
+				pMetadata.put("bullets"," ");
+				pMetadata.put("costs"," ");
 				pMetadata.put("displayName", env.getProperty("APIPLAN.Unlimited"));
 				
 				free = true;

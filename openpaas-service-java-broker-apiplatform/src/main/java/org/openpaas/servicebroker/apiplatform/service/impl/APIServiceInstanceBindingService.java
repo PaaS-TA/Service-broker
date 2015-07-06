@@ -14,6 +14,7 @@ import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.exception.ServiceInstanceBindingExistsException;
 import org.openpaas.servicebroker.model.CreateServiceInstanceBindingRequest;
 import org.openpaas.servicebroker.model.DeleteServiceInstanceBindingRequest;
+import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.ServiceInstanceBinding;
 import org.openpaas.servicebroker.service.ServiceInstanceBindingService;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 
@@ -441,17 +443,16 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			DeleteServiceInstanceBindingRequest request)
 			throws ServiceBrokerException {
 		
+		ServiceInstance instance = request.getInstance();
+		
 		String bindingId = request.getBindingId();
 		String serviceInstanceId = request.getServiceId();
 		Map<String,Object> credentials = new LinkedHashMap<String, Object>();
 		String syslogDrainUrl = null;
-		String appGuid = "dummy";
-		//TODO appGuid를 브로커에서 가지고 있어야 하는지.
+		String appGuid = "";
+		
 		return new ServiceInstanceBinding(bindingId, serviceInstanceId, credentials, syslogDrainUrl, appGuid);
 	}
 
-	
-	
-	
 	
 }
