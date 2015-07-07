@@ -31,14 +31,6 @@ import org.springframework.stereotype.Service;
 
 
 
-
-
-
-
-
-
-
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
@@ -98,6 +90,18 @@ public class APICatalogService implements CatalogService {
 		List<ServiceDefinition> services = new ArrayList<ServiceDefinition>();
 		JsonNode apis = getApisResponseJson.get("apis");
 
+		
+		List<String> planList = new ArrayList<String>();
+		String planAvailable;
+		int i = 1;
+		do{
+			planAvailable = env.getProperty("AvailablePlan"+i);
+			planList.add(planAvailable);
+			i++;
+			System.out.println(planAvailable);
+		}while((env.getProperty("AvailablePlan"+i)!=null));
+		
+		
 // Make ServiceDefinitions
 
 		for (JsonNode api : apis) {
@@ -136,9 +140,11 @@ public class APICatalogService implements CatalogService {
 			// Plan Data
 			// TODO : Get plan informations. (HOWTO??)
 			// default : "Unlimited"
+
 			
 			// 정확하게 API 플랫폼의 플랜명과 버전의 글자수 제한을 명시
 				// 플랜 변수 선언
+			for(i=1;i<=planList.size();i++) {
 				String pId;
 				String pName;
 				String pDescription;
@@ -146,36 +152,32 @@ public class APICatalogService implements CatalogService {
 				boolean free;
 				
 				//플랜 변수 정의
-				pId = api.get("name").asText() + " " + api.get("version").asText() + " " + env.getProperty("PLAN.Unlimited"); 
-				pName = env.getProperty("APIPLAN.Unlimited");
-				pDescription = env.getProperty("APIPLAN.Unlimited") + " Plan Description";
+				pId = api.get("name").asText() + " " + api.get("version").asText() + " " + env.getProperty("AvailablePlan"+i); 
+				pName = env.getProperty("AvailablePlan"+i);
+				pDescription = env.getProperty("AvailablePlan"+i) + " Plan Description";
 				//플랜 메타데이터 정의
 				pMetadata = new LinkedHashMap<String,Object>();
-//						
-//						List<String> bullets = new ArrayList<String>();
-//							bullets.add(0, "test value");
-//				
-//						List<Object> costs= new ArrayList<Object>();
-//							Map<String, Object> cost = new HashMap<String, Object>();
-//								Map<String,Float> amount = new HashMap<String,Float>();
-//								amount.put("KRW", (float) 0);
-//							cost.put("amount", amount);
-//							cost.put("unit", " ");
-//						costs.add(cost);
-//						
-//				pMetadata.put("bullets",bullets);
-//				pMetadata.put("costs",costs);
-//				pMetadata.put("displayName", env.getProperty("APIPLAN.Unlimited"));
-//				
-				pMetadata.put("bullets"," ");
-				pMetadata.put("costs"," ");
-				pMetadata.put("displayName", env.getProperty("APIPLAN.Unlimited"));
+						
+						List<String> bullets = new ArrayList<String>();
+							bullets.add(0, "test value");
+				
+						List<Object> costs= new ArrayList<Object>();
+							Map<String, Object> cost = new HashMap<String, Object>();
+								Map<String,Float> amount = new HashMap<String,Float>();
+								amount.put("KRW", (float) 0);
+							cost.put("amount", amount);
+							cost.put("unit", " ");
+						costs.add(cost);
+						
+				pMetadata.put("bullets",bullets);
+				pMetadata.put("costs",costs);
+				pMetadata.put("displayName", env.getProperty("AvailablePlan"+i));
 				
 				free = true;
 				
 				Plan plan = new Plan(pId, pName, pDescription, pMetadata, free);
 				plans.add(plan);
-				
+			}	
 			ServiceDefinition service = new ServiceDefinition(id, name, description, bindable, planUpdatable, plans, tags, metadata, requires, dashboardClient);
 			services.add(service);
 		}

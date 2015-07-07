@@ -134,10 +134,7 @@ public class APIServiceInstanceDAO {
 		
 	return apiService;
 	}
-	
-	
-	
-	
+
 	public void insertAPIUser(String oranizationGuid, String userId, String userPassword){
 		
 		logger.info("insertAPIUser() start");
@@ -168,5 +165,16 @@ public class APIServiceInstanceDAO {
 		jdbcTemplate.update(sql);
 		
 		logger.info("updateAPIUser() finished");
+	}
+	
+	public void deleteAPIServiceInstance(String oranizationGuid,String serviceInstanceId, String serviceId,String planId ){
+		
+		logger.info("deleteAPIServiceInstance() start");
+		String sql ="UPDATE apiplatform_services SET delyn = 'Y' WHERE instance_id = '"+serviceInstanceId+"' AND "
+				+ "organization_guid = '"+oranizationGuid+"' AND service_id = '"+serviceId+"' AND plan_id = '"+planId+"'";
+		
+		jdbcTemplate.update(sql);
+		
+		logger.info("deleteAPIServiceInstance() finished");
 	}
 }

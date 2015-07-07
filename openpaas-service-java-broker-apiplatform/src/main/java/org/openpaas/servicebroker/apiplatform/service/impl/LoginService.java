@@ -54,7 +54,8 @@ public class LoginService {
 		
 		cookie = loginResponseHttp.getHeaders().getFirst("Set-Cookie");
 		
-		logger.info(" Login 성공");
+		logger.info("Login Success");
+		logger.debug("Username : ["+userId+"], Password : ["+userPassword+"]");
 		return cookie;
 	}
 	

@@ -57,11 +57,27 @@ public class ApiPlatformUtils {
 			else if(json.get("apis").asText().equals("[]")){
 				throw new ServiceBrokerException("No Application or Subscription");
 			}
+			//Remove an Application
+			else if(apiPlatformMessage.equals("Error occurred while executing the action removeApplication")){
+				throw new ServiceBrokerException("No Application");
+			}
+			
 			else {
 				throw new ServiceBrokerException(json.get("message").asText());
 			}
 		}
 		
+		if (json.has("error")&&!json.get("error").asText().equals("false")){
+			//remove a subscription
+			if(json.get("message").equals("Error occurred while executing the action removeSubscription")){
+				throw new ServiceBrokerException("invalid parameters");
+			}
+			
+			
+		}
+			
+			
+			
 		//Add an Application API
 		//API플랫폼이 error : true를 응답하지는 않았지만, 어플리케이션 추가가 정상적으로 이루어지지 않았을 경우
 		//파라미터명(키값)이 잘못 되었을 때, "error": false, "status": null
