@@ -31,34 +31,34 @@ import org.springframework.stereotype.Service;
 public class CubridServiceInstanceService implements ServiceInstanceService {
 
 	private static final Logger logger = LoggerFactory.getLogger(CubridServiceInstanceService.class);
-	
+
 	@Autowired
 	private CubridAdminService cubridAdminService;
-	
+
 	@Autowired
 	public CubridServiceInstanceService(CubridAdminService cubridAdminService) {
 		this.cubridAdminService = cubridAdminService;
 	}
-	
+
 	@Override
 	public ServiceInstance createServiceInstance(CreateServiceInstanceRequest request) 
 			throws ServiceInstanceExistsException, ServiceBrokerException {
 		logger.info("=====> CubridServiceInstanceService CLASS createServiceInstance");
-		
+
 		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
-		
+
 		logger.debug("instance : {}", (instance == null ? "Not exist": "Exist") );
-		
+
 		if (instance != null) {
-			
+
 			String as_is_id = instance.getServiceInstanceId();
 			String as_is_plan = instance.getPlanId();
 			String to_be_id = request.getServiceInstanceId();
 			String to_be_plan = request.getPlanId();
-			
+
 			logger.debug("as-is : Instance ID = {}, Plan = {}", as_is_id, as_is_plan);
 			logger.debug("to-be : Instance ID = {}, Plan = {}", to_be_id, to_be_plan);
-			
+
 			if( as_is_id.equals(to_be_id) && as_is_plan.equals(to_be_plan) ) {
 				instance.setHttpStatusOK();
 				return instance;
@@ -66,24 +66,24 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 				throw new ServiceInstanceExistsException(instance);
 			}
 		}
-		
+
 		instance = new CubridServiceInstance();
 		instance.setServiceInstanceId(request.getServiceInstanceId());
 		instance.setPlanId(request.getPlanId());
-		
+
 		do {
 			instance.setDatabaseName(getDatabaseName());
 		} while(cubridAdminService.isExistsService(instance));
-		
+
 		if (!cubridAdminService.createDatabase(instance)) {
 			throw new ServiceBrokerException("Failed to create new DB instance.");
 		}
-		
+
 		cubridAdminService.save(instance);
-		
+
 		return instance;
 	}
-	
+
 
 	@Override
 	public ServiceInstance getServiceInstance(String id) {
@@ -99,16 +99,16 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 	@Override
 	public ServiceInstance deleteServiceInstance(DeleteServiceInstanceRequest request) throws CubridServiceException {
 		logger.info("=====> CubridServiceInstanceService CLASS deleteServiceInstance");
-		
+
 		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
-		
+
 		logger.debug("instance : {}", (instance == null ? "Not exist": "Exist") );
-		
+
 		if (instance != null) {
 			cubridAdminService.deleteDatabase(instance);
 			cubridAdminService.delete(instance.getServiceInstanceId());
 		}
-		
+
 		return instance;		
 	}
 
@@ -116,27 +116,37 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 	public ServiceInstance updateServiceInstance(UpdateServiceInstanceRequest request)
 			throws ServiceInstanceUpdateNotSupportedException, ServiceBrokerException, ServiceInstanceDoesNotExistException {
 		logger.info("=====> CubridServiceInstanceService CLASS updateServiceInstance");
-		
+
 		CubridServiceInstance instance = cubridAdminService.findById(request.getServiceInstanceId());
-		ServiceInstance updatedInstance = new ServiceInstance(request);
-		
-		String as_is = instance.getPlanId();
-		String to_be = updatedInstance.getPlanId();
-		
-		logger.debug("as-is : {}, to be : {}", instance.getPlanId(), updatedInstance.getPlanId());
-		
-		if ( ("100mb-utf8".equals(as_is) && "200mb-utf8".equals(to_be)) ||
-				("100mb-euckr".equals(as_is) && "200mb-euckr".equals(to_be)) ) {
-			
-			cubridAdminService.addVolume(instance.getDatabaseName());
-			cubridAdminService.update(updatedInstance, updatedInstance);
+
+		logger.debug("instance : {}", (instance == null ? "Not exist": "Exist") );
+
+		if ( instance == null ) {
+			throw new ServiceInstanceDoesNotExistException(request.getServiceInstanceId());
 		} else {
-			throw new ServiceInstanceUpdateNotSupportedException("Only supported add volume.");
+			ServiceInstance updateInstance = new ServiceInstance(request);
+
+			String as_is = instance.getPlanId();
+			String to_be = updateInstance.getPlanId();
+
+			logger.debug("as-is : {}, to be : {}", instance.getPlanId(), updateInstance.getPlanId());
+
+			if ( ("100mb-utf8".equals(as_is) && "200mb-utf8".equals(to_be)) ||
+					("100mb-euckr".equals(as_is) && "200mb-euckr".equals(to_be)) ) {
+
+				cubridAdminService.addVolume(instance.getDatabaseName());
+				
+				instance.setPlanId(to_be);
+				cubridAdminService.update(instance);
+				
+			} else {
+				throw new ServiceInstanceUpdateNotSupportedException("Not Supported.");
+			}
 		}
-		
-		return updatedInstance;
+
+		return instance;
 	}
-	
+
 	private String getDatabaseName() {
 		MessageDigest digest = null;
 		try {
@@ -147,7 +157,7 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		}
 		//[^a-zA-Z0-9]
 		return new BigInteger(1, digest.digest()).toString(16).replaceAll("/[^a-zA-Z0-9]+/", "").substring(0, 16);
-		
+
 	}
-	
+
 }

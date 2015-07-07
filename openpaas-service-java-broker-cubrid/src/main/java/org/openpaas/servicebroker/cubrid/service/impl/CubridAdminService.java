@@ -142,6 +142,7 @@ public class CubridAdminService {
 				String serviceInstanceBindingId = (String)findById.get("guid");
 				String serviceInstanceId = (String)findById.get("service_instance_id");
 				String databaseUserName = (String)findById.get("db_user_name");
+				
 				if ( !"".equals(serviceInstanceBindingId) && serviceInstanceBindingId !=null) serviceInstanceBinding.setId(serviceInstanceBindingId);
 				if ( !"".equals(serviceInstanceId) && serviceInstanceId !=null) serviceInstanceBinding.setServiceInstanceId(serviceInstanceId);
 				if ( !"".equals(databaseUserName) && databaseUserName !=null) serviceInstanceBinding.setDatabaseUserName(databaseUserName);
@@ -159,8 +160,10 @@ public class CubridAdminService {
 
 	public void delete(String id) throws CubridServiceException{
 		try {
+			
 			jdbcTemplate.update("DELETE FROM service_instances WHERE guid = ?", id);
 			jdbcTemplate.update("DELETE FROM service_instance_bindings WHERE service_instance_id = ?", id);
+			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
 		} catch (DataAccessException e) {
@@ -206,11 +209,11 @@ public class CubridAdminService {
 		}
 	}
 
-	public void update(ServiceInstance instance, ServiceInstance updateInstance) throws CubridServiceException{
+	public void update(ServiceInstance instance) throws CubridServiceException{
 		try {
 			
 			jdbcTemplate.update("UPDATE service_instances SET plan_id = ? WHERE guid = ?", 
-					updateInstance.getPlanId(), instance.getServiceInstanceId());
+					instance.getPlanId(), instance.getServiceInstanceId());
 			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
@@ -255,7 +258,7 @@ public class CubridAdminService {
 		Map<String, String> plan = (Map<String, String>) plans.get(planId);
 
 		if (plan == null) {
-			throw new CubridServiceException("Error : no plan");
+			throw new CubridServiceException("no plan");
 		}
 
 		//1. create shell command(s)
