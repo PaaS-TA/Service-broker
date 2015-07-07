@@ -43,6 +43,13 @@ public class HttpClientUtils {
 	static public ResponseEntity<String> sendProvision(String uri, HttpEntity<ProvisionBody> entity,HttpMethod httpMethod) throws ServiceBrokerException {
 
 		RestTemplate client = new RestTemplate();
+		
+		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+		requestFactory.setConnectTimeout(0);
+		requestFactory.setReadTimeout(0);
+		
+		client.setRequestFactory(requestFactory);
+		
 		ResponseEntity<String> httpResponse=null;
 		try {
 			httpResponse = client.exchange(uri, httpMethod, entity, String.class);		
@@ -55,4 +62,47 @@ public class HttpClientUtils {
 		return httpResponse;
 	}
 
+	static public ResponseEntity<String> sendUpdateProvision(String uri, HttpEntity<UpdateProvisionBody> entity,HttpMethod httpMethod) throws ServiceBrokerException {
+
+		RestTemplate client = new RestTemplate();
+		
+		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+		requestFactory.setConnectTimeout(0);
+		requestFactory.setReadTimeout(0);
+		
+		client.setRequestFactory(requestFactory);
+		
+		ResponseEntity<String> httpResponse=null;
+		try {
+			httpResponse = client.exchange(uri, httpMethod, entity, String.class);		
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			throw new ServiceBrokerException(e.getMessage());
+		}
+		
+		logger.info("Http Response");
+		return httpResponse;
+	}
+	
+	static public ResponseEntity<String> sendBinding(String uri, HttpEntity<BindingBody> entity,HttpMethod httpMethod) throws ServiceBrokerException {
+
+		RestTemplate client = new RestTemplate();
+		
+		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+		requestFactory.setConnectTimeout(0);
+		requestFactory.setReadTimeout(0);
+		
+		client.setRequestFactory(requestFactory);
+		
+		ResponseEntity<String> httpResponse=null;
+		try {
+			httpResponse = client.exchange(uri, httpMethod, entity, String.class);		
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			throw new ServiceBrokerException(e.getMessage());
+		}
+		
+		logger.info("Http Response");
+		return httpResponse;
+	}
 }
