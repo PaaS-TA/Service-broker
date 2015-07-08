@@ -55,12 +55,12 @@ public class APIServiceInstanceDAO {
 	return apiUser;
 	}
 	
-	public APIServiceInstance getAPIServiceByInstanceID(String serviceInstanceId){
+	public APIServiceInstance getAPIServiceByInstanceAndOrgID(String serviceInstanceId, String organizationGuid){
 		logger.info("getServiceByInstanceID() start");
 		logger.debug("instance_id : "+serviceInstanceId);
-		String sql = "SELECT * FROM apiplatform_services WHERE instance_id='"+serviceInstanceId+"' AND delyn = 'N'";
+		String sql = "SELECT * FROM apiplatform_services WHERE instance_id='"+serviceInstanceId+"' AND organization_guid ='"+organizationGuid+"'";
 		
-		APIServiceInstance apiService = new APIServiceInstance();
+		APIServiceInstance apiServiceInstance = new APIServiceInstance();
 		
 		RowMapper mapper = new RowMapper(){
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -70,46 +70,24 @@ public class APIServiceInstanceDAO {
 				apiService.setSpace_guid(rs.getString("space_guid"));
 				apiService.setService_id(rs.getString("service_id"));
 				apiService.setPlan_id(rs.getString("plan_id"));
-				
+				apiService.setDelyn(rs.getString("delyn"));
 				return apiService;
 				}
 			};
 
-			apiService = (APIServiceInstance)jdbcTemplate.queryForObject(sql, mapper);
+			apiServiceInstance = (APIServiceInstance)jdbcTemplate.queryForObject(sql, mapper);
 
 		logger.info("getAPIServiceByInstanceID() finished");
 		
-	return apiService;
-	}
-	//
-	public APIUser getAPIUserByInstanceId(String serviceInstanceId){
-		logger.debug("instanceId : "+serviceInstanceId);
-		String sql = "SELECT * FROM apiplatform_users WHERE instance_id='"+serviceInstanceId+"'";
-		
-		APIUser apiUser = new APIUser();
-		
-		RowMapper mapper = new RowMapper(){
-			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-				APIUser apiUser = new APIUser();
-				apiUser.setOrganization_guid(rs.getString("organization_guid"));
-				apiUser.setUser_id(rs.getString("user_id"));
-				apiUser.setUser_password(rs.getString("user_password"));
-				
-				return apiUser;
-				}
-			};
-
-		apiUser = (APIUser)jdbcTemplate.queryForObject(sql, mapper);
-		
-		return apiUser;
+	return apiServiceInstance;
 	}
 	
 	public APIServiceInstance getAPIInfoByInstanceID(String serviceInstanceId){
 		logger.info("getServiceByInstanceID() start");
 		logger.debug("instance_id : "+serviceInstanceId);
 		String sql = 
-				"SELECT s.organization_guid,s.instance_id,s.space_guid,s.service_id,s.plan_id,u.user_id,u.user_password FROM apiplatform_services s "
-				+ "INNER JOIN apiplatform_users u ON u.organization_guid = s.organization_guid WHERE instance_id= '"+serviceInstanceId+"' AND delyn = 'N' ";
+				"SELECT s.organization_guid,s.instance_id,s.space_guid,s.service_id,s.plan_id,u.user_id,u.user_password,s.delyn FROM apiplatform_services s "
+				+ "INNER JOIN apiplatform_users u ON u.organization_guid = s.organization_guid WHERE instance_id= '"+serviceInstanceId+"'";
 		
 		APIServiceInstance apiService = new APIServiceInstance();
 		
@@ -123,7 +101,7 @@ public class APIServiceInstanceDAO {
 				apiService.setPlan_id(rs.getString("plan_id"));
 				apiService.setUser_id(rs.getString("user_id"));
 				apiService.setUser_password(rs.getString("user_password"));
-				
+				apiService.setDelyn(rs.getString("delyn"));
 				return apiService;
 				}
 			};
@@ -170,7 +148,7 @@ public class APIServiceInstanceDAO {
 	public void deleteAPIServiceInstance(String oranizationGuid,String serviceInstanceId, String serviceId,String planId ){
 		
 		logger.info("deleteAPIServiceInstance() start");
-		String sql ="UPDATE apiplatform_services SET delyn = 'Y' WHERE instance_id = '"+serviceInstanceId+"' AND "
+		String sql ="UPDATE apiplatform_services SET delyn = 'Y', deletetimestamp = utc_timestamp() WHERE instance_id = '"+serviceInstanceId+"' AND "
 				+ "organization_guid = '"+oranizationGuid+"' AND service_id = '"+serviceId+"' AND plan_id = '"+planId+"'";
 		
 		jdbcTemplate.update(sql);

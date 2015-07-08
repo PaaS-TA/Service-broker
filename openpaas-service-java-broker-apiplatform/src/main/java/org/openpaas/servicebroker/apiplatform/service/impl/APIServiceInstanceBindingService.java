@@ -1,7 +1,6 @@
 package org.openpaas.servicebroker.apiplatform.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +60,9 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		String serviceInstanceId = bindingRequest.getServiceInstanceId();
 		String serviceId = bindingRequest.getServiceDefinitionId();
 		String planId = bindingRequest.getPlanId();
-
+		String serviceName = serviceId.split(" ")[0];
+		String planName = planId.split(" ")[2];
+		
 	//인스턴스 정보를  확인하고 API정보를 받아온다.	
 		APIServiceInstance apiServiceInstance;
 		try {	
@@ -77,14 +78,19 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			throw new ServiceBrokerException(e.getMessage());
 		}
 
-		//요청된 서비스 인스턴스 정보와 DB에 저장된 서비스 인스턴스 정보가 같은지 확인한다.
-		if(!apiServiceInstance.getService_id().equals(serviceId)||!apiServiceInstance.getPlan_id().equals(planId)){
-			logger.error("Invalid Information requested. requseted ServiceID : "+serviceId+", PlanID : "+planId+", Valid ServiceID : "+apiServiceInstance.getService_id()+", PlanID : "+apiServiceInstance.getPlan_id());
-			throw new ServiceBrokerException("Delete and recreate Service instance and then try again.");
+		//요청된 서비스 인스턴스 정보와 DB에 저장된 서비스 인스턴스 정보가 일치하는지 확인한다.
+		if(!apiServiceInstance.getService_id().equals(serviceId)){
+			logger.error("Invalid Information requested. ServiceID : "+serviceId+", Valid ServiceID : "+apiServiceInstance.getService_id());
+			throw new ServiceBrokerException("Invalid Service Name : ["+serviceName+"], Valid ServiceName : "+apiServiceInstance.getService_id().split(" ")[0]+"]");
+			
+		}
+		if(!apiServiceInstance.getPlan_id().equals(planId)){
+			logger.error("Invalid Information requested. PlanID : "+planId+", Valid PlanID : "+apiServiceInstance.getPlan_id());
+			throw new ServiceBrokerException("Invalid Plan Name : ["+planName+"], Valid PlanName : "+apiServiceInstance.getPlan_id().split(" ")[2]+"]");
+			
 		}
 
-
-		String serviceName = serviceId.split(" ")[0];
+		
 		String serviceVersion = serviceId.split(" ")[1];
 		String serviceProvider = "";
 		
@@ -324,6 +330,8 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			List<Map> methodList = new ArrayList<Map>();
 			for(JsonNode api:apis)
 			{
+				
+				
 				JsonNode operations = api.get("operations");
 				for(JsonNode method : operations)
 				{	
@@ -331,7 +339,7 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 					List<JsonNode> parameterList = new ArrayList<JsonNode>();
 					Map<String, Object> methodMap = new LinkedHashMap<String, Object>();
 					methodMap.put("method", method.get("method").asText());
-					Map<String, JsonNode> parameterMap = new LinkedHashMap<String, JsonNode>();
+//					Map<String, JsonNode> parameterMap = new LinkedHashMap<String, JsonNode>();
 					
 					for(JsonNode parameter : parameters)
 					{
@@ -350,9 +358,10 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 				}
 			}	
 			resourceMap.put("methods", methodList);
+				
 			resourceMapList.add(resourceMap);
+			
 		}
-		
 		credentials.put("uri", basePath);
 		credentials.put("username", userId);
 		credentials.put("password", userPassword);

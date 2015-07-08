@@ -1,8 +1,5 @@
 package org.openpaas.servicebroker.apiplatform.model;
 
-import org.openpaas.servicebroker.model.CreateServiceInstanceBindingRequest;
-import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
-
 public class APIServiceInstance {
 
 	private String instance_id;
@@ -18,6 +15,8 @@ public class APIServiceInstance {
 	private String user_id;
 	
 	private String user_password;
+	
+	private String delyn;
 	
 	public String getInstance_id() {
 		return instance_id;
@@ -73,6 +72,14 @@ public class APIServiceInstance {
 
 	public void setUser_password(String user_password) {
 		this.user_password = user_password;
+	}
+
+	public String getDelyn() {
+		return delyn;
+	}
+
+	public void setDelyn(String delyn) {
+		this.delyn = delyn;
 	}
 
 }

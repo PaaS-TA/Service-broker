@@ -365,7 +365,7 @@ public class ProvisionRestTest {
 		System.out.println("End - empty parameters_plan_id");
 	}
 	
-	//존재하지 않는 플랜 아이디를 요청한 경우
+	//존재하지 않는 플랜 아이디를 요청한 경우(설정파일에 정의된 사용가능한 플랜목록에 없는 플랜으로 프로비전 요청이 들어온 경우)
 	@Test	
 	public void sendProvision_fail_plan_id() {
 		
@@ -397,7 +397,7 @@ public class ProvisionRestTest {
 		
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 		assertTrue(response.getBody().contains("Invalid Plan Name - Plan Name must be 'Unlimited'"));
-	
+		
 		System.out.println("End - fail Plan Id");
 	}
 	
