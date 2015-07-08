@@ -1,5 +1,7 @@
 package org.openpaas.servicebroker.apiplatform.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
@@ -61,7 +63,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		String spaceGuid = instance.getSpaceGuid();
 		String serviceId = instance.getServiceDefinitionId();
 		String planId = instance.getPlanId();
-		String planName = env.getProperty("APIPlatformApplicationPlan");
+		String planName = planId.split(" ")[2];
 		
 		String serviceName = serviceId.split(" ")[0];
 		String serviceVersion = serviceId.split(" ")[1];
@@ -72,13 +74,28 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		HttpHeaders headers;
 		
 		String cookie = "";
-				
-	//플랜명이 unlimited가 맞는지 확인한다.
-//		if(!planId.split(" ")[2].equals(planName)){
-//			logger.error("invalid plan requseted");`
-//			throw new ServiceBrokerException("Invalid Plan Name - Plan Name must be 'Unlimited'");
-//		}
-//		
+		
+		
+	//요청된 플랜명이 설정된 플랜명과 동일한지 확인
+		//TODO
+		boolean planAvailable = false;
+		String planSetted;
+		int i = 1;
+		do{
+			planSetted = env.getProperty("AvailablePlan"+i);
+			i++;
+			if(planSetted.equals(planName)){
+				planAvailable=true;
+				System.out.println(planName);
+				break;
+			}
+		} while((env.getProperty("AvailablePlan"+i)!=null));
+
+		if(!planAvailable){
+			throw new ServiceBrokerException("invalid PlanName :["+request.getPlanId().split(" ")[2]+"]");
+		}
+
+		
 	//해당 인스턴스 아이디로 DB에 저장된 정보가 있는지 확인한다.
 		boolean instanceExsistsAtDB = false;
 		APIServiceInstance apiServiceInstacne = new APIServiceInstance();
@@ -107,20 +124,26 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			//인스턴스 아이디에 대한 org 아이디가 DB의 org아이디와 요청된 org아이디가 다른 경우이다.
 			if(!apiServiceInstacne.getOrganization_id().equals(organizationGuid)){
 				logger.error("incorrect orgID requested. OrgId :["+organizationGuid+"]");
-				throw new ServiceBrokerException("incorrect OrganizationId : ["+organizationGuid+"], correct OrganizationId : ["+apiServiceInstacne.getOrganization_id()+"]");			
+				throw new ServiceInstanceExistsException(instance);			
 			}
-			
-			if(!apiServiceInstacne.getService_id().equals(serviceId)){
-				
-				logger.info("Instance :"+serviceInstanceId+" has a service :"+serviceName+" not "+apiServiceInstacne.getService_id().split(" ")[0]);
+			//DB에 저장된 서비스명, 플랜명과 일치하면 이미 존재하는 인스턴스이므로 예외없이 통과시킨다.
+			if(!apiServiceInstacne.getService_id().equals(serviceId)&&!apiServiceInstacne.getPlan_id().equals(planId)){
+				logger.error("invalid ServiceName :["+request.getServiceDefinitionId().split(" ")[0]+"]. valid ServiceName: ["+apiServiceInstacne.getService_id().split(" ")[0]+"], "
+						+ "invalid PlanName :["+request.getPlanId().split(" ")[2]+"]. valid PlanName: ["+apiServiceInstacne.getPlan_id().split(" ")[2]+"]");
+				throw new ServiceInstanceExistsException(instance);
+			}
+			else if(!apiServiceInstacne.getService_id().equals(serviceId)){
+				logger.error("invalid ServiceName :["+request.getServiceDefinitionId().split(" ")[0]+"]. valid ServiceName: ["+apiServiceInstacne.getService_id().split(" ")[0]+"]");
 				throw new ServiceInstanceExistsException(instance);
 			}
 			else if(!apiServiceInstacne.getPlan_id().equals(planId)){
-				logger.info("invalid Plan Id");
-				throw new ServiceBrokerException("invalid Plan Id");
+				logger.error("invalid PlanName :["+request.getPlanId().split(" ")[2]+"]. valid PlanName: ["+apiServiceInstacne.getPlan_id().split(" ")[2]+"]");
+				throw new ServiceInstanceExistsException(instance);
 			}
-		}	
-		
+			else{
+				logger.info("Service Instance already exists. InstanceID :["+serviceInstanceId+"]");
+			}
+		}
 
 	//서비스 브로커의 DB에서 organizationGuid를 확인하여 API플랫폼 로그인 아이디와 비밀번호를 획득한다.
 		
@@ -197,7 +220,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		
 		String addApplicationUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddAnApplication");
 		String addApplicationParameters = 
-				"action=addApplication&application="+serviceInstanceId+"&tier="+env.getProperty("APIPlatformApplicationPlan")+"&description=&callbackUrl=";		
+				"action=addApplication&application="+serviceInstanceId+"&tier="+planName+"&description=&callbackUrl=";		
 		httpEntity = new HttpEntity<String>(addApplicationParameters, headers);
 
 		responseEntity = HttpClientUtils.send(addApplicationUri, httpEntity, HttpMethod.POST);
@@ -227,7 +250,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 	//Generate Key API를 사용하여 API플랫폼 어플리케이션의 키값을 생성한다.
 		logger.info("API Platform Generate Key Started. Application : "+serviceInstanceId);
 		//두가지 키타입으로 키를 생성해야하기 때문에 두번 실행한다.
-		for(int i=1;i<3;i++) {	
+		for(i=1;i<3;i++) {	
 			logger.debug("API Platform Generate Key Started - KEYTYPE : "+env.getProperty("Keytype"+i));
 			headers.set("Cookie", cookie);
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);

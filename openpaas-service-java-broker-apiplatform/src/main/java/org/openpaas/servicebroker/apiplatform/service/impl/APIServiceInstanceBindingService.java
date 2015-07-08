@@ -81,12 +81,12 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		//요청된 서비스 인스턴스 정보와 DB에 저장된 서비스 인스턴스 정보가 일치하는지 확인한다.
 		if(!apiServiceInstance.getService_id().equals(serviceId)){
 			logger.error("Invalid Information requested. ServiceID : "+serviceId+", Valid ServiceID : "+apiServiceInstance.getService_id());
-			throw new ServiceBrokerException("Invalid Service Name : ["+serviceName+"], Valid ServiceName : "+apiServiceInstance.getService_id().split(" ")[0]+"]");
+			throw new ServiceBrokerException("Invalid Service Name : ["+serviceName+"], Valid ServiceName : ["+apiServiceInstance.getService_id().split(" ")[0]+"]");
 			
 		}
 		if(!apiServiceInstance.getPlan_id().equals(planId)){
 			logger.error("Invalid Information requested. PlanID : "+planId+", Valid PlanID : "+apiServiceInstance.getPlan_id());
-			throw new ServiceBrokerException("Invalid Plan Name : ["+planName+"], Valid PlanName : "+apiServiceInstance.getPlan_id().split(" ")[2]+"]");
+			throw new ServiceBrokerException("Invalid Plan Name : ["+planName+"], Valid PlanName : ["+apiServiceInstance.getPlan_id().split(" ")[2]+"]");
 			
 		}
 
@@ -112,6 +112,10 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			if(e.getMessage().equals("No User")){
 				//유저가 API플랫폼에 등록이 되어있지 않을 경우, 유저등록을 한다.
 				logger.warn("not found API Platform User");
+				
+				//TODO 유저생성을 하지 않고 예외를 발생시킬 수 있다. 상황에 따라 가변
+				//throw new ServiceBrokerException("API Platform User ["+userId+"] removed");				
+	
 				apiServiceInstanceService.userSignup(userId, userPassword);
 				//다시 로그인을 시도한다.
 				cookie = loginService.getLogin(userId, userPassword);
@@ -173,10 +177,10 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		
 		//어플리케이션이 존재하지 않으므로 예외를 발생시킨다.
 		if(!applicationExists){
-			logger.error("UserID : ["+userId+"], ApplicationName : ["+serviceInstanceId+"] dose not exist. "
-					+ "Login APIPlatform username: ["+userId+"] and create application :["+serviceInstanceId+"] and subscribe API ["+serviceName+"]");
+			logger.error("UserID: ["+userId+"], ApplicationName: ["+serviceInstanceId+"] dose not exist. "
+					+ "Login APIPlatform username ["+userId+"] and create application ["+serviceInstanceId+"] and subscribe API ["+serviceName+"]");
 
-			throw new ServiceBrokerException("API Platform Application dose not exist. UserID : "+userId+", ApplicationName : "+serviceInstanceId);
+			throw new ServiceBrokerException("API Platform Application dose not exist. UserID: ["+userId+"], ApplicationName: ["+serviceInstanceId+"]");
 		}
 		else{
 			//consumer key와 consumer secret이 각각 두가지 키타입으로 총 4개가 생성되어 있지 않으면 예외를 발생시킨다.
@@ -207,7 +211,6 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 				throw new ServiceBrokerException("Try again, after provisioning");
 			}
 			else {
-			
 				//위의 경우를 제외한 나머지 예외가 발생한 경우
 				logger.error("API Platform response error - Get Published APIs by Application");
 				throw new ServiceBrokerException(e.getMessage());
@@ -263,49 +266,11 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		
 		
 	// Get API Information Detail API를 사용한다.
-		List<JsonNode> apiList = new ArrayList<JsonNode>();
-		Map<String, JsonNode> apiMap = new LinkedHashMap<String, JsonNode>();
 		String basePath = null;
 		JsonNode  getAPIInfoDetailResponseJson = null;
-/*
-		for(i=0;i<resourceList.size();i++){
-			String getAPIInfoDetailUrl = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAPIDetailInformation")
-					+serviceProvider+"/"+serviceName+"/"+serviceVersion+"/"+resourceList.get(i);
-			
-			httpEntity = new HttpEntity<String>("", headers);
-			responseEntity = HttpClientUtils.send(getAPIInfoDetailUrl, httpEntity, HttpMethod.GET);
-
-			try {
-				getAPIInfoDetailResponseJson =JsonUtils.convertToJson(responseEntity);
-				ApiPlatformUtils.apiPlatformErrorMessageCheck(getAPIInfoDetailResponseJson);
-			} catch (ServiceBrokerException e) {
-				throw new ServiceBrokerException(e.getMessage());
-			}
-			
-			apis = getAPIInfoDetailResponseJson.get("apis");
-			apiMap.put(resourceList.get(i), apis);
-		}
-		
-		
-		basePath = getAPIInfoDetailResponseJson.get("basePath").asText();
-		
-		credentials.put("uri", basePath);
-		credentials.put("username", userId);
-		credentials.put("password", userPassword);
-		credentials.put("host","");
-		credentials.put("port","");
-		credentials.put("database","");
-		credentials.put("prodConsumerKey", prodConsumerKey);
-		credentials.put("prodConsumerSecret", prodConsumerSecret);
-		credentials.put("sandConsumerKey", sandConsumerKey);
-		credentials.put("sandConsumerSecret", sandConsumerSecret);
-		credentials.put("resources", apiMap);
-		
-*/		
-		
-	
 		List<Map> resourceMapList = new ArrayList<Map>();
 		Map<String, Object> resourceMap = null;
+		
 		for(i=0;i<resourceList.size();i++){
 			String getAPIInfoDetailUrl = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAPIDetailInformation")
 					+serviceProvider+"/"+serviceName+"/"+serviceVersion+"/"+resourceList.get(i);
@@ -515,7 +480,7 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			//유저가 API플랫폼에 등록이 되어있지 않을 경우, 유저등록을 한다. 유저는 반드시 존재해야 하기 때문에 유저를 생성하고 예외를 던진다.
 				logger.warn("not found API Platform User");
 				apiServiceInstanceService.userSignup(userId, userPassword);
-				throw new ServiceBrokerException("API Platform Error : removed API Platfotm user. User created ["+userId+"]");
+				throw new ServiceBrokerException("API Platform Error : removed API Platform user. User created ["+userId+"]");
 			}
 			else {
 				logger.error("APIPlatform User Signup Error");

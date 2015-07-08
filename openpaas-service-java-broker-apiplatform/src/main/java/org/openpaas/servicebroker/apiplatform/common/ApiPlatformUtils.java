@@ -1,13 +1,19 @@
 package org.openpaas.servicebroker.apiplatform.common;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class ApiPlatformUtils {
-
+	
+	
 	private static final Logger logger = LoggerFactory.getLogger(ApiPlatformUtils.class);
 	
 	static public void apiPlatformErrorMessageCheck(JsonNode json) throws ServiceBrokerException{
@@ -85,6 +91,6 @@ public class ApiPlatformUtils {
 			
 			throw new ServiceBrokerException("Add an Application Error");
 		}
-		
 	}
+	
 }
