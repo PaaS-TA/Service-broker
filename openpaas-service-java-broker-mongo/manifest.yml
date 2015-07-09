@@ -1,0 +1,6 @@
+---
+applications:
+- name: openpaas-cubrid-broker
+  memory: 512M
+  instances: 1
+  path: build/libs/openpaas-service-java-broker-cubrid.war
