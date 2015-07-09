@@ -92,7 +92,6 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 
 		
 		String serviceVersion = serviceId.split(" ")[1];
-		String serviceProvider = "";
 		
 		String bindingId =bindingRequest.getBindingId();
 		Map<String,Object> credentials = new LinkedHashMap<String, Object>();
@@ -164,8 +163,8 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		JsonNode applications = listApplicationResponseJson.get("subscriptions");
 		for(JsonNode application :applications){
 			if(application.get("name").asText().equals(serviceInstanceId)){
-				//어플리케이션의 키값들을 변수에 담는다.
 				applicationExists = true;
+				//어플리케이션의 키값들을 변수에 담는다.
 				logger.debug("Application Exists. Application Name : "+serviceInstanceId);
 				prodConsumerKey = application.get("prodConsumerKey").asText();
 				prodConsumerSecret = application.get("prodConsumerSecret").asText();
@@ -205,19 +204,21 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			getAPIsResponseJson = JsonUtils.convertToJson(responseEntity);
 			ApiPlatformUtils.apiPlatformErrorMessageCheck(getAPIsResponseJson);
 		} catch (ServiceBrokerException e) {
-			//어플리케이션 생성 또는 API사용등록이 모두 정상적으로 처리되어있는지 확인한다.
-			if(e.getMessage().equals("No Application or Subscription")){
-				logger.debug("Try again, after provisioning - Provisioning response status must be 200 'OK'");
-				throw new ServiceBrokerException("Try again, after provisioning");
+			//API사용등록이 정상적으로 처리되어 있는지 확인한다.
+			if(e.getMessage().equals("No subscribed API")){
+				logger.error("UserID: ["+userId+"], ApplicationName: ["+serviceInstanceId+"], API ["+serviceName+"] dose not exist. "
+						+ "Login APIPlatform username ["+userId+"] and create application ["+serviceInstanceId+"] and subscribe API ["+serviceName+"]");
+				throw new ServiceBrokerException("no subscribed API. UserID: ["+userId+"], ApplicationName: ["+serviceInstanceId+"], API: ["+serviceName+"]");
 			}
 			else {
 				//위의 경우를 제외한 나머지 예외가 발생한 경우
 				logger.error("API Platform response error - Get Published APIs by Application");
 				throw new ServiceBrokerException(e.getMessage());
-			}		
+			}
 		}
 	
 	//Get Published APIs by Application API를 통해 가져온 API정보에서 공급자명을 찾아 변수에 담는다.
+		String serviceProvider = null;
 		logger.debug("API : "+serviceName);
 		JsonNode apis = getAPIsResponseJson.get("apis");
 		for(JsonNode api :apis){
@@ -227,9 +228,10 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 				break;
 			}
 		}
-		if(serviceProvider.equals("null")){
+		//서비스 공급자명을 찾을 수 없는 경우는 API플랫폼에서 API가 삭제되었거나 해당 어플리케이션에서 사용등록이 해제된 경우로 간주 
+		if(serviceProvider==null){
 			logger.error("Service Provider not found - Service : ["+serviceName+"]");
-			throw new ServiceBrokerException("Service not found - Service : ["+serviceName+"]");
+			throw new ServiceBrokerException("APIPlatform API not found - API Name : ["+serviceName+"]");
 		} else {
 			logger.info("get Service Provider - Service : ["+serviceName+"], Provider : ["+serviceProvider+"]");
 		}	
@@ -261,9 +263,6 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			resourceList.add(i,resourcePath);
 			i++;
 		}
-		
-
-		
 		
 	// Get API Information Detail API를 사용한다.
 		String basePath = null;

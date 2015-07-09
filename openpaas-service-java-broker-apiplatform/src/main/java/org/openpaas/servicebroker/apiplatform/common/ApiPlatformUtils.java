@@ -1,13 +1,8 @@
 package org.openpaas.servicebroker.apiplatform.common;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -58,11 +53,6 @@ public class ApiPlatformUtils {
 				return;
 			}
 			
-			//Get published APIs by application
-			//어플리케이션이 생성되어 있지 않은 경우
-			else if(json.get("apis").asText().equals("[]")){
-				throw new ServiceBrokerException("No Application or Subscription");
-			}
 			//Remove an Application
 			else if(apiPlatformMessage.equals("Error occurred while executing the action removeApplication")){
 				throw new ServiceBrokerException("No Application");
@@ -72,25 +62,30 @@ public class ApiPlatformUtils {
 				throw new ServiceBrokerException(json.get("message").asText());
 			}
 		}
-		
-		if (json.has("error")&&!json.get("error").asText().equals("false")){
+		//API플랫폼이 true도 false도 아닌 에러값을 보내는 경우
+		else if (json.has("error")&&!json.get("error").asText().equals("false")){
 			//remove a subscription
 			if(json.get("message").equals("Error occurred while executing the action removeSubscription")){
 				throw new ServiceBrokerException("invalid parameters");
 			}
-			
-			
 		}
+		//API플랫폼에서 응답하는 에러값은 false인데, 예외를 발생시켜야 하는 경우
+		else if(json.has("error")&&json.get("error").asText().equals("false")){
 			
-			
-			
-		//Add an Application API
-		//API플랫폼이 error : true를 응답하지는 않았지만, 어플리케이션 추가가 정상적으로 이루어지지 않았을 경우
-		//파라미터명(키값)이 잘못 되었을 때, "error": false, "status": null
-		if(json.has("status")&&!json.get("status").asText().equals("APPROVED")){
-			
-			throw new ServiceBrokerException("Add an Application Error");
-		}
+			 if(json.has("apis")&&json.get("apis").has(0)){
+				 
+			 }
+			//Get published APIs by application
+			//API의 사용등록이 되어있지 않은 경우
+			else if(json.has("apis")&&!json.get("apis").has(0)){
+				throw new ServiceBrokerException("No subscribed API");
+			}
+			//Add an Application API
+			//파라미터명(키값)이 잘못 되었을 때, "error": false, "status": null
+			else if(json.has("status")&&!json.get("status").asText().equals("APPROVED")){
+				//어플리케이션 추가가 정상적으로 이루어지지 않은 경우이다.
+				throw new ServiceBrokerException("Add an Application Error");
+			}
+		}	
 	}
-	
 }

@@ -55,10 +55,10 @@ public class APIServiceInstanceDAO {
 	return apiUser;
 	}
 	
-	public APIServiceInstance getAPIServiceByInstanceAndOrgID(String serviceInstanceId, String organizationGuid){
+	public APIServiceInstance getAPIServiceByInstance(String serviceInstanceId){
 		logger.info("getServiceByInstanceID() start");
 		logger.debug("instance_id : "+serviceInstanceId);
-		String sql = "SELECT * FROM apiplatform_services WHERE instance_id='"+serviceInstanceId+"' AND organization_guid ='"+organizationGuid+"'";
+		String sql = "SELECT * FROM apiplatform_services WHERE instance_id='"+serviceInstanceId+"'";
 		
 		APIServiceInstance apiServiceInstance = new APIServiceInstance();
 		

@@ -98,7 +98,6 @@ public class APICatalogService implements CatalogService {
 			planAvailable = env.getProperty("AvailablePlan"+i);
 			planList.add(planAvailable);
 			i++;
-			System.out.println(planAvailable);
 		} while((env.getProperty("AvailablePlan"+i)!=null));
 		
 		

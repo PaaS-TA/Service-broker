@@ -1,7 +1,5 @@
 package org.openpaas.servicebroker.apiplatform.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
@@ -54,9 +52,11 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 	
 	@Override
 	public ServiceInstance createServiceInstance(CreateServiceInstanceRequest request) throws ServiceInstanceExistsException, ServiceBrokerException 
-	{
-		ServiceInstance instance = new ServiceInstance(request);
+	{		
 		logger.info("create ServiceInstance");
+		
+		String dashboardUrl = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformDashboardPort")+env.getProperty("APIPlatformDashboardURL");
+		ServiceInstance instance = new ServiceInstance(request).withDashboardUrl(dashboardUrl);
 		
 		String organizationGuid =instance.getOrganizationGuid();
 		String serviceInstanceId = instance.getServiceInstanceId();
@@ -94,13 +94,12 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		if(!planAvailable){
 			throw new ServiceBrokerException("invalid PlanName :["+request.getPlanId().split(" ")[2]+"]");
 		}
-
 		
 	//해당 인스턴스 아이디로 DB에 저장된 정보가 있는지 확인한다.
 		boolean instanceExsistsAtDB = false;
 		APIServiceInstance apiServiceInstacne = new APIServiceInstance();
 		try {
-			apiServiceInstacne=dao.getAPIServiceByInstanceAndOrgID(serviceInstanceId, organizationGuid);
+			apiServiceInstacne=dao.getAPIServiceByInstance(serviceInstanceId);
 			//이미 삭제된 인스턴스와 동일한 인스턴스 ID 및 org ID로 요청이 들어온 경우
 			//TODO 삭제된 인스턴스 처리를 어떻게 할지에 대한 결정에 따라 가변적
 			if(apiServiceInstacne.getDelyn().equals("Y")){
@@ -121,31 +120,34 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		
 	//해당 인스턴스 아이디로 DB에 저장된 서비스와 요청이들어온 서비스가 다를 경우, 409 예외를 발생시킨다.
 		if(instanceExsistsAtDB){
-			//인스턴스 아이디에 대한 org 아이디가 DB의 org아이디와 요청된 org아이디가 다른 경우이다.
+			//인스턴스 아이디에 대한 DB의 org아이디와 요청된 org아이디가 다른 경우이다.
 			if(!apiServiceInstacne.getOrganization_id().equals(organizationGuid)){
-				logger.error("incorrect orgID requested. OrgId :["+organizationGuid+"]");
+				logger.error("incorrect OrganizationID :["+organizationGuid+"]. valid OrganizationID: ["+apiServiceInstacne.getOrganization_id()+"]");
 				throw new ServiceInstanceExistsException(instance);			
 			}
-			//DB에 저장된 서비스명, 플랜명과 일치하면 이미 존재하는 인스턴스이므로 예외없이 통과시킨다.
+			//DB에 저장된 서비스명, 플랜명과 일치하지 않으면 예외를 발생시킨다.
 			if(!apiServiceInstacne.getService_id().equals(serviceId)&&!apiServiceInstacne.getPlan_id().equals(planId)){
-				logger.error("invalid ServiceName :["+request.getServiceDefinitionId().split(" ")[0]+"]. valid ServiceName: ["+apiServiceInstacne.getService_id().split(" ")[0]+"], "
-						+ "invalid PlanName :["+request.getPlanId().split(" ")[2]+"]. valid PlanName: ["+apiServiceInstacne.getPlan_id().split(" ")[2]+"]");
+				logger.error("invalid ServiceName :["+request.getServiceDefinitionId().split(" ")[0]+"]. valid ServiceName :["+apiServiceInstacne.getService_id().split(" ")[0]+"]"
+						+ "invalid PlanName :["+request.getPlanId().split(" ")[2]+"]. valid PlanName :["+apiServiceInstacne.getPlan_id().split(" ")[2]+"]");
 				throw new ServiceInstanceExistsException(instance);
 			}
 			else if(!apiServiceInstacne.getService_id().equals(serviceId)){
-				logger.error("invalid ServiceName :["+request.getServiceDefinitionId().split(" ")[0]+"]. valid ServiceName: ["+apiServiceInstacne.getService_id().split(" ")[0]+"]");
+				logger.error("invalid ServiceName :["+request.getServiceDefinitionId().split(" ")[0]+"]. valid ServiceName :["+apiServiceInstacne.getService_id().split(" ")[0]+"]");
 				throw new ServiceInstanceExistsException(instance);
 			}
 			else if(!apiServiceInstacne.getPlan_id().equals(planId)){
-				logger.error("invalid PlanName :["+request.getPlanId().split(" ")[2]+"]. valid PlanName: ["+apiServiceInstacne.getPlan_id().split(" ")[2]+"]");
+				logger.error("invalid PlanName :["+request.getPlanId().split(" ")[2]+"]. valid PlanName :["+apiServiceInstacne.getPlan_id().split(" ")[2]+"]");
 				throw new ServiceInstanceExistsException(instance);
 			}
+			//DB에 저장된 서비스명, 플랜명과 일치한다면 이미 존재하는 인스턴스이다. 이경우 예외를 발생시키지 않는다.
 			else{
 				logger.info("Service Instance already exists. InstanceID :["+serviceInstanceId+"]");
 			}
 		}
+		
+		
 
-	//서비스 브로커의 DB에서 organizationGuid를 확인하여 API플랫폼 로그인 아이디와 비밀번호를 획득한다.
+	//DB에서 organizationGuid를 확인하여 API플랫폼 로그인 아이디와 비밀번호를 획득한다.
 		
 		APIUser userInfo = new APIUser();
 		try{
@@ -323,12 +325,12 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			instance.setHttpStatusOK();
 			return instance;
 		}
-		else {	
+		else {
 		//API서비스 인스턴스 정보를 API플랫폼 DB에 저장한다.
 			try {
 				dao.insertAPIServiceInstance(organizationGuid,serviceInstanceId,spaceGuid,serviceId,planId);
 			} catch (Exception e) {
-				logger.error("API Service Instance insert failed");
+				logger.error("API Service Instance insert failed "+e.getMessage());
 				throw new APIServiceInstanceException("Database Error: API ServiceInstance insert");		
 			}
 			logger.info("API Service Instance insert finished");
@@ -439,7 +441,6 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			}
 			if(serviceExists){
 				String serviceProvider = serviceDefinition.getMetadata().get("providerDisplayName").toString();
-				
 				String removeSubscriptionUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.RemoveSubscription");
 				String removeSubscriptionParameters = "action=removeSubscription&name="+serviceName+"&version="+serviceVersion+"&provider="+serviceProvider+"&applicationId="+applicationId;
 				
