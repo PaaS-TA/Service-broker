@@ -30,10 +30,10 @@ public class APIServiceInstanceDAO {
 	@Autowired
 	private Environment env;
 	
-	public APIUser getAPIUserByOrgID(String oranizationGuid){
+	public APIUser getAPIUserByOrgID(String organizationGuid){
 		logger.info("getAPIUserByOrgID() start");
-		logger.debug("oranization_guid : "+oranizationGuid);
-		String sql = "SELECT * FROM apiplatform_users WHERE organization_guid='"+oranizationGuid+"'";
+		logger.debug("oranization_guid : "+organizationGuid);
+		String sql = "SELECT * FROM apiplatform_users WHERE organization_guid='"+organizationGuid+"'";
 		
 		APIUser apiUser = new APIUser();
 		
@@ -126,23 +126,23 @@ public class APIServiceInstanceDAO {
 	
 	public void insertAPIServiceInstance(String oranizationGuid, String serviceInstanceId,String spaceGuid,String serviceId,String planId){
 		
-		logger.info("insertAPIUser() start");
+		logger.info("insertAPIServiceInstance() start");
 		String sql ="INSERT INTO apiplatform_services (organization_guid,instance_id,space_guid,service_id,plan_id,delyn,createtimestamp) VALUES "
 				+ "('"+oranizationGuid+"','"+serviceInstanceId+"','"+spaceGuid+"','"+serviceId+"','"+planId+"','N',utc_timestamp())";
 	
 		jdbcTemplate.execute(sql);
 		
-		logger.info("insertAPIUser() finished");
+		logger.info("insertAPIServiceInstance() finished");
 	}
 	
 	public void updateAPIServiceInstance(String serviceInstanceId, String planId){
 		
-		logger.info("updateAPIUser() start");
+		logger.info("updateAPIServiceInstance() start");
 		String sql ="UPDATE apiplatform_services SET plan_id = '"+planId+"' WHERE instance_id = '"+serviceInstanceId+"'";
 
 		jdbcTemplate.update(sql);
 		
-		logger.info("updateAPIUser() finished");
+		logger.info("updateAPIServiceInstance() finished");
 	}
 	
 	public void deleteAPIServiceInstance(String oranizationGuid,String serviceInstanceId, String serviceId,String planId ){

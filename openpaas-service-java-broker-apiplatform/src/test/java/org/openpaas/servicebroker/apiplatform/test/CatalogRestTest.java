@@ -2,24 +2,15 @@ package org.openpaas.servicebroker.apiplatform.test;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openpaas.servicebroker.common.JsonUtils;
-import org.openpaas.servicebroker.apiplatform.service.impl.APICatalogService;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
-import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
-import org.openpaas.servicebroker.service.CatalogService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -28,7 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
-import ch.qos.logback.core.net.server.Client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.org.apache.xml.internal.security.utils.Base64;

@@ -8,6 +8,7 @@ import java.util.Map;
 import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
 import org.openpaas.servicebroker.apiplatform.dao.APIServiceInstanceDAO;
 import org.openpaas.servicebroker.apiplatform.model.APIServiceInstance;
+import org.openpaas.servicebroker.apiplatform.model.APIUser;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
@@ -80,14 +81,22 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 
 		//요청된 서비스 인스턴스 정보와 DB에 저장된 서비스 인스턴스 정보가 일치하는지 확인한다.
 		if(!apiServiceInstance.getService_id().equals(serviceId)){
-			logger.error("Invalid Information requested. ServiceID : "+serviceId+", Valid ServiceID : "+apiServiceInstance.getService_id());
-			throw new ServiceBrokerException("Invalid Service Name : ["+serviceName+"], Valid ServiceName : ["+apiServiceInstance.getService_id().split(" ")[0]+"]");
-			
+			if(!apiServiceInstance.getService_id().split(" ")[0].equals(serviceName)){
+				logger.error("Invalid Information requested. ServiceName :["+serviceName+"], Valid ServiceName :["+apiServiceInstance.getService_id().split(" ")[0]+"]");
+				throw new ServiceBrokerException("Invalid ServiceName :["+serviceName+"], Valid ServiceName :["+apiServiceInstance.getService_id().split(" ")[0]+"]");
+			} else {
+				logger.error("Invalid Information requested. ServiceID : "+serviceId+", Valid ServiceID : "+apiServiceInstance.getService_id());
+				throw new ServiceBrokerException("Invalid ServiceID :["+serviceId+"], Valid ServiceID :["+apiServiceInstance.getService_id()+"]");
+			}
 		}
 		if(!apiServiceInstance.getPlan_id().equals(planId)){
-			logger.error("Invalid Information requested. PlanID : "+planId+", Valid PlanID : "+apiServiceInstance.getPlan_id());
-			throw new ServiceBrokerException("Invalid Plan Name : ["+planName+"], Valid PlanName : ["+apiServiceInstance.getPlan_id().split(" ")[2]+"]");
-			
+			if(!apiServiceInstance.getPlan_id().split(" ")[2].equals(planName)){
+				logger.error("Invalid Information requested. PlanName :["+planName+"], Valid PlanName :["+apiServiceInstance.getPlan_id().split(" ")[2]+"]");
+				throw new ServiceBrokerException("Invalid PlanName :["+planName+"], Valid PlanName :["+apiServiceInstance.getPlan_id().split(" ")[2]+"]");
+			} else {
+			logger.error("Invalid Information requested. PlanID :["+planId+"], Valid PlanID :["+apiServiceInstance.getPlan_id()+"]");
+			throw new ServiceBrokerException("Invalid PlanID :["+planId+"], Valid PlanID :["+apiServiceInstance.getPlan_id()+"]");
+			}
 		}
 
 		
@@ -113,11 +122,10 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 				logger.warn("not found API Platform User");
 				
 				//TODO 유저생성을 하지 않고 예외를 발생시킬 수 있다. 상황에 따라 가변
-				//throw new ServiceBrokerException("API Platform User ["+userId+"] removed");				
-	
-				apiServiceInstanceService.userSignup(userId, userPassword);
-				//다시 로그인을 시도한다.
-				cookie = loginService.getLogin(userId, userPassword);
+				throw new ServiceBrokerException("API Platform User ["+userId+"] removed");				
+//	
+//				apiServiceInstanceService.userSignup(userId, userPassword);
+//				cookie = loginService.getLogin(userId, userPassword);
 			}
 			else {
 				logger.error("User Signup Error");
@@ -219,12 +227,14 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 	
 	//Get Published APIs by Application API를 통해 가져온 API정보에서 공급자명을 찾아 변수에 담는다.
 		String serviceProvider = null;
+		String lifecycle = null;
 		logger.debug("API : "+serviceName);
 		JsonNode apis = getAPIsResponseJson.get("apis");
 		for(JsonNode api :apis){
 			if(api.get("apiName").asText().equals(serviceName)&&
 					api.get("apiVersion").asText().equals(serviceVersion)){
 				serviceProvider = api.get("apiProvider").asText();
+				lifecycle = api.get("status").asText();
 				break;
 			}
 		}
@@ -232,9 +242,15 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		if(serviceProvider==null){
 			logger.error("Service Provider not found - Service : ["+serviceName+"]");
 			throw new ServiceBrokerException("APIPlatform API not found - API Name : ["+serviceName+"]");
-		} else {
+		}
+		//프로비전까지 완료된 상태의 API의 라이프 사이클을 API플랫폼 publisher에서 변경한 경우
+		else if(!lifecycle.equals("PUBLISHED")){
+			logger.error("APIPlatform API not published - Service : ["+serviceName+"]", "Status :["+lifecycle+"]" );
+			throw new ServiceBrokerException("APIPlatform API not published - API Name : ["+serviceName+"], Status :["+lifecycle+"]");		
+		}
+		else {
 			logger.info("get Service Provider - Service : ["+serviceName+"], Provider : ["+serviceProvider+"]");
-		}	
+		}
 		
 	//API의 리소스 패스를 얻기 위해, Get API Information API를 사용한다.
 		String getAPIInfoUrl = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAPIDetailInformation")+serviceProvider+"/"+serviceName+"/"+serviceVersion;
@@ -434,19 +450,20 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		
 		ServiceInstance instance = request.getInstance();
 		
+		String organizationGuid =instance.getOrganizationGuid();
 		String bindingId = request.getBindingId();
 		String serviceInstanceId = instance.getServiceInstanceId();
 		Map<String,Object> credentials = new LinkedHashMap<String, Object>();
 		String syslogDrainUrl = null;
 		String appGuid = "";
 		
-	//해당 인스턴스 아이디로 API플랫폼의 유저정보를 가져온다.
+	//인스턴스의 orgID로 API플랫폼의 유저정보를 가져온다.
 	
-		APIServiceInstance apiServiceInstance;
+		APIUser apiUser;
 		try {	
-			apiServiceInstance = dao.getAPIInfoByInstanceID(serviceInstanceId);
+			apiUser = dao.getAPIUserByOrgID(organizationGuid);
 		} catch (EmptyResultDataAccessException e) {
-			//해당 인스턴스 아이디에 해당하는 유저정보가 DB에 저장 되어 있어야 하지만 그렇지 않은 경우이다.
+			//해당 orgID에 해당하는 유저정보가 DB에 저장 되어 있어야 하지만 그렇지 않은 경우이다.
 			logger.error("Database error - not found instance information. Instance ID : ["+serviceInstanceId+"]");
 			throw new ServiceBrokerException("not found instance information");
 		} catch (Exception e){
@@ -454,21 +471,24 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			throw new ServiceBrokerException("APIPlatform Error :"+e.getMessage());
 		}
 		
-		String serviceId = instance.getServiceDefinitionId();
-		String planId = instance.getPlanId();
+		String serviceId = request.getServiceId();
+		String planId = request.getPlanId();
 
 	//요청된 서비스 인스턴스 정보와 DB에 저장된 서비스 인스턴스 정보가 일치하는지 확인한다.
-		if(!apiServiceInstance.getService_id().equals(serviceId)&&!apiServiceInstance.getPlan_id().equals(planId)){
-			logger.error("Delete and create again Service instance and then try again.");
-			throw new ServiceBrokerException("Delete and create again Service instance and then try again.");		
-		}else if(!apiServiceInstance.getService_id().equals(serviceId)|!apiServiceInstance.getPlan_id().equals(planId)){
-			logger.error("invalid Instance infomation");
-			throw new ServiceBrokerException("Recheck the request information - InstanceID : ["+serviceInstanceId+"], ServiceID : ["+serviceId+"], PlanID : ["+planId+"]");
+		if(!instance.getServiceDefinitionId().equals(serviceId)&&!instance.getPlanId().equals(planId)){
+			logger.error("Invalid ServiceID :["+serviceId+"], PlanID :["+planId+"]. Valid ServiceID :["+instance.getServiceDefinitionId()+"], PlanID :["+instance.getPlanId()+"]");
+			throw new ServiceBrokerException("Invalid Instance infomation. ServiceID :["+serviceId+"], PlanID :["+planId+"]");
+		}else if(!instance.getServiceDefinitionId().equals(serviceId)){
+			logger.error("Invalid ServiceID :["+serviceId+"] Valid ServiceID :["+instance.getServiceDefinitionId()+"]");
+			throw new ServiceBrokerException("Invalid ServiceID :["+serviceId+"] Valid ServiceID :["+instance.getServiceDefinitionId()+"]");	
+		}else if(!instance.getPlanId().equals(planId)){
+			logger.error("Invalid PlanID :["+planId+"] Valid PlanID :["+instance.getPlanId()+"]");
+			throw new ServiceBrokerException("Invalid PlanID :["+planId+"] Valid PlanID :["+instance.getPlanId()+"]");
 		}
 		
 	//로그인한다.
-		String userId = apiServiceInstance.getUser_id();
-		String userPassword = apiServiceInstance.getUser_password();
+		String userId = apiUser.getUser_id();
+		String userPassword = apiUser.getUser_password();
 		String cookie = "";
 		
 		try {
@@ -476,10 +496,11 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			logger.info("API Platform login success");
 		} catch (ServiceBrokerException e) {
 			if(e.getMessage().equals("No User")){
-			//유저가 API플랫폼에 등록이 되어있지 않을 경우, 유저등록을 한다. 유저는 반드시 존재해야 하기 때문에 유저를 생성하고 예외를 던진다.
-				logger.warn("not found API Platform User");
-				apiServiceInstanceService.userSignup(userId, userPassword);
-				throw new ServiceBrokerException("API Platform Error : removed API Platform user. User created ["+userId+"]");
+			//유저가 API플랫폼에 등록이 되어있지 않을 경우 예외를 던진다.
+				//자동으로 유저생성을 하도록 바꿀 수 있다.
+				logger.warn("not found API Platform User :["+userId+"]");
+//				apiServiceInstanceService.userSignup(userId, userPassword);
+				throw new ServiceBrokerException("API Platform user removed. User :["+userId+"]");
 			}
 			else {
 				logger.error("APIPlatform User Signup Error");
@@ -525,7 +546,7 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 	//어플리케이션이 존재하지 않는 경우이다. 언바인딩 과정을 진행하는데에 문제는 없지만, 다른 문제를 야기할 수 있기 때문에 예외를 던지고 사용자에게 알린다.
 		if(!applicationExists){
 			logger.error("Application ["+serviceInstanceId+"] not exists.");
-			throw new ServiceBrokerException("API Platform Error : Application ["+serviceInstanceId+"] not exists.");
+			throw new ServiceBrokerException("API Platform Application ["+serviceInstanceId+"] not exists.");
 		}
 		
 		
@@ -552,7 +573,7 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		} catch(ServiceBrokerException e){
 			if(e.getMessage().equals("invalid parameters")){
 				logger.error("Invalid parameters Service name : ["+serviceName+"], Version : ["+serviceVersion+"], API Provider : ["+serviceProvider+"], Application ID : ["+applicationId+"]");
-				throw new ServiceBrokerException("API Platform Error : Invalid Parameters Service "+serviceName);
+				throw new ServiceBrokerException("API Platform Error : Invalid Parameters Service :["+serviceName+"]");
 			}
 		} catch (Exception e) {
 			throw new ServiceBrokerException("APIPlatform Error :"+e.getMessage());

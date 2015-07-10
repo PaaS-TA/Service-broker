@@ -8,7 +8,9 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.ProvisionBody;
 import org.springframework.http.HttpEntity;
@@ -19,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 
+
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 /**
@@ -27,6 +30,7 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
  * 
  * @author ahnchan
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ProvisionRestTest {
 	
 	private static Properties prop = new Properties();
@@ -86,9 +90,9 @@ public class ProvisionRestTest {
 	//요청된 인스턴스 아이디가 DB에 존재할때, API플랫폼에는 존재하지만 DB에 저장된 인스턴스 정보와는 다른 서비스ID(서비스명+버전)가 요청된 케이스
 	//409 Conflict
 	@Test
-	public void sendProvision_duplicate_instance_different_serviceID() {
+	public void sendProvision_duplicate_instance_other_serviceID() {
 		
-		System.out.println("Start - duplicate_instance_different_serviceID");
+		System.out.println("Start - duplicate_instance_other_serviceID");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -99,7 +103,7 @@ public class ProvisionRestTest {
 		String organization_guid = UUID.randomUUID().toString();
 		String space_guid = UUID.randomUUID().toString();
 		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_different_service_id"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_other_service_id"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
@@ -112,7 +116,7 @@ public class ProvisionRestTest {
 		assertTrue(response.getBody().equals("{}"));
 		assertEquals(response.getStatusCode(), HttpStatus.CONFLICT);
 		System.out.println(response.getBody());
-		System.out.println("End - duplicate_instance_different_serviceID");
+		System.out.println("End - duplicate_instance_other_serviceID");
 	}
 	
 	//요청된 인스턴스 아이디가 DB에 존재할때, 존재하지 않는 서비스아이디를 요청한 경우 - 422 UNPROCESSABLE_ENTITY
@@ -179,7 +183,7 @@ public class ProvisionRestTest {
 	//요청된 인스턴스 아이디가 DB에 존재할때, 사용가능한 플랜이지만 DB에 저장된 인스턴스 정보와는 다른 플랜아이디를 요청한 경우  - 409 CONFLICT
 	//aplication-mvc.properties 파일에 AvailablePlan을 추가하고  테스트 해야함.
 //	@Test
-	public void sendProvision_duplicate_instance_different_planID() {
+	public void sendProvision_duplicate_instance_other_planID() {
 		
 		System.out.println("Start - duplicate_instance_fail_planID");
 		
@@ -192,7 +196,7 @@ public class ProvisionRestTest {
 		String organization_guid = UUID.randomUUID().toString();
 		String space_guid = UUID.randomUUID().toString();
 		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id"), prop.getProperty("provision_different_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id"), prop.getProperty("provision_other_plan_id"), organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
@@ -317,7 +321,7 @@ public class ProvisionRestTest {
 		String instance_id = "";
 		String organization_guid = prop.getProperty("provision_test_org_guid");
 		String space_guid = UUID.randomUUID().toString();
-		String service_id= prop.getProperty("provision_different_service_id");
+		String service_id= prop.getProperty("provision_other_service_id");
 		String plan_id= prop.getProperty("provision_duplicate_plan_id");
 		
 		ProvisionBody body = new ProvisionBody(service_id,plan_id, organization_guid, space_guid);
@@ -342,7 +346,7 @@ public class ProvisionRestTest {
 		String instance_id = prop.getProperty("provision_duplicate_instance_id");
 		String organization_guid ="";
 		String space_guid = UUID.randomUUID().toString();
-		String service_id= prop.getProperty("provision_different_service_id");
+		String service_id= prop.getProperty("provision_other_service_id");
 		String plan_id=prop.getProperty("provision_duplicate_plan_id");
 		
 		HttpHeaders headers = new HttpHeaders();	
@@ -430,10 +434,10 @@ public class ProvisionRestTest {
 	}
 	
 	
-	//인스턴스 아이디가 같고 org아이디가 다른케이스 - 409 Conflict
-	public void sendProvision_duplicate_instance_different_orgID() {
+	//인스턴스 아이디가 같고 해당인스턴스 아이디로 DB에 저장된 org아이디와 다른 org아이디 요청이 들어온 케이스 - 409 Conflict
+	public void sendProvision_duplicate_instance_other_orgID() {
 		
-		System.out.println("Start - duplicate_instance_different_orgID");
+		System.out.println("Start - duplicate_instance_other_orgID");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -456,7 +460,7 @@ public class ProvisionRestTest {
 		assertTrue(response.getBody().equals("{}"));
 		assertEquals(response.getStatusCode(), HttpStatus.CONFLICT);
 		System.out.println(response.getBody());
-		System.out.println("End - duplicate_instance_different_orgID");
+		System.out.println("End - duplicate_instance_other_orgID");
 	}
 	
 	
@@ -494,9 +498,9 @@ public void sendProvision_duplicate_all_except_instanceID() {
 	
 	
 //	@Test	
-//	public void sendProvision_intance_id_different_org() {
+//	public void sendProvision_intance_id_other_org() {
 //		
-//		System.out.println("Start - intance_id_different_org");
+//		System.out.println("Start - intance_id_other_org");
 //		
 //		String instance_id = "instance_id";
 //		String organization_guid =UUID.randomUUID().toString();
@@ -524,7 +528,7 @@ public void sendProvision_duplicate_all_except_instanceID() {
 //		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 //		assertTrue(response.getBody().contains("incorrect OrgId : ["+organization_guid+"]"));
 //	
-//		System.out.println("End - intance_id_different_org");
+//		System.out.println("End - intance_id_other_org");
 //	}
 	
 }
