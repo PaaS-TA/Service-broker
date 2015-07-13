@@ -11,6 +11,7 @@ import org.openpaas.servicebroker.apiplatform.common.StringUtils;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
+import org.openpaas.servicebroker.exception.ServiceDefinitionDoesNotExistException;
 import org.openpaas.servicebroker.model.Catalog;
 import org.openpaas.servicebroker.model.DashboardClient;
 import org.openpaas.servicebroker.model.Plan;
@@ -27,6 +28,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 
 
 
@@ -120,6 +122,9 @@ public class APICatalogService implements CatalogService {
 			id = api.get("name").asText() + " " + api.get("version").asText();
 			name = api.get("name").asText();
 			description = StringUtils.nullToBlank(api.get("description").asText());
+			if(description.equals("")){
+				description="no description";
+			}
 			bindable = true;
 			planUpdatable = true;
 			plans = new ArrayList<Plan>();
@@ -158,7 +163,7 @@ public class APICatalogService implements CatalogService {
 				pMetadata = new LinkedHashMap<String,Object>();
 						
 						List<String> bullets = new ArrayList<String>();
-							bullets.add(0, "test value");
+						bullets.add(0, "test value");
 				
 						List<Object> costs= new ArrayList<Object>();
 							Map<String, Object> cost = new HashMap<String, Object>();
@@ -211,6 +216,8 @@ public class APICatalogService implements CatalogService {
 				return svc;
 			}
 		}
+		//서비스ID에 포함된 서비스명이 잘못된 케이스 - P003, P007
+		//ServiceDefinitionDoesNotExistException 422 UNPROCESSABLE_ENTITY
 		logger.warn("could not find service");
 		return null;
 	}

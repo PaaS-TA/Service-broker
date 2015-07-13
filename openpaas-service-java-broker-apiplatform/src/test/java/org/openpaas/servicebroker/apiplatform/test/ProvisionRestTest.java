@@ -52,12 +52,11 @@ public class ProvisionRestTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 	 		System.err.println(e);
-	 	}
-		
+	 	}		
 	}
-	//적절한 데이터로 요청이 들어온 케이스 - 201 CREATED
+	//P001 적절한 데이터로 요청이 들어온 케이스 - 201 CREATED
 	@Test
-	public void sendProvision_validData() {
+	public void P001_sendProvision_validData() {
 		
 		System.out.println("Start - valid data");
 		
@@ -68,10 +67,10 @@ public class ProvisionRestTest {
 		
 		String instance_id = UUID.randomUUID().toString();
 		String organization_guid = prop.getProperty("test_org_guid");
-		String space_guid = UUID.randomUUID().toString();
+		String space_guid = prop.getProperty("test_space_guid");
 		
 //		String body = new ProvisionBody(prop.getProperty("provision_service_id"), prop.getProperty("provision_plan_id"), organization_guid, space_guid).convertToJsonString();
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("test_service_id"), prop.getProperty("test_plan_id"), organization_guid, space_guid);
 		
 //		HttpEntity<String> entity = new HttpEntity<String>(body, headers);		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
@@ -81,16 +80,16 @@ public class ProvisionRestTest {
 		
 		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 	
+		System.out.println(response.getBody());
 		assertTrue(response.getBody().contains("dashboard_url"));
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
-		System.out.println(response.getBody());
 		System.out.println("End - valid data");
 	}
 
-	//요청된 인스턴스 아이디가 DB에 존재할때, API플랫폼에는 존재하지만 DB에 저장된 인스턴스 정보와는 다른 서비스ID(서비스명+버전)가 요청된 케이스
+	//P002 요청된 인스턴스 아이디가 DB에 존재할때, API플랫폼에는 존재하지만 DB에 저장된 인스턴스 정보와는 다른 서비스ID(서비스명+버전)와 플랜아이디가 요청된 케이스
 	//409 Conflict
 	@Test
-	public void sendProvision_duplicate_instance_other_serviceID() {
+	public void P002_sendProvision_duplicate_instance_other_serviceID() {
 		
 		System.out.println("Start - duplicate_instance_other_serviceID");
 		
@@ -99,29 +98,27 @@ public class ProvisionRestTest {
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
-		String instance_id = prop.getProperty("provision_duplicate_instance_id");
-		String organization_guid = UUID.randomUUID().toString();
-		String space_guid = UUID.randomUUID().toString();
+		String instance_id = prop.getProperty("test_instance_id");
+		String organization_guid = prop.getProperty("test_org_guid");
+		String space_guid = prop.getProperty("test_space_guid");
 		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_other_service_id"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("test_other_service_id"), prop.getProperty("test_other_plan_id"), organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
 
-
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
 		
 		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
-			
+		System.out.println(response.getBody());
 		assertTrue(response.getBody().equals("{}"));
 		assertEquals(response.getStatusCode(), HttpStatus.CONFLICT);
-		System.out.println(response.getBody());
 		System.out.println("End - duplicate_instance_other_serviceID");
 	}
 	
-	//요청된 인스턴스 아이디가 DB에 존재할때, 존재하지 않는 서비스아이디를 요청한 경우 - 422 UNPROCESSABLE_ENTITY
+	//P003 요청된 인스턴스 아이디가 DB에 존재할때, 존재하지 않는 서비스아이디를 요청한 경우 - 422 UNPROCESSABLE_ENTITY
 	@Test
-	public void sendProvision_duplicate_instance_fail_serviceID() {
+	public void P003_sendProvision_duplicate_instance_fail_serviceID() {
 		
 		System.out.println("Start - duplicate_instance_fail_serviceID");
 		
@@ -130,11 +127,11 @@ public class ProvisionRestTest {
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
-		String instance_id = prop.getProperty("provision_duplicate_instance_id");
-		String organization_guid = UUID.randomUUID().toString();
-		String space_guid = UUID.randomUUID().toString();
+		String instance_id = prop.getProperty("test_instance_id");
+		String organization_guid = prop.getProperty("test_org_guid");
+		String space_guid = prop.getProperty("test_space_guid");
 		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id_fail"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("test_service_id_fail"), prop.getProperty("test_plan_id"), organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
@@ -142,48 +139,18 @@ public class ProvisionRestTest {
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
 		
 		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
-
-		assertTrue(response.getBody().contains("ServiceDefinition does not exist: id = "+prop.getProperty("provision_service_id_fail")));
-		assertEquals(response.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
 		System.out.println(response.getBody());
+
+		assertTrue(response.getBody().contains("ServiceDefinition does not exist: id = "+prop.getProperty("test_service_id_fail")));
+		assertEquals(response.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
 		System.out.println("End - duplicate_instance_fail_serviceID");
 	}
 	
-	//요청된 인스턴스 아이디가 DB에 존재할때, 존재하지 않는 플랜아이디를 요청한 경우  - 500 INTERNAL_SERVER_ERROR
-	@Test
-	public void sendProvision_duplicate_instance_fail_planID() {
-		
-		System.out.println("Start - duplicate_instance_fail_planID");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		String instance_id = prop.getProperty("provision_duplicate_instance_id");
-		String organization_guid = UUID.randomUUID().toString();
-		String space_guid = UUID.randomUUID().toString();
-		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id"), prop.getProperty("provision_plan_id_fail"), organization_guid, space_guid);
-		
-		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
-		ResponseEntity<String> response = null;
 
-		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-
-		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
-
-		System.out.println(response.getBody());
-
-		assertTrue(response.getBody().contains("invalid PlanName :["+prop.getProperty("provision_plan_id_fail")+"]"));
-		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-		System.out.println("End - duplicate_instance_fail_planID");
-	}
-	
-	//요청된 인스턴스 아이디가 DB에 존재할때, 사용가능한 플랜이지만 DB에 저장된 인스턴스 정보와는 다른 플랜아이디를 요청한 경우  - 409 CONFLICT
+	//P004 요청된 인스턴스 아이디가 DB에 존재할때, 사용가능한 플랜이지만 DB에 저장된 인스턴스 정보와는 다른 플랜아이디를 요청한 경우  - 409 CONFLICT
 	//aplication-mvc.properties 파일에 AvailablePlan을 추가하고  테스트 해야함.
 //	@Test
-	public void sendProvision_duplicate_instance_other_planID() {
+	public void P004_sendProvision_duplicate_instance_other_planID() {
 		
 		System.out.println("Start - duplicate_instance_fail_planID");
 		
@@ -192,11 +159,11 @@ public class ProvisionRestTest {
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
-		String instance_id = prop.getProperty("provision_duplicate_instance_id");
-		String organization_guid = UUID.randomUUID().toString();
-		String space_guid = UUID.randomUUID().toString();
+		String instance_id = prop.getProperty("test_instance_id");
+		String organization_guid = prop.getProperty("test_org_guid");
+		String space_guid = prop.getProperty("test_space_guid");
 		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id"), prop.getProperty("provision_other_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("test_service_id"), prop.getProperty("test_other_plan_id"), organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
@@ -210,11 +177,72 @@ public class ProvisionRestTest {
 		assertEquals(response.getStatusCode(), HttpStatus.CONFLICT);
 		System.out.println("End - duplicate_instance_fail_planID");
 	}
-	
-	
-	//요청된 인스턴스 아이디가 DB에 존재하지 않을 때,존재하지 않는 서비스아이디가 요청들어온 경우  - 500 INTERNAL_SERVER_ERROR
+	//P005 플랜ID에 포함된 플랜명이 잘못된(API플랫폼에 존재하지 않는, 사용가능 하도록 설정된 플랜이 아닌) 케이스  - 500 INTERNAL_SERVER_ERROR
 	@Test
-	public void sendProvision_fail_serviceID() {
+	public void P005_sendProvision_duplicate_instance_fail_planName() {
+		
+		System.out.println("Start - duplicate_instance_fail_planName");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		
+		String instance_id = prop.getProperty("test_instance_id");
+		String organization_guid = prop.getProperty("test_org_guid");
+		String space_guid = prop.getProperty("test_space_guid");
+		
+		ProvisionBody body = new ProvisionBody(prop.getProperty("test_service_id"), prop.getProperty("test_plan_id_plan_name_fail"), organization_guid, space_guid);
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
+		ResponseEntity<String> response = null;
+
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+
+		System.out.println(response.getBody());
+
+		assertTrue(response.getBody().contains("invalid PlanId"));
+		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+		System.out.println("End - duplicate_instance_fail_planName");
+	}
+	
+	//P006 플랜명은 정상이나, 플랜ID가 잘못된 케이스  - 500 INTERNAL_SERVER_ERROR	
+	@Test
+	public void P006_sendProvision_duplicate_instance_fail_planID() {
+		
+		System.out.println("Start - duplicate_instance_fail_planID");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		
+		String instance_id = prop.getProperty("test_instance_id");
+		String organization_guid = prop.getProperty("test_org_guid");
+		String space_guid = prop.getProperty("test_space_guid");
+		
+		ProvisionBody body = new ProvisionBody(prop.getProperty("test_service_id"), prop.getProperty("test_plan_id_fail"), organization_guid, space_guid);
+		
+		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
+		ResponseEntity<String> response = null;
+
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
+
+		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+
+		System.out.println(response.getBody());
+
+		assertTrue(response.getBody().contains("invalid PlanID"));
+		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+		System.out.println("End - duplicate_instance_fail_planID");
+	}
+	
+	
+	//P007 요청된 인스턴스 아이디가 DB에 존재하지 않을 때,존재하지 않는 서비스아이디가 요청들어온 경우  - 500 INTERNAL_SERVER_ERROR
+	@Test
+	public void P007_sendProvision_fail_serviceID() {
 		
 		System.out.println("Start - fail service id");
 		
@@ -224,10 +252,10 @@ public class ProvisionRestTest {
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
 		String instance_id = UUID.randomUUID().toString();
-		String organization_guid = UUID.randomUUID().toString();
-		String space_guid = UUID.randomUUID().toString();
+		String organization_guid = prop.getProperty("test_org_guid");
+		String space_guid = prop.getProperty("test_space_guid");
 		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id_fail"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("test_service_id_fail"), prop.getProperty("test_plan_id"), organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
@@ -236,15 +264,15 @@ public class ProvisionRestTest {
 	
 		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 
-		assertTrue(response.getBody().contains("ServiceDefinition does not exist: id = "+prop.getProperty("provision_service_id_fail")));
-		assertEquals(response.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
 		System.out.println(response.getBody());
+		assertTrue(response.getBody().contains("ServiceDefinition does not exist: id = "+prop.getProperty("test_service_id_fail")));
+		assertEquals(response.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
 		System.out.println("End - fail service id");
 	}
 	
-	//요청된 인스턴스 아이디가 DB에 존재하지 않을 때,존재하지 않는 플랜아이디가 요청들어온 경우 - 500 INTERNAL_SERVER_ERROR
+	//P008 요청된 인스턴스 아이디가 DB에 존재하지 않을 때,존재하지 않는 플랜아이디가 요청들어온 경우 - 500 INTERNAL_SERVER_ERROR
 	@Test
-	public void sendProvision_fail_planID() {
+	public void P008_sendProvision_fail_planID() {
 		
 		System.out.println("Start - fail plan id");
 		
@@ -254,10 +282,10 @@ public class ProvisionRestTest {
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
 		String instance_id = UUID.randomUUID().toString();
-		String organization_guid = UUID.randomUUID().toString();
-		String space_guid = UUID.randomUUID().toString();
+		String organization_guid = prop.getProperty("test_org_guid");
+		String space_guid = prop.getProperty("test_space_guid");
 		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id"), prop.getProperty("provision_plan_id_fail"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("test_service_id"), prop.getProperty("test_plan_id_fail"), organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
@@ -267,15 +295,15 @@ public class ProvisionRestTest {
 		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 
 		System.out.println(response.getBody());
-		assertTrue(response.getBody().contains("invalid PlanName :["+prop.getProperty("provision_plan_id_fail")+"]"));
+		assertTrue(response.getBody().contains("invalid PlanId :["));
 		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
 		System.out.println("End - fail plan id");
 	}
 	
 	
-	//모든 파라미터가이미 DB에 저장된 것과 같은 값으로 들어온 경우 - 200 OK
+	//P009 모든 파라미터가 이미 DB에 저장된 것과 같은 값으로 들어온 경우 - 200 OK
 	@Test	
-	public void sendProvision_duplicate_instance() {
+	public void P009_sendProvision_duplicate_instance() {
 		
 		System.out.println("Start - duplicate instance");
 		
@@ -284,11 +312,11 @@ public class ProvisionRestTest {
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
-		String instance_id = prop.getProperty("provision_duplicate_instance_id");
-		String organization_guid = prop.getProperty("provision_duplicate_org_guid");
-		String space_guid = prop.getProperty("provision_duplicate_space_id");
-		String service_id= prop.getProperty("provision_duplicate_service_id");
-		String plan_id=prop.getProperty("provision_duplicate_plan_id");
+		String instance_id = prop.getProperty("test_instance_id");
+		String organization_guid = prop.getProperty("test_org_guid");
+		String space_guid = prop.getProperty("test_space_guid");
+		String service_id= prop.getProperty("test_service_id");
+		String plan_id=prop.getProperty("test_plan_id");
 		
 		ProvisionBody body = new ProvisionBody(service_id,plan_id , organization_guid, space_guid);
 		
@@ -299,17 +327,17 @@ public class ProvisionRestTest {
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
 
 		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+		System.out.println(response.getBody());
 
 		assertTrue(response.getBody().contains("dashboard_url"));
 		assertEquals(response.getStatusCode(), HttpStatus.OK);
-		System.out.println(response.getBody());
 		System.out.println("End - duplicate instance");
 	}
 	
-//각각의 파라미터들이 빈값으로 요청되었을 때
+	//P010 각각의 파라미터들이 빈값으로 요청되었을 때
 	//인스턴스 아이디로 빈값이 들어왔을때 - 404 Not found
 	@Test	
-	public void sendProvision_empty_parameters_instance_id() {
+	public void P010_sendProvision_empty_parameters_instance_id() {
 		
 		System.out.println("Start - empty parameters_instance id");
 		
@@ -319,10 +347,10 @@ public class ProvisionRestTest {
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
 		String instance_id = "";
-		String organization_guid = prop.getProperty("provision_test_org_guid");
-		String space_guid = UUID.randomUUID().toString();
-		String service_id= prop.getProperty("provision_other_service_id");
-		String plan_id= prop.getProperty("provision_duplicate_plan_id");
+		String organization_guid = prop.getProperty("test_org_guid");
+		String space_guid =  prop.getProperty("test_space_guid");
+		String service_id= prop.getProperty("test_other_service_id");
+		String plan_id= prop.getProperty("test_plan_id");
 		
 		ProvisionBody body = new ProvisionBody(service_id,plan_id, organization_guid, space_guid);
 		
@@ -332,22 +360,22 @@ public class ProvisionRestTest {
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
 
 		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+		System.out.println(response.getBody());
 		
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-		System.out.println(response.getBody());
 		System.out.println("End - empty parameters_instance id");
 	}
-	//org아이디로 빈값이 들어왔을때 - 422 UNPROCESSABLE_ENTITY
+	//P011 org아이디로 빈값이 들어왔을때 - 422 UNPROCESSABLE_ENTITY
 	@Test	
-	public void sendProvision_empty_parameters_organization_guid() {
+	public void P011_sendProvision_empty_parameters_organization_guid() {
 		
 		System.out.println("Start - empty parameters_organization id");
 		
-		String instance_id = prop.getProperty("provision_duplicate_instance_id");
+		String instance_id = prop.getProperty("test_instance_id");
 		String organization_guid ="";
-		String space_guid = UUID.randomUUID().toString();
-		String service_id= prop.getProperty("provision_other_service_id");
-		String plan_id=prop.getProperty("provision_duplicate_plan_id");
+		String space_guid = prop.getProperty("test_space_guid");
+		String service_id= prop.getProperty("test_other_service_id");
+		String plan_id=prop.getProperty("test_plan_id");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -363,24 +391,24 @@ public class ProvisionRestTest {
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
 
 		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
+		System.out.println(response.getBody());
 		
 		assertTrue(response.getBody().contains("Missing required fields: organizationGuid"));
 		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-		System.out.println(response.getBody());
 		System.out.println("End - empty parameters_organization id");
 	}
 	
-	//서비스 아이디로 빈값이 들어왔을때 - 422 UNPROCESSABLE_ENTITY
+	//P012 서비스 아이디로 빈값이 들어왔을때 - 422 UNPROCESSABLE_ENTITY
 	@Test	
-	public void sendProvision_empty_parameters_service_id() {
+	public void P012_sendProvision_empty_parameters_service_id() {
 		
 		System.out.println("Start - empty parameters_service_id");
 		
-		String instance_id = prop.getProperty("provision_duplicate_instance_id");
-		String organization_guid =UUID.randomUUID().toString();
-		String space_guid = UUID.randomUUID().toString();
+		String instance_id = prop.getProperty("test_instance_id");
+		String organization_guid =prop.getProperty("test_org_guid");
+		String space_guid = prop.getProperty("test_space_guid");
 		String service_id= "";
-		String plan_id=prop.getProperty("provision_duplicate_plan_id");
+		String plan_id=prop.getProperty("test_plan_id");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -398,20 +426,19 @@ public class ProvisionRestTest {
 		System.out.println(response.getBody());
 		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
 		assertTrue(response.getBody().contains("Missing required fields: serviceDefinitionId"));
-		System.out.println(response.getBody());
 		System.out.println("End - empty parameters_service_id");
 	}
 
-	//플랜아이디로 빈값이 들어왔을때 - 422 UNPROCESSABLE_ENTITY
+	//P013 플랜아이디로 빈값이 들어왔을때 - 422 UNPROCESSABLE_ENTITY
 	@Test	
-	public void sendProvision_empty_parameters_plan_id() {
+	public void P013_sendProvision_empty_parameters_plan_id() {
 		
 		System.out.println("Start - empty parameters_plan_id");
 		
 		String instance_id = UUID.randomUUID().toString();
 		String organization_guid =UUID.randomUUID().toString();
 		String space_guid = UUID.randomUUID().toString();
-		String service_id= prop.getProperty("provision_duplicate_service_id");
+		String service_id= prop.getProperty("test_service_id");
 		String plan_id = "";
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -429,13 +456,13 @@ public class ProvisionRestTest {
 		System.out.println(response.getBody());
 		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
 		assertTrue(response.getBody().contains("Missing required fields: planId"));
-		System.out.println(response.getBody());
+
 		System.out.println("End - empty parameters_plan_id");
 	}
 	
 	
-	//인스턴스 아이디가 같고 해당인스턴스 아이디로 DB에 저장된 org아이디와 다른 org아이디 요청이 들어온 케이스 - 409 Conflict
-	public void sendProvision_duplicate_instance_other_orgID() {
+	//P014 인스턴스 아이디가 같고 해당인스턴스 아이디로 DB에 저장된 org아이디와 다른 org아이디 요청이 들어온 케이스 - 409 Conflict
+	public void P014_sendProvision_duplicate_instance_other_orgID() {
 		
 		System.out.println("Start - duplicate_instance_other_orgID");
 		
@@ -444,11 +471,11 @@ public class ProvisionRestTest {
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
-		String instance_id = prop.getProperty("provision_duplicate_instance_id");
+		String instance_id = prop.getProperty("test_instance_id");
 		String organization_guid = UUID.randomUUID().toString();
-		String space_guid = UUID.randomUUID().toString();
+		String space_guid =  prop.getProperty("test_space_guid");
 		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("test_service_id"), prop.getProperty("test_plan_id"), organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
@@ -457,16 +484,16 @@ public class ProvisionRestTest {
 
 		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
 
+		System.out.println(response.getBody());
 		assertTrue(response.getBody().equals("{}"));
 		assertEquals(response.getStatusCode(), HttpStatus.CONFLICT);
-		System.out.println(response.getBody());
 		System.out.println("End - duplicate_instance_other_orgID");
 	}
 	
 	
-	//같은 org,스페이스에서 같은 서비스, 같은 플랜 but 다른 인스턴스 아이디로 요청된 케이스 - 201 CREATED
+	//P015 같은 org,스페이스에서 같은 서비스, 같은 플랜 but 다른 인스턴스 아이디로 요청된 케이스 - 201 CREATED
 	
-public void sendProvision_duplicate_all_except_instanceID() {
+	public void P015_sendProvision_duplicate_all_except_instanceID() {
 		
 		System.out.println("Start - duplicate_all_except_instanceID");
 		
@@ -476,10 +503,10 @@ public void sendProvision_duplicate_all_except_instanceID() {
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
 		String instance_id = UUID.randomUUID().toString();
-		String organization_guid = prop.getProperty("provision_duplicate_org_guid");
-		String space_guid = prop.getProperty("provision_duplicate_space_id");
+		String organization_guid = prop.getProperty("test_org_guid");
+		String space_guid = prop.getProperty("test_space_id");
 		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("provision_service_id"), prop.getProperty("provision_plan_id"), organization_guid, space_guid);
+		ProvisionBody body = new ProvisionBody(prop.getProperty("test_service_id"), prop.getProperty("test_plan_id"), organization_guid, space_guid);
 		
 		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
@@ -487,7 +514,7 @@ public void sendProvision_duplicate_all_except_instanceID() {
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
 
 		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
-
+		System.out.println(response.getBody());
 		assertTrue(response.getBody().contains("dashboard_url"));
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		

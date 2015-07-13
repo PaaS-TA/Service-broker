@@ -155,4 +155,10 @@ public class APIServiceInstanceDAO {
 		
 		logger.info("deleteAPIServiceInstance() finished");
 	}
+	
+	public void test_beforeBindingTest(String serviceInstanceId){
+		
+		String sql ="UPDATE apiplatform_services SET delyn = 'N' WHERE instance_id = '"+serviceInstanceId+"'";
+		jdbcTemplate.update(sql);
+	}
 }

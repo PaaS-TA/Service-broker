@@ -76,7 +76,7 @@ public class DeprovisionRestTest {
 		
 	}
 	
-	//잘못된 플랜아이디로 요청이 들어온 케이스
+	//D001 잘못된 플랜아이디로 요청이 들어온 케이스
 	@Test
 	public void D001_invalid_parameters_plan_id_test() {
 		System.out.println("Start - D001_invalid_parameters_plan_id_test");
@@ -104,7 +104,7 @@ public class DeprovisionRestTest {
 		System.out.println("End - D001_invalid_parameters_plan_id_test");
 	}
 	
-	//잘못된 서비스 아이디로 요청이 들어온 케이스
+	//D002 잘못된 서비스 아이디로 요청이 들어온 케이스
 	@Test
 	public void D002_invalid_parameters_service_id_test() {
 		System.out.println("Start - D002_invalid_parameters_service_id_test");
@@ -132,7 +132,7 @@ public class DeprovisionRestTest {
 		System.out.println("End - D002_invalid_parameters_service_id_test");
 	}
 	
-	//존재하지 않는 인스턴스 아이디로 요청이 들어온 케이스 410 GONE
+	//D003 존재하지 않는 인스턴스 아이디로 요청이 들어온 케이스 410 GONE
 	@Test
 	public void D003_invalid_parameters_instance_id_test() {
 		System.out.println("Start - D003_invalid_parameters_instance_id_test");
@@ -160,7 +160,7 @@ public class DeprovisionRestTest {
 		System.out.println("End - D003_invalid_parameters_instance_id_test");
 	}
 	
-	//요청된 인스턴스 아이디에 해당하는 어플리케이션을 가지고 있는 유저가 API플랫폼에서 삭제된 케이스
+	//D004 요청된 인스턴스 아이디에 해당하는 어플리케이션을 가지고 있는 유저가 API플랫폼에서 삭제된 케이스
 	@Test
 	public void D004_removed_user_test() {
 		System.out.println("Start - D004_removed_user_test");
@@ -188,7 +188,7 @@ public class DeprovisionRestTest {
 		System.out.println("End - D004_removed_user_test");
 	}
 	
-	//요청된 인스턴스 아이디에 해당하는 어플리케이션이 API플랫폼에서 삭제된 케이스
+	//D005 요청된 인스턴스 아이디에 해당하는 어플리케이션이 API플랫폼에서 삭제된 케이스
 	@Test
 	public void D005_removed_application_test() {
 		System.out.println("Start - D005_removed_application_test");
@@ -216,7 +216,7 @@ public class DeprovisionRestTest {
 		System.out.println("End - D005_removed_application_test");
 	}
 	
-	//요청된 인스턴스 아이디에 해당하는 어플리케이션이 API플랫폼에서 삭제된 케이스
+	//D005 요청된 인스턴스 아이디에 해당하는 어플리케이션이 API플랫폼에서 삭제된 케이스
 	@Test
 	public void D005_removed_subscription_test() {
 		System.out.println("Start - D005_removed_subscription_test");
@@ -245,7 +245,7 @@ public class DeprovisionRestTest {
 	}
 	
 	
-	//적절한 데이터로 요청이 들어온 케이스 - 200 OK
+	//D010 적절한 데이터로 요청이 들어온 케이스 - 200 OK
 	@Test
 	public void D010_valid_parameters_test() {
 		System.out.println("Start - D010_valid_parameters_test");
@@ -273,7 +273,7 @@ public class DeprovisionRestTest {
 		System.out.println("End - D010_valid_parameters_test");
 	}
 	
-	//이미 제거된 인스턴스 아이디로 요청이 들어온 케이스 - 500 INTERNAL_SERVER_ERROR
+	//D011 이미 제거된 인스턴스 아이디로 요청이 들어온 케이스 - 500 INTERNAL_SERVER_ERROR
 	@Test
 	public void D011_valid_parameters_removed_test() {
 		System.out.println("Start - D011_valid_parameters_removed_test");

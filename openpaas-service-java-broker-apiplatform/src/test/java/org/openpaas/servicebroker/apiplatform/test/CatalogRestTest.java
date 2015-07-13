@@ -55,10 +55,11 @@ public class CatalogRestTest {
 	}
 	
 	/**
-	 * 사용자 ID, 비밀번호가 없을 경우
+	 * C001 사용자 ID, 비밀번호가 없을 경우 
 	 */
+	
 	@Test	
-	public void getCatalogTest_noUser() {
+	public void C001_getCatalogTest_noUser() {
 		
 		System.out.println("Start - no user");
 		
@@ -82,10 +83,10 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * 사용자 ID, 비밀번호가 잘못 입력되었을 경우
+	 * C002 사용자 ID, 비밀번호가 잘못 입력되었을 경우
 	 */
 	@Test	
-	public void getCatalogTest_invalidUser() {
+	public void C002_getCatalogTest_invalidUser() {
 		
 		System.out.println("Start - invalid user");
 		
@@ -115,10 +116,10 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * 사용자 ID, 비밀번호가 정상적으로 입력되었을 경우
+	 * C003 사용자 ID, 비밀번호가 정상적으로 입력되었을 경우
 	 */
 	@Test	
-	public void getCatalogTest_correctUser() {
+	public void C003_getCatalogTest_correctUser() {
 		
 		System.out.println("Start - correct user");
 		
@@ -146,10 +147,10 @@ public class CatalogRestTest {
 		System.out.println("End - correct user");
 	}
 	/**
-	 * 사용자 password가 유효하지 않은 경우
+	 * C004 사용자 password가 유효하지 않은 경우
 	 */
 	@Test	
-	public void getCatalogTest_invalidPassword() {
+	public void C004_getCatalogTest_invalidPassword() {
 		
 		System.out.println("Start - invalid Password");
 		
@@ -181,10 +182,10 @@ public class CatalogRestTest {
 
 
 	/**
-	 * Version이 잘못 입력되었을 경우
+	 * C005 Version이 잘못 입력되었을 경우
 	 */
 	@Test	
-	public void getCatalogTest_incorrectAPIVersion() {
+	public void C005_getCatalogTest_incorrectAPIVersion() {
 		
 		System.out.println("Start - incorrect API Version");
 		
@@ -213,11 +214,11 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * Catalog 정보를 정상적으로 가져옴
+	 * C006 Catalog 정보를 정상적으로 가져옴
 	 * Mandatory 부분이 다 들어가 있는지 확인
 	 */
 	@Test	
-	public void getCatalogTest_validCatalog() {
+	public void C006_getCatalogTest_validCatalog() {
 		
 		System.out.println("Start - valid catalog");
 		
@@ -305,10 +306,10 @@ public class CatalogRestTest {
 	
 	
 	/**
-	 * POST로 요청
+	 * C007 POST로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodPOST() {
+	public void C007_getCatalogTest_methodPOST() {
 		
 		System.out.println("Start - POST");
 		
@@ -343,10 +344,10 @@ public class CatalogRestTest {
 
 
 	/**
-	 * PUT으로 요청
+	 * C008 PUT으로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodPUT() {
+	public void C008_getCatalogTest_methodPUT() {
 		
 		System.out.println("Start - PUT");
 		
@@ -378,10 +379,10 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * DELETE로 요청
+	 * C009 DELETE로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodDELETE() {
+	public void C009_getCatalogTest_methodDELETE() {
 		
 		System.out.println("Start - DELETE");
 		
@@ -414,10 +415,10 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * PATCH로 요청
+	 * C010 PATCH로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodPATCH() {
+	public void C010_getCatalogTest_methodPATCH() {
 		
 		System.out.println("Start - PATCH");
 		
@@ -447,10 +448,10 @@ public class CatalogRestTest {
 	
 	
 	/**
-	 * OPTIONS로 요청
+	 * C011 OPTIONS로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodOPTIONS() {
+	public void C011_getCatalogTest_methodOPTIONS() {
 		
 		System.out.println("Start - OPTIONS");
 		
@@ -476,10 +477,10 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * HEAD로 요청
+	 * C012 HEAD로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodHEAD() {
+	public void C012_getCatalogTest_methodHEAD() {
 		
 		System.out.println("Start - HEAD");
 		

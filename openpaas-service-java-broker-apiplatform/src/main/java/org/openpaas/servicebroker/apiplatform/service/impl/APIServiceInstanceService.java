@@ -1,5 +1,6 @@
 package org.openpaas.servicebroker.apiplatform.service.impl;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
@@ -15,8 +16,10 @@ import org.openpaas.servicebroker.exception.ServiceInstanceExistsException;
 import org.openpaas.servicebroker.exception.ServiceInstanceUpdateNotSupportedException;
 import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
 import org.openpaas.servicebroker.model.DeleteServiceInstanceRequest;
+import org.openpaas.servicebroker.model.Plan;
 import org.openpaas.servicebroker.model.ServiceDefinition;
 import org.openpaas.servicebroker.model.ServiceInstance;
+import org.openpaas.servicebroker.model.ServiceInstanceBinding;
 import org.openpaas.servicebroker.model.UpdateServiceInstanceRequest;
 import org.openpaas.servicebroker.service.ServiceInstanceService;
 import org.slf4j.Logger;
@@ -56,15 +59,14 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		logger.info("create ServiceInstance");
 		
 		String dashboardUrl = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformDashboardPort")+env.getProperty("APIPlatformDashboardURL");
-		ServiceInstance instance = new ServiceInstance(request).withDashboardUrl(dashboardUrl);
 		
-		String organizationGuid =instance.getOrganizationGuid();
-		String serviceInstanceId = instance.getServiceInstanceId();
-		String spaceGuid = instance.getSpaceGuid();
-		String serviceId = instance.getServiceDefinitionId();
-		String planId = instance.getPlanId();
+		String organizationGuid =request.getOrganizationGuid();
+		String serviceInstanceId = request.getServiceInstanceId();
+		String spaceGuid = request.getSpaceGuid();
+		String serviceId = request.getServiceDefinitionId();
+		String planId = request.getPlanId();
+		
 		String planName = planId.split(" ")[2];
-		
 		String serviceName = serviceId.split(" ")[0];
 		String serviceVersion = serviceId.split(" ")[1];
 		String serviceProvider = apiCatalogService.svc.getMetadata().get("providerDisplayName").toString();
@@ -75,33 +77,41 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		
 		String cookie = "";
 		
-		
-	//요청된 플랜명이 설정된 플랜명과 동일한지 확인
+
+	//설정된 플랜명중에서 요청된 플랜명이 존재하는지 확인, 설정되어있는 플랜명이라면, 플랜명이 적절한지 확인한다.
 		//TODO
 		boolean planAvailable = false;
 		String planSetted;
 		int i = 1;
 		do{
 			planSetted = env.getProperty("AvailablePlan"+i);
-			i++;
 			if(planSetted.equals(planName)){
-				planAvailable=true;
-				System.out.println(planName);
-				break;
+				if(planId.equals(serviceId+" "+planName)){
+					planAvailable = true;					
+					break;
+				}
+				else{
+					//플랜명은 적절하지만, 플랜ID는 잘못된 케이스 - P006, P008
+					logger.error("invalid PlanId :["+planId+"]");
+					throw new ServiceBrokerException("invalid PlanID :["+planId+"] - P006,P008");
+				}
 			}
+			i++;
 		} while((env.getProperty("AvailablePlan"+i)!=null));
 
 		if(!planAvailable){
-			throw new ServiceBrokerException("invalid PlanName :["+request.getPlanId().split(" ")[2]+"]");
+			//플랜명이 잘못된 케이스 - P005
+			throw new ServiceBrokerException("invalid PlanID :["+planId+"] - P005"); 
 		}
 		
+
 	//해당 인스턴스 아이디로 DB에 저장된 정보가 있는지 확인한다.
 		boolean instanceExsistsAtDB = false;
 		APIServiceInstance apiServiceInstacne = new APIServiceInstance();
 		try {
 			apiServiceInstacne=dao.getAPIServiceByInstance(serviceInstanceId);
 			//이미 삭제된 인스턴스와 동일한 인스턴스 ID 및 org ID로 요청이 들어온 경우
-			//TODO 삭제된 인스턴스 처리를 어떻게 할지에 대한 결정에 따라 수정가능
+			//TODO 삭제된 인스턴스 처리를 어떻게 할지에 대한 결정에 따라 변경
 			if(apiServiceInstacne.getDelyn().equals("Y")){
 				logger.info("Service Instance : ["+serviceInstanceId+"] already removed" );
 				throw new ServiceBrokerException("already removed Service Instance : ["+serviceInstanceId+"]");
@@ -118,25 +128,31 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			throw new ServiceBrokerException(e.getMessage());
 		}
 		
-	//해당 인스턴스 아이디로 DB에 저장된 서비스와 요청이들어온 서비스가 다를 경우, 409 예외를 발생시킨다.
+	//해당 인스턴스 아이디로 DB에 저장된 서비스 인스턴스 정보와 요청이 들어온 서비스 인스턴스의 내용이 다를 경우, 409 예외를 발생시킨다.
 		if(instanceExsistsAtDB){
-			//인스턴스 아이디에 대한 DB의 org아이디와 요청된 org아이디가 다른 경우이다.
+			//인스턴스 아이디에 대한 DB의 org아이디와 요청된 org아이디가 다른 경우이다. - D014
 			if(!apiServiceInstacne.getOrganization_id().equals(organizationGuid)){
 				logger.error("incorrect OrganizationID :["+organizationGuid+"]. valid OrganizationID: ["+apiServiceInstacne.getOrganization_id()+"]");
+				ServiceInstance instance = new ServiceInstance(request).withDashboardUrl(dashboardUrl);
 				throw new ServiceInstanceExistsException(instance);			
 			}
-			//DB에 저장된 서비스명, 플랜명과 일치하지 않으면 예외를 발생시킨다.
+			//DB에 저장된 서비스아이디, 플랜아이디와 일치하지 않으면 예외를 발생시킨다.
 			if(!apiServiceInstacne.getService_id().equals(serviceId)&&!apiServiceInstacne.getPlan_id().equals(planId)){
 				logger.error("invalid ServiceId :["+serviceId+"]. valid ServiceId :["+apiServiceInstacne.getService_id()+"]"
-						+ "invalid PlanId :["+planId+"]. valid PlanName :["+apiServiceInstacne.getPlan_id()+"]");
+						+ "invalid PlanID :["+planId+"]. valid PlanName :["+apiServiceInstacne.getPlan_id()+"]");
+				ServiceInstance instance = new ServiceInstance(request).withDashboardUrl(dashboardUrl);
 				throw new ServiceInstanceExistsException(instance);
 			}
+			//DB에 저장된 서비스 아이디와 일치하지 않는 경우 - P016
 			else if(!apiServiceInstacne.getService_id().equals(serviceId)){
 				logger.error("invalid ServiceId :["+serviceId+"]. valid ServiceId :["+apiServiceInstacne.getService_id()+"]");
+				ServiceInstance instance = new ServiceInstance(request).withDashboardUrl(dashboardUrl);
 				throw new ServiceInstanceExistsException(instance);
 			}
+			//DB에 저장된 플랜아이디와 일치하지 않는 경우 - P004
 			else if(!apiServiceInstacne.getPlan_id().equals(planId)){
-				logger.error("invalid PlanId :["+planId+"]. valid PlanId :["+apiServiceInstacne.getPlan_id()+"]");
+				logger.error("invalid PlanID :["+planId+"]. valid PlanId :["+apiServiceInstacne.getPlan_id()+"]");
+				ServiceInstance instance = new ServiceInstance(request).withDashboardUrl(dashboardUrl);
 				throw new ServiceInstanceExistsException(instance);
 			}
 			//DB에 저장된 서비스명, 플랜명과 일치한다면 이미 존재하는 인스턴스이다. 이경우 예외를 발생시키지 않는다.
@@ -144,7 +160,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 				logger.info("Service Instance already exists. InstanceID :["+serviceInstanceId+"]");
 			}
 		}
-		
+
 	//DB에서 organizationGuid를 확인하여 API플랫폼 로그인 아이디와 비밀번호를 획득한다.
 		
 		APIUser userInfo = new APIUser();
@@ -315,7 +331,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		}
 		logger.info("API Platform Subscription finished");
 		
-
+		ServiceInstance instance = new ServiceInstance(request).withDashboardUrl(dashboardUrl);
 		//인스턴스ID가 존재하고 해당 어플리케이션, 서비스가 모두 존재하는 경우
 		//TODO 
 		if(instanceExsistsAtDB&&applicationExsists&&subscriptionExists){
@@ -353,24 +369,28 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			logger.debug("get API Information");
 			
 		} catch (EmptyResultDataAccessException e) {
-			logger.error("not found infomation about instance ID : "+serviceInstanceId);
+			//인스턴스 ID를 DB에서 찾을 수 없는 경우 - D012
+			logger.error("not found information about instance ID :["+serviceInstanceId+"] - D012");
 			return null;
 		} catch (Exception e){
 			logger.error("Database Error - getServiceInstanceByInstanceID()");
 			throw new ServiceBrokerException(e.getMessage());
 		}
+		//이미 삭제된 인스턴스 ID인 경우 - D011
 		if(apiServiceInstance.getDelyn().equals("Y")){
 			logger.info("Service Instance : ["+serviceInstanceId+"] already removed" );
-			throw new ServiceBrokerException("already removed Service Instance : ["+serviceInstanceId+"]");
+			throw new ServiceBrokerException("already removed Service Instance : ["+serviceInstanceId+"] - D011");
 		}
-		//DB의 인스턴스 정보와 CF에서 디프로비전을 요청한 인스턴스 정보가 일치하는지 확인한다.
+		//DB의 인스턴스 정보와 CF에서 디프로비전을 요청한 인스턴스 정보가 일치하는지 확인한다. 
+		//플랜ID가 DB의 인스턴스 정보와 다른 경우 - D002
 		if(!apiServiceInstance.getService_id().equals(serviceId)){
 			logger.error("Invalid ServiceID :["+serviceId+"] Valid ServiceID: ["+apiServiceInstance.getService_id()+"]");
-			throw new ServiceBrokerException("Invalid ServiceID :["+serviceId+"] Valid ServiceID: ["+apiServiceInstance.getService_id()+"]");
+			throw new ServiceBrokerException("Invalid ServiceID :["+serviceId+"] Valid ServiceID: ["+apiServiceInstance.getService_id()+"] - D002");
 		}
+		//서비스 ID가 DB의 인스턴스 정보와 다른 경우 - D001
 		else if(!apiServiceInstance.getPlan_id().equals(planId)){
 			logger.error("Invalid PlanID :["+planId+"] Valid PlanID: ["+apiServiceInstance.getPlan_id()+"]");
-			throw new ServiceBrokerException("Invalid PlanID :["+planId+"] Valid PlanID: ["+apiServiceInstance.getPlan_id()+"]");
+			throw new ServiceBrokerException("Invalid PlanID :["+planId+"] Valid PlanID: ["+apiServiceInstance.getPlan_id()+"] - D001");
 		}
 		
 	//로그인한다.
@@ -383,10 +403,11 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			logger.info("API Platform login success");
 		} catch (ServiceBrokerException e) {
 			if(e.getMessage().equals("No User")){
-			//유저가 API플랫폼에 등록이 되어있지 않을 경우. 언바인딩과는 달리 유저를 다시 생성하여, 사용등록 해제와 어플리케이션 삭제를 진행한다.
+			//유저가 API플랫폼에서 삭제 되어있을 경우. 유저를 다시 생성하여, 사용등록 해제와 어플리케이션 삭제를 진행한다.
 				//API플랫폼은 유저를 삭제해도 사용등록 정보 등이 남아있기 때문에, 유저를 삭제 하더라도 사용등록을 해제하고 삭제하는 편이 좋다고 생각한다.
 				logger.warn("not found API Platform User");
 				userSignup(userId, userPassword);
+				cookie = loginService.getLogin(userId, userPassword);
 //				throw new ServiceBrokerException("API Platfotm user["+userId+"] already removed.");
 			}
 			else {
@@ -432,19 +453,48 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		}
 		
 	//어플리케이션이 존재하는 경우 Remove a Subscription API를 이용해 사용등록을 해제한다.
-		if(applicationExists){	
-		//removeSubscription API를 사용한다.
-			String serviceName = serviceId.split(" ")[0];
-			String serviceVersion = serviceId.split(" ")[1];
-			ServiceDefinition serviceDefinition = apiCatalogService.getServiceDefinition(serviceId);
-			boolean serviceExists = true;
-			//서비스가 존재하지 않는 경우에 대한 처리를 한다. API플랫폼에서 서비스의 라이프 사이클을 변경했거나 API를 삭제한 경우이다.
-			if(serviceDefinition==null){
-				serviceExists =false;
-				logger.warn("Service not found at API Platform.  Service : ["+serviceName+"]");
+		if(applicationExists){
+		//API의 공급자 정보를 가져오기 위해 Get Published APIs by Application API를 사용한다.
+		//WSO2 공식 문서의 명칭은  Get Published APIs by Application이지만 실제로는 라이프사이클과 무관하게 어플리케이션에 사용등록 된 API의 정보를 가져온다.
+			String listAPIsUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAPIsByApplication");
+			String listAPIsParameters = "action=getSubscriptionByApplication&app="+serviceInstanceId;		
+			boolean subscriptionExists =true;
+			httpEntity = new HttpEntity<String>("", headers);
+			responseEntity = HttpClientUtils.send(listAPIsUri+"?"+listAPIsParameters, httpEntity, HttpMethod.GET);
+			
+			JsonNode getAPIsResponseJson = null;
+			
+			try {
+				getAPIsResponseJson = JsonUtils.convertToJson(responseEntity);
+				ApiPlatformUtils.apiPlatformErrorMessageCheck(getAPIsResponseJson);
+			} catch (ServiceBrokerException e) {
+				//API사용등록이 정상적으로 처리되어 있는지 확인한다.
+				if(e.getMessage().equals("No subscribed API")){
+					logger.error("UserID: ["+userId+"], ApplicationName: ["+serviceInstanceId+"], API ["+serviceId+"] dose not exist.");
+					//이미 사용등록이 해제 되었다면 사용등록 해제 절차를 건너뛰기 위해 subscriptionExists변수 값을 변경한다. - D006
+					subscriptionExists=false;
+				}
+				else {
+					//위의 경우를 제외한 나머지 예외가 발생한 경우
+					logger.error("API Platform response error - Get Published APIs by Application");
+					throw new ServiceBrokerException(e.getMessage());
+				}
 			}
-			if(serviceExists){
-				String serviceProvider = serviceDefinition.getMetadata().get("providerDisplayName").toString();
+			
+			//Get Published APIs by Application API를 통해 가져온 API정보에서 공급자명을 찾아 변수에 담는다.
+			//라이프사이클이 변경된 경우에도 정상적으로 사용등록을 해제해야하기 때문에 라이프사이클을 따로 확인하지 않는다. - D007
+			if(!subscriptionExists){
+				String serviceProvider = null;
+				JsonNode apis = getAPIsResponseJson.get("apis");
+				for(JsonNode api :apis){
+					if(serviceId.equals(api.get("apiName").asText()+" "+api.get("apiVersion").asText())){
+						serviceProvider = api.get("apiProvider").asText();
+						logger.debug("API ["+serviceId+"] found");
+						break;
+					}
+				}
+				String serviceName = serviceId.split(" ")[0];
+				String serviceVersion = serviceId.split(" ")[1];
 				String removeSubscriptionUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.RemoveSubscription");
 				String removeSubscriptionParameters = "action=removeSubscription&name="+serviceName+"&version="+serviceVersion+"&provider="+serviceProvider+"&applicationId="+applicationId;
 				
@@ -467,7 +517,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 					throw new ServiceBrokerException("APIPlatform Error :"+e.getMessage());
 				}
 			}
-				
+		
 		//Remove an Application API로 어플리케이션을 삭제한다.
 			
 			String removeApplicationUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.RemoveApplication");
@@ -493,8 +543,8 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			}
 		}
 		//API플랫폼에 해당 어플리케이션이 존재하지 않는 경우이다.
-		else {
-			
+		//디프로비전 절차 자체가 어플리케이션 삭제이기 때문에 어플리케이션이 존재하지 않는다면 특별한 작업을 하지않고 DB만 변경한다. - D005
+		else {		
 			logger.warn("APIPlatform Application not Exists.");
 		}
 		
@@ -506,7 +556,6 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			logger.error("Database Error - deleteAPIServiceInstance");
 			System.out.println(e.getMessage());
 		}
-		
 		
 		return new ServiceInstance(request);
 	}
@@ -521,14 +570,15 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		try {
 			apiServiceInstance=dao.getAPIServiceByInstance(serviceInstanceId);
 			logger.debug("get API Information");
-			//이미 delete명령으로 제거한 서비스인스턴스의 인스턴스 아이디로 요청이 들어온 경우
+			//이미 delete명령으로 제거한 서비스인스턴스의 인스턴스 아이디로 요청이 들어온 경우 - U009
 			//TODO 삭제된 인스턴스를 DB에서 어떻게 처리할지에 대해서 결정이 되면 수정
 			if(apiServiceInstance.getDelyn().equals("Y")){
-				logger.info("Service Instance : ["+serviceInstanceId+"] already removed" );
-				throw new ServiceBrokerException("already removed Service Instance :["+serviceInstanceId+"]");
+				logger.info("Service Instance : ["+serviceInstanceId+"] already removed - U009");
+				throw new ServiceBrokerException("already removed Service Instance :["+serviceInstanceId+"] - U009");
 			}
-		} catch (EmptyResultDataAccessException e) {			
-			logger.error("not found infomation about instance ID :["+serviceInstanceId+"]");
+		} catch (EmptyResultDataAccessException e) {
+			//존재하지 않는 인스턴스 아이디가 요청된 경우 - U002
+			logger.error("not found information about instance ID :["+serviceInstanceId+"] - U002");
 			return null;
 		} catch (Exception e){
 			logger.error("Database Error - getServiceInstanceByInstanceID()");
