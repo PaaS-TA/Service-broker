@@ -18,20 +18,24 @@ public class CatalogConfig {
 	public Catalog catalog() {		
 		return new Catalog( Arrays.asList(
 				new ServiceDefinition(
-					"96b9e707-0e2b-47e3-a21a-fd01a8eb0452", 
-					"Glusterfs-DB", 
+					"e5rt43e6-0e2b-47e3-a21a-fd01a8eb0452", 
+					"Glusterfs", 
 					"A simple glusterfs implementation", 
 					true, 
 					true,
 					Arrays.asList(
-							new Plan("411d0c3e-b086-4a24-b041-0aeef1a819d1", 
-									"Glusterfs-Plan1-10con", 
-									"This is a glusterfs plan1.  10 user connections",
+							new Plan("ty8u76yi-b086-4a24-b041-0aeef1a819d1", 
+									"Glusterfs-Plan1-5Mb", 
+									"This is a glusterfs plan1.  5Mb Storage",
 									getPlanMetadata("A"),true),
-							new Plan("4a932d9d-9bc5-4a86-937f-e2c14bb9f497", 
-									"Glusterfs-Plan2-100con", 
-									"This is a glusterfs plan2.  100 user connections",
-									getPlanMetadata("B"),false)),
+							new Plan("sd456f21-9bc5-4a86-937f-e2c14bb9f497", 
+									"Glusterfs-Plan2-100Mb", 
+									"This is a glusterfs plan2.  100Mb Storage",
+									getPlanMetadata("B"),false),
+							new Plan("koi908i7-9bc5-4a86-937f-e2c14bb9f497", 
+									"Glusterfs-Plan3-1000Mb", 
+									"This is a glusterfs plan3.  1000Mb Storage",
+									getPlanMetadata("C"),false)),
 					Arrays.asList("glusterfs", "document"),
 					getServiceDefinitionMetadata(),
 					null,
@@ -69,6 +73,11 @@ public class CatalogConfig {
 			costsMap.put("unit", "MONTHLY");
 			
 		}else if(planType.equals("B")){
+			amount.put("usd", new Double(10.0));
+			costsMap.put("amount", amount);
+			costsMap.put("unit", "MONTHLY");
+			
+		}else if(planType.equals("C")){
 			amount.put("usd", new Double(100.0));
 			costsMap.put("amount", amount);
 			costsMap.put("unit", "MONTHLY");
@@ -85,14 +94,17 @@ public class CatalogConfig {
 	
 	private List<String> getBullets(String planType) {
 		if(planType.equals("A")){
-			return Arrays.asList("Shared Glusterfs server", 
-					"10 concurrent connections (not enforced)");
+			return Arrays.asList("Shared Glusterfs 5Mb", 
+					"5Mb Storage Size");
 		}else if(planType.equals("B")){
-			return Arrays.asList("Shared Glusterfs server", 
-					"100 concurrent connections (not enforced)");
+			return Arrays.asList("Shared Glusterfs 100Mb", 
+					"100Mb Storage Size");
+		}else if(planType.equals("C")){
+			return Arrays.asList("Shared Glusterfs 1000Mb", 
+					"1000Mb Storage Size");
 		}
-		return Arrays.asList("Shared Glusterfs server", 
-				"10 concurrent connections (not enforced)");
+		return Arrays.asList("Shared Glusterfs 5Mb server", 
+				"5Mb Storage Size");
 	}
 	
 }

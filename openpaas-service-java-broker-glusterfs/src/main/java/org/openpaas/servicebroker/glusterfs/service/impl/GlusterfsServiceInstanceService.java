@@ -8,6 +8,7 @@ import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.exception.ServiceInstanceDoesNotExistException;
 import org.openpaas.servicebroker.exception.ServiceInstanceExistsException;
 import org.openpaas.servicebroker.exception.ServiceInstanceUpdateNotSupportedException;
+import org.openpaas.servicebroker.glusterfs.model.GlusterfsServiceInstance;
 import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
 import org.openpaas.servicebroker.model.DeleteServiceInstanceRequest;
 import org.openpaas.servicebroker.model.ServiceInstance;
@@ -53,7 +54,6 @@ public class GlusterfsServiceInstanceService implements ServiceInstanceService {
 		logger.debug("loggerGlusterfsServiceInstanceService CLASS createServiceInstance");
 		
 		/* 최초 ServiceInstance 생성 요청시에는 해당 ServiceInstance가 존재하지 않아 해당 메소드를 주석처리 하였습니다.*/
-		//ServiceInstance instance = glusterfsAdminService.findById(request.getServiceInstanceId());
 		ServiceInstance findInstance = glusterfsAdminService.findById(request.getServiceInstanceId());
 		
 		// 요청 정보로부터 ServiceInstance정보를 생성합니다.
@@ -70,19 +70,11 @@ public class GlusterfsServiceInstanceService implements ServiceInstanceService {
 			}
 		}
 		
-		// 해당 요청 정보로부터 생성된 Database가 존재하는지 확인합니다.
-		// 존재 할 경우 Database를 삭제합니다.
-		if (glusterfsAdminService.isExistsService(instance)) {
-			// ensure the instance is empty
-			glusterfsAdminService.deleteDatabase(instance);
-			//throw new ServiceInstanceExistsException(instance);
-		}
-		
 		// Database를 생성합니다.
-		glusterfsAdminService.createDatabase(instance);
+		GlusterfsServiceInstance gf = glusterfsAdminService.createTenant(instance);
 		
 		// ServiceInstance 정보를 저장합니다.
-		glusterfsAdminService.save(instance);
+		glusterfsAdminService.save(instance, gf);
 		
 		return instance;
 	}
@@ -100,20 +92,9 @@ public class GlusterfsServiceInstanceService implements ServiceInstanceService {
 		if(instance == null) return null;
 		
 		// 조회된 ServiceInstance정보로 해당 Database를 삭제합니다
-		glusterfsAdminService.deleteDatabase(instance);
+		glusterfsAdminService.deleteTenant(instance);
 		// 조회된 ServiceInstance정보로 해당 ServiceInstance정보를 삭제합니다
 		glusterfsAdminService.delete(instance.getServiceInstanceId());
-		
-		/* 조회된 ServiceInstance정보로 해당 ServiceInstanceBinding 정보를 삭제합니다.*/
-		// ServiceInstanceBinding정보를 조회합니다.
-		List<Map<String,Object>> list = glusterfsAdminService.findBindByInstanceId(instance.getServiceInstanceId());
-		for(Map<String,Object> tmp : list){
-			// ServiceInstance에 Binding 된 사용자 정보를 삭제합니다.
-			glusterfsAdminService.deleteUser(instance.getServiceInstanceId(), (String)tmp.get("binding_id"));
-			
-			// ServiceInstance에 Binding정보를 삭제합니다.
-			glusterfsAdminService.deleteBind((String)tmp.get("binding_id"));
-		}
 		
 		return instance;		
 	}
@@ -134,23 +115,13 @@ public class GlusterfsServiceInstanceService implements ServiceInstanceService {
 		// 요청 정보로부터 새로운 ServiceInstance정보를 생성합니다.
 		ServiceInstance updatedInstance = new ServiceInstance(request);
 
-		/* Provision(update)시 Database에 직접적인 변경사항이 존재하지 않아 주석처리 합니다.
-		 * 
-		if (glusterfsAdminService.isExistsService(instance)) {
-			// ensure the instance is empty
-			glusterfsAdminService.deleteDatabase(instance);
-		}
-
-		glusterfsAdminService.createDatabase(updatedInstance);
-			
-		glusterfsAdminService.delete(instance.getServiceInstanceId());
-		*/
-		
 		/* 기존 ServiceInstance의 Plan에 변견될경우 다음 처리를 수행합니다. */
 		if(!instance.getPlanId().equals(updatedInstance.getPlanId())){
 			// Plan 정보에 따라 해당 Database 사용자의 MAX_USER_CONNECTIONS 정보를 조정합니다.
 			try {
-				glusterfsAdminService.setUserConnections(updatedInstance.getPlanId(), instance.getServiceInstanceId());
+				GlusterfsServiceInstance gf = glusterfsAdminService.tenantInfofindById(updatedInstance.getServiceInstanceId());
+				glusterfsAdminService.setGlusterfsQuota(updatedInstance.getPlanId(), gf.getTenantId());
+				//glusterfsAdminService.setUserConnections(updatedInstance.getPlanId(), instance.getServiceInstanceId());
 			} catch (Exception e) {
 				throw new ServiceInstanceUpdateNotSupportedException(e.getMessage());
 			}
