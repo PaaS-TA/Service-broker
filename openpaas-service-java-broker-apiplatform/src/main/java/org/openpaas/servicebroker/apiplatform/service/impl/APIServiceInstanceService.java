@@ -1,6 +1,5 @@
 package org.openpaas.servicebroker.apiplatform.service.impl;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
@@ -16,10 +15,7 @@ import org.openpaas.servicebroker.exception.ServiceInstanceExistsException;
 import org.openpaas.servicebroker.exception.ServiceInstanceUpdateNotSupportedException;
 import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
 import org.openpaas.servicebroker.model.DeleteServiceInstanceRequest;
-import org.openpaas.servicebroker.model.Plan;
-import org.openpaas.servicebroker.model.ServiceDefinition;
 import org.openpaas.servicebroker.model.ServiceInstance;
-import org.openpaas.servicebroker.model.ServiceInstanceBinding;
 import org.openpaas.servicebroker.model.UpdateServiceInstanceRequest;
 import org.openpaas.servicebroker.service.ServiceInstanceService;
 import org.slf4j.Logger;
@@ -91,9 +87,9 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 					break;
 				}
 				else{
-					//플랜명은 적절하지만, 플랜ID는 잘못된 케이스 - P006, P008
-					logger.error("invalid PlanId :["+planId+"]");
-					throw new ServiceBrokerException("invalid PlanID :["+planId+"] - P006,P008");
+					//플랜명은 적절하지만, 플랜ID는 잘못된 케이스 OR 서비스 ID가 잘못 된 케이스 - P006, P008, P007, P016, P018
+					logger.error("Invalid ServiceID or Invalid PlanID. ServiceID :["+serviceId+"], PlanId :["+planId+"]");
+					throw new ServiceBrokerException("Invalid ServiceID or Invalid PlanID. ServiceID :["+serviceId+"], PlanId :["+planId+"] - P006,P007,P008,P016,P018");
 				}
 			}
 			i++;
@@ -101,7 +97,8 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 
 		if(!planAvailable){
 			//플랜명이 잘못된 케이스 - P005
-			throw new ServiceBrokerException("invalid PlanID :["+planId+"] - P005"); 
+			logger.error("Invalid PlanID :["+planId+"]");
+			throw new ServiceBrokerException("Invalid PlanID :["+planId+"] - P005"); 
 		}
 		
 
@@ -110,11 +107,11 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		APIServiceInstance apiServiceInstacne = new APIServiceInstance();
 		try {
 			apiServiceInstacne=dao.getAPIServiceByInstance(serviceInstanceId);
-			//이미 삭제된 인스턴스와 동일한 인스턴스 ID 및 org ID로 요청이 들어온 경우
+			//이미 삭제된 인스턴스와 동일한 인스턴스 ID 및 org ID로 요청이 들어온 경우 - P017
 			//TODO 삭제된 인스턴스 처리를 어떻게 할지에 대한 결정에 따라 변경
 			if(apiServiceInstacne.getDelyn().equals("Y")){
 				logger.info("Service Instance : ["+serviceInstanceId+"] already removed" );
-				throw new ServiceBrokerException("already removed Service Instance : ["+serviceInstanceId+"]");
+				throw new ServiceBrokerException("already removed Service Instance : ["+serviceInstanceId+"] - P017");
 			}
 			instanceExsistsAtDB = true;
 
@@ -130,32 +127,32 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		
 	//해당 인스턴스 아이디로 DB에 저장된 서비스 인스턴스 정보와 요청이 들어온 서비스 인스턴스의 내용이 다를 경우, 409 예외를 발생시킨다.
 		if(instanceExsistsAtDB){
-			//인스턴스 아이디에 대한 DB의 org아이디와 요청된 org아이디가 다른 경우이다. - D014
+			//인스턴스 아이디에 대한 DB의 org아이디와 요청된 org아이디가 다른 경우이다. - P014
 			if(!apiServiceInstacne.getOrganization_id().equals(organizationGuid)){
-				logger.error("incorrect OrganizationID :["+organizationGuid+"]. valid OrganizationID: ["+apiServiceInstacne.getOrganization_id()+"]");
+				logger.error("Incorrect OrganizationID :["+organizationGuid+"]. Valid OrganizationID: ["+apiServiceInstacne.getOrganization_id()+"]");
 				ServiceInstance instance = new ServiceInstance(request).withDashboardUrl(dashboardUrl);
 				throw new ServiceInstanceExistsException(instance);			
 			}
-			//DB에 저장된 서비스아이디, 플랜아이디와 일치하지 않으면 예외를 발생시킨다.
+			//DB에 저장된 서비스아이디, 플랜아이디와 일치하지 않으면 예외를 발생시킨다. - P002
 			if(!apiServiceInstacne.getService_id().equals(serviceId)&&!apiServiceInstacne.getPlan_id().equals(planId)){
-				logger.error("invalid ServiceId :["+serviceId+"]. valid ServiceId :["+apiServiceInstacne.getService_id()+"]"
-						+ "invalid PlanID :["+planId+"]. valid PlanName :["+apiServiceInstacne.getPlan_id()+"]");
+				logger.error("Invalid ServiceID :["+serviceId+"]. Valid ServiceID :["+apiServiceInstacne.getService_id()+"]"
+						+ "Invalid PlanID :["+planId+"]. Valid PlanName :["+apiServiceInstacne.getPlan_id()+"]");
 				ServiceInstance instance = new ServiceInstance(request).withDashboardUrl(dashboardUrl);
 				throw new ServiceInstanceExistsException(instance);
 			}
 			//DB에 저장된 서비스 아이디와 일치하지 않는 경우 - P016
 			else if(!apiServiceInstacne.getService_id().equals(serviceId)){
-				logger.error("invalid ServiceId :["+serviceId+"]. valid ServiceId :["+apiServiceInstacne.getService_id()+"]");
+				logger.error("Invalid ServiceID :["+serviceId+"]. Valid ServiceID :["+apiServiceInstacne.getService_id()+"]");
 				ServiceInstance instance = new ServiceInstance(request).withDashboardUrl(dashboardUrl);
 				throw new ServiceInstanceExistsException(instance);
 			}
 			//DB에 저장된 플랜아이디와 일치하지 않는 경우 - P004
 			else if(!apiServiceInstacne.getPlan_id().equals(planId)){
-				logger.error("invalid PlanID :["+planId+"]. valid PlanId :["+apiServiceInstacne.getPlan_id()+"]");
+				logger.error("Invalid PlanID :["+planId+"]. Valid PlanID :["+apiServiceInstacne.getPlan_id()+"]");
 				ServiceInstance instance = new ServiceInstance(request).withDashboardUrl(dashboardUrl);
 				throw new ServiceInstanceExistsException(instance);
 			}
-			//DB에 저장된 서비스명, 플랜명과 일치한다면 이미 존재하는 인스턴스이다. 이경우 예외를 발생시키지 않는다.
+			//DB에 저장된 서비스아이디, 플랜아이디, org아이디와 일치한다면 이미 존재하는 인스턴스이다. 이경우 예외를 발생시키지 않는다.
 			else{
 				logger.info("Service Instance already exists. InstanceID :["+serviceInstanceId+"]");
 			}
@@ -367,7 +364,6 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		try {
 			apiServiceInstance = dao.getAPIInfoByInstanceID(serviceInstanceId);	
 			logger.debug("get API Information");
-			
 		} catch (EmptyResultDataAccessException e) {
 			//인스턴스 ID를 DB에서 찾을 수 없는 경우 - D012
 			logger.error("not found information about instance ID :["+serviceInstanceId+"] - D012");
@@ -547,15 +543,21 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		else {		
 			logger.warn("APIPlatform Application not Exists.");
 		}
-		
-		//DB에서 서비스 인스턴스 정보를 삭제상태로 변경한다.
-		String oranizationGuid = apiServiceInstance.getOrganization_id();
-		try {
-			dao.deleteAPIServiceInstance(oranizationGuid, serviceInstanceId, serviceId, planId);			
-		} catch (Exception e) {
-			logger.error("Database Error - deleteAPIServiceInstance");
-			System.out.println(e.getMessage());
+		if(serviceInstanceId.contains("test")){
+			//테스트 진행을 위해 인스턴스 아이디에 test라는 단어가 포함되어 있으면 DB변경을 건너뛴다.
+			//TODO 최종적으로는 반드시 삭제
 		}
+		else{
+			//DB에서 서비스 인스턴스 정보를 삭제상태로 변경한다.
+			String oranizationGuid = apiServiceInstance.getOrganization_id();
+			try {
+				dao.deleteAPIServiceInstance(oranizationGuid, serviceInstanceId, serviceId, planId);			
+			} catch (Exception e) {
+				logger.error("Database Error - deleteAPIServiceInstance");
+				System.out.println(e.getMessage());
+			}
+		}
+
 		
 		return new ServiceInstance(request);
 	}

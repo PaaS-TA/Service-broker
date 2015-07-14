@@ -71,13 +71,9 @@ public class ApiPlatformUtils {
 		}
 		//API플랫폼에서 응답하는 에러값은 false인데, 예외를 발생시켜야 하는 경우
 		else if(json.has("error")&&json.get("error").asText().equals("false")){
-			
-			 if(json.has("apis")&&json.get("apis").has(0)){
-				 
-			 }
 			//Get published APIs by application
 			//API의 사용등록이 되어있지 않은 경우
-			else if(json.has("apis")&&!json.get("apis").has(0)){
+			if(json.has("apis")&&!json.get("apis").has(0)){
 				throw new ServiceBrokerException("No subscribed API");
 			}
 			//Add an Application API

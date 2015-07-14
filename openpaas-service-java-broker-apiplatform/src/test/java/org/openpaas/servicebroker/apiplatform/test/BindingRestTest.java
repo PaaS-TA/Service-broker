@@ -11,10 +11,8 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import org.openpaas.servicebroker.apiplatform.dao.APIServiceInstanceDAO;
 import org.openpaas.servicebroker.common.BindingBody;
 import org.openpaas.servicebroker.common.HttpClientUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -154,7 +152,7 @@ private static Properties prop = new Properties();
 		
 		System.out.println("Start - not_found_apiplatform_user_test");
 		
-		String instance_id = prop.getProperty("test_instance_id");
+		String instance_id = prop.getProperty("removed_user_instance_id");
 		String plan_id = prop.getProperty("test_plan_id");
 		String service_id= prop.getProperty("test_service_id");
 		String app_guid = UUID.randomUUID().toString();
@@ -187,7 +185,7 @@ private static Properties prop = new Properties();
 		
 		System.out.println("Start - not_found_apiplatform_application_test");
 		
-		String instance_id = prop.getProperty("binding_no_app_instance_id");
+		String instance_id = prop.getProperty("removed_app_instance_id");
 		String plan_id = prop.getProperty("test_plan_id");
 		String service_id= prop.getProperty("test_service_id");
 		String app_guid = UUID.randomUUID().toString();
@@ -221,9 +219,9 @@ private static Properties prop = new Properties();
 		
 		System.out.println("Start - lifecycle_changed_API_test");
 		
-		String instance_id = prop.getProperty("binding_lifecycle_change_instance_id");
-		String plan_id = prop.getProperty("binding_lifecycle_change_plan_id");
-		String service_id= prop.getProperty("binding_lifecycle_change_service_id");
+		String instance_id = prop.getProperty("lifecycle_change_instance_id");
+		String plan_id = prop.getProperty("lifecycle_change_plan_id");
+		String service_id= prop.getProperty("lifecycle_change_service_id");
 		String app_guid = UUID.randomUUID().toString();
 		String binding_id = UUID.randomUUID().toString();
 		
@@ -253,7 +251,7 @@ private static Properties prop = new Properties();
 	public void B010_subscription_removed_API_test() {
 		System.out.println("Start - subscription_removed_API_test");
 		
-		String instance_id = prop.getProperty("binding_no_subs_instance_id");
+		String instance_id = prop.getProperty("removed_subs_instance_id");
 		String plan_id = prop.getProperty("test_plan_id");
 		String service_id= prop.getProperty("test_service_id");
 		String app_guid = UUID.randomUUID().toString();
@@ -443,5 +441,39 @@ private static Properties prop = new Properties();
 		assertTrue(response.getBody().contains("No message available"));
 
 		System.out.println("End - no_instance_id_test");
+	}
+	
+	//B016 DB에 존재하는 인스턴스 아이디로 요청이 들어왔을 때, 인스턴스의 조직아이디에 해당하는 유저정보가 DB의 users테이블에서 삭제된 케이스 - 404 NOT_FOUND
+	//500 INTERNAL_SERVER_ERROR
+	@Test
+	public void B016_no_user_test() {
+		System.out.println("Start - _no_user_test");
+		
+		String instance_id =  prop.getProperty("removed_user_instance_id_DB");
+		String plan_id = prop.getProperty("test_plan_id");
+		String service_id= prop.getProperty("test_service_id");
+		String app_guid = UUID.randomUUID().toString();
+		String binding_id = UUID.randomUUID().toString();
+	
+		BindingBody body =new BindingBody(service_id, plan_id, app_guid);
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+
+		HttpEntity<BindingBody> entity = new HttpEntity<BindingBody>(body, headers);		
+		ResponseEntity<String> response = null;
+
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id+"/"+prop.getProperty("binding_path")+"/"+binding_id;
+		
+		response = HttpClientUtils.sendBinding(url, entity, HttpMethod.PUT);
+		System.out.println(response.getStatusCode());
+		System.out.println(response.getBody());
+		
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+		assertTrue(response.getBody().contains("not found APIPlatform user information about InstanceID"));
+
+		System.out.println("End - _no_user_test");
 	}
 }

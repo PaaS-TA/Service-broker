@@ -58,7 +58,7 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		String serviceId = bindingRequest.getServiceDefinitionId();
 		String planId = bindingRequest.getPlanId();
 		String serviceName = serviceId.split(" ")[0];
-		String planName = planId.split(" ")[2];
+
 		
 	//인스턴스 정보를  확인하고 API정보를 받아온다.	
 		APIServiceInstance apiServiceInstance;
@@ -67,8 +67,8 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		} catch (EmptyResultDataAccessException e) {
 			//해당 인스턴스 아이디에 해당하는 유저정보가 DB에 저장 되어있어야 하지만 그렇지 않은 경우이다. - B016
 			//getServiceInstance메소드에서 이미 인스턴스 정보가 apiplatform_services 테이블에 저장되어 있음을 확인했기 때문에 예외 발생 시, 유저정보가 없는 경우임을 확인할 수 있다.
-			logger.error("not found infomation about instance ID : ["+serviceInstanceId+"] - B016");
-			throw new ServiceBrokerException("not found instance information");
+			logger.error("not found APIPlatform user information about InstanceID :["+serviceInstanceId+"] - B016");
+			throw new ServiceBrokerException("not found APIPlatform user information about InstanceID :["+serviceInstanceId+"]");
 			
 		} catch (Exception e){
 			logger.error("Database Error - getAPIInfoByInstanceId");
@@ -175,10 +175,43 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			throw new ServiceBrokerException("API Platform Application dose not exist. UserID: ["+userId+"], ApplicationName: ["+serviceInstanceId+"] - B008");
 		}
 		else{
-			//consumer key와 consumer secret이 각각 두가지 키타입으로 총 4개가 생성되어 있지 않으면 예외를 발생시킨다.
+			//consumer key와 consumer secret이 각각 두가지 키타입으로 총 4개가 생성되어 있지 않으면 예외를 발생 or 키생성을 해준다.
+//			throw new ServiceBrokerException("Credential not found. Application : ["+serviceInstanceId+"]");
 			if(prodConsumerKey.equals("null")||"null".equals(prodConsumerSecret)||"null".equals(sandConsumerKey)||"null".equals(sandConsumerSecret)){
 				logger.error("Key not generated. UsernID : ["+userId+"], Application : ["+serviceInstanceId+"]");
-				throw new ServiceBrokerException("Credential not found. Application : ["+serviceInstanceId+"]");
+				//Generate Key API를 사용하여 API플랫폼 어플리케이션의 키값을 생성한다.
+				logger.info("API Platform Generate Key Started. Application : "+serviceInstanceId);
+				//두가지 키타입으로 키를 생성해야하기 때문에 두번 실행한다.
+				for(int i=1;i<3;i++) {	
+					logger.debug("API Platform Generate Key Started - KEYTYPE : "+env.getProperty("Keytype"+i));
+					headers.set("Cookie", cookie);
+					headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+					String generateKeyUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GenerateAnApplicationKey");
+					String generateKeyParameters = 
+							"action=generateApplicationKey&application="+serviceInstanceId+"&keytype="+env.getProperty("Keytype"+i)+"&callbackUrl=&authorizedDomains=ALL&validityTime=360000";
+				
+					httpEntity = new HttpEntity<String>(generateKeyParameters, headers);
+					responseEntity = HttpClientUtils.send(generateKeyUri, httpEntity, HttpMethod.POST);
+			
+					JsonNode generateKeyResponseJson = null;
+					
+					try {
+						generateKeyResponseJson = JsonUtils.convertToJson(responseEntity);
+						ApiPlatformUtils.apiPlatformErrorMessageCheck(generateKeyResponseJson);
+						logger.debug(env.getProperty("Keytype"+i)+" Key generated. Application : "+serviceInstanceId);
+					} catch (ServiceBrokerException e) {
+						if(e.getMessage().equals("Key already generated"))
+						{
+							logger.debug(env.getProperty("Keytype"+i)+" Key already generated");
+						} else {
+							logger.error("API Platform response error - Generate Key KEYTYPE : "+env.getProperty("Keytype"+i));
+							throw new ServiceBrokerException(e.getMessage());					
+						}
+						logger.debug("API Platform Generate Key finished - KEYTYPE : "+env.getProperty("Keytype"+i));
+					}
+				}
+				logger.info("API Platform Generate Key finished. Application : "+serviceInstanceId);
+
 			} else {			
 				logger.info("get Application Credentials completed. UserID :["+userId+"], Application :["+serviceInstanceId+"]");
 			}
@@ -458,11 +491,11 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		if(!instance.getServiceDefinitionId().equals(serviceId)&&!instance.getPlanId().equals(planId)){
 			logger.error("Invalid ServiceID :["+serviceId+"], PlanID :["+planId+"]. Valid ServiceID :["+instance.getServiceDefinitionId()+"], PlanID :["+instance.getPlanId()+"]");
 			throw new ServiceBrokerException("Invalid Instance infomation. ServiceID :["+serviceId+"], PlanID :["+planId+"]");
-		//서비스 아이디가 잘못된 경우 - D002
+		//서비스 아이디가 잘못된 경우 - U003
 		}else if(!instance.getServiceDefinitionId().equals(serviceId)){
 			logger.error("Invalid ServiceID :["+serviceId+"] Valid ServiceID :["+instance.getServiceDefinitionId()+"]");
 			throw new ServiceBrokerException("Invalid ServiceID :["+serviceId+"] Valid ServiceID :["+instance.getServiceDefinitionId()+"]");	
-		//플랜아이디가 잘못된 경우 - D001
+		//플랜아이디가 잘못된 경우 - U004
 		}else if(!instance.getPlanId().equals(planId)){
 			logger.error("Invalid PlanID :["+planId+"] Valid PlanID :["+instance.getPlanId()+"]");
 			throw new ServiceBrokerException("Invalid PlanID :["+planId+"] Valid PlanID :["+instance.getPlanId()+"]");
@@ -478,8 +511,7 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			logger.info("API Platform login success");
 		} catch (ServiceBrokerException e) {
 			if(e.getMessage().equals("No User")){
-			//유저가 API플랫폼에 등록이 되어있지 않을 경우 예외를 던진다.
-				//자동으로 유저생성을 하도록 바꿀 수 있다.
+			//유저가 API플랫폼에 등록이 되어있지 않을 경우 예외를 던지거나 자동으로 유저생성을 하도록 바꿀 수 있다.
 				logger.warn("not found API Platform User :["+userId+"]");
 				apiServiceInstanceService.userSignup(userId, userPassword);
 				cookie = loginService.getLogin(userId, userPassword);
@@ -530,6 +562,7 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 	//어플리케이션과 API가 1:1관계이기 때문에 어플리케이션 삭제와 API 사용등록 해제를 구분할 필요는 없다.
 	//어플리케이션이 존재하지 않는게 확인되면 DB만 변경하고 언바인딩 과정을 끝내도 무방하다.
 		if(!applicationExists){
+			String planName = planId.split(" ")[2];
 			logger.error("Application ["+serviceInstanceId+"] not exists.");
 			logger.info("Add An Application API Start");
 			
@@ -540,7 +573,7 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			
 			String addApplicationUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddAnApplication");
 			String addApplicationParameters = 
-					"action=addApplication&application="+serviceInstanceId+"&tier=Unlimited&description=&callbackUrl=";		
+					"action=addApplication&application="+serviceInstanceId+"&tier="+planName+"&description=&callbackUrl=";		
 			httpEntity = new HttpEntity<String>(addApplicationParameters, headers);
 
 			responseEntity = HttpClientUtils.send(addApplicationUri, httpEntity, HttpMethod.POST);

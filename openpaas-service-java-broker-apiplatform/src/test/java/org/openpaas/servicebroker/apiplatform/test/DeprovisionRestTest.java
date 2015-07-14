@@ -20,6 +20,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.Rollback;
 
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
@@ -55,7 +56,7 @@ public class DeprovisionRestTest {
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 
 		String organization_guid = prop.getProperty("test_org_guid");
-		String space_guid = prop.getProperty("test_space_id");
+		String space_guid = prop.getProperty("test_space_guid");
 		String service_id = prop.getProperty("test_service_id");
 		String plan_id = prop.getProperty("test_plan_id");
 		
@@ -73,6 +74,14 @@ public class DeprovisionRestTest {
 		
 		//어플리케이션삭제, 			사용등록 해제 API를 각각 사용하여 테스트 환경을 만든다. ->  
 		//removed_app_instance_id	removed_subs_instance_id
+		
+		
+		
+		
+		
+		
+		
+		
 		
 	}
 	
@@ -93,7 +102,7 @@ public class DeprovisionRestTest {
 		ResponseEntity<String> response = null;
 
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/"
-					+instance_id+"?service_id="+service_id+"&plan_id="+plan_id;
+					+prop.getProperty("test_instance_id")+"?service_id="+service_id+"&plan_id="+plan_id;
 		
 		response = HttpClientUtils.sendUnbinding(url, entity, HttpMethod.DELETE);
 		System.out.println(response.getStatusCode());
@@ -121,7 +130,7 @@ public class DeprovisionRestTest {
 		ResponseEntity<String> response = null;
 
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/"
-					+instance_id+"?service_id="+service_id+"&plan_id="+plan_id;
+					+prop.getProperty("test_instance_id")+"?service_id="+service_id+"&plan_id="+plan_id;
 		
 		response = HttpClientUtils.sendUnbinding(url, entity, HttpMethod.DELETE);
 		System.out.println(response.getStatusCode());
@@ -161,7 +170,8 @@ public class DeprovisionRestTest {
 	}
 	
 	//D004 요청된 인스턴스 아이디에 해당하는 어플리케이션을 가지고 있는 유저가 API플랫폼에서 삭제된 케이스
-	@Test
+	//API플랫폼 관리 콘솔에서 직접 유저를 삭제하고 테스트
+ 	//	@Test
 	public void D004_removed_user_test() {
 		System.out.println("Start - D004_removed_user_test");
 		
@@ -216,10 +226,10 @@ public class DeprovisionRestTest {
 		System.out.println("End - D005_removed_application_test");
 	}
 	
-	//D005 요청된 인스턴스 아이디에 해당하는 어플리케이션이 API플랫폼에서 삭제된 케이스
+	//D006 요청된 인스턴스 아이디에 해당하는 어플리케이션에 사용등록 된 API가 API플랫폼에서 이미 사용등록이 해제된 케이스
 	@Test
-	public void D005_removed_subscription_test() {
-		System.out.println("Start - D005_removed_subscription_test");
+	public void D006_removed_subscription_test() {
+		System.out.println("D006 == Start - removed_subscription_test");
 		
 		String plan_id = prop.getProperty("test_plan_id");
 		String service_id= prop.getProperty("test_service_id");
@@ -241,12 +251,41 @@ public class DeprovisionRestTest {
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertTrue(response.getBody().equals("{}"));
 		
-		System.out.println("End - D005_removed_subscription_test");
+		System.out.println("D006 == End - removed_subscription_test");
 	}
 	
+
+	//D007 요청된 인스턴스 아이디에 해당하는 어플리케이션에 사용등록 된 API의 라이프사이클이 변경된 케이스
+	@Test
+	public void D007_changed_lifecycle_test() {
+		System.out.println("D007 == Start - changed_lifecycle_test");
+		
+		String plan_id = prop.getProperty("lifecycle_change_plan_id");
+		String service_id= prop.getProperty("lifecycle_change_service_id");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);		
+		ResponseEntity<String> response = null;
+
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/"
+					+prop.getProperty("lifecycle_change_instance_id")+"?service_id="+service_id+"&plan_id="+plan_id;
+		
+		response = HttpClientUtils.sendUnbinding(url, entity, HttpMethod.DELETE);
+		System.out.println(response.getStatusCode());
+		System.out.println(response.getBody());
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertTrue(response.getBody().equals("{}"));
+		
+		System.out.println("D007 == End - changed_lifecycle_test");
+	}
 	
 	//D010 적절한 데이터로 요청이 들어온 케이스 - 200 OK
 	@Test
+	@Rollback(true)
 	public void D010_valid_parameters_test() {
 		System.out.println("Start - D010_valid_parameters_test");
 		

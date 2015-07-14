@@ -1,14 +1,9 @@
-package org.openpaas.servicebroker.apiplatform.test;
-
-import java.util.Properties;
+package org.openpaas.servicebroker.apiplatform.common;
 
 import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
-import org.openpaas.servicebroker.apiplatform.service.impl.APICatalogService;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
-import org.openpaas.servicebroker.model.ServiceDefinition;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
