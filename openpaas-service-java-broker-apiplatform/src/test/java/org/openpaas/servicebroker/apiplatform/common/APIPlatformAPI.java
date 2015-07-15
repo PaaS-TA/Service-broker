@@ -163,7 +163,7 @@ public class APIPlatformAPI {
 		return applicationId;
 	}
 
-	public void addSubscription( String addApplicationUri, String addApplicationParameters,String cookie){
+	public void lifecycleChange( String lifecycleChangeUri, String lifecycleChangeParameters,String cookie){
 		
 		HttpEntity<String> httpEntity;
 		ResponseEntity<String> responseEntity;
@@ -172,19 +172,42 @@ public class APIPlatformAPI {
 		headers.set("Cookie", cookie);
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		
-		httpEntity = new HttpEntity<String>(addApplicationParameters, headers);
+		httpEntity = new HttpEntity<String>(lifecycleChangeParameters, headers);
 
-		responseEntity = HttpClientUtils.send(addApplicationUri, httpEntity, HttpMethod.POST);
+		responseEntity = HttpClientUtils.send(lifecycleChangeUri, httpEntity, HttpMethod.POST);
 		
-		JsonNode addApplicationResponseJson = null;
+		JsonNode lifecycleChangeResponseJson = null;
 
 		try {
-			addApplicationResponseJson = JsonUtils.convertToJson(responseEntity);
-			ApiPlatformUtils.apiPlatformErrorMessageCheck(addApplicationResponseJson);
+			lifecycleChangeResponseJson = JsonUtils.convertToJson(responseEntity);
 		} catch (ServiceBrokerException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	public void addSubscription( String addSubscriptionUri, String addSubscriptionParameters,String cookie){
+		
+		HttpEntity<String> httpEntity;
+		ResponseEntity<String> responseEntity;
+		HttpHeaders headers = new HttpHeaders();
+	
+		headers.set("Cookie", cookie);
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		
+		httpEntity = new HttpEntity<String>(addSubscriptionParameters, headers);
 
+		responseEntity = HttpClientUtils.send(addSubscriptionUri, httpEntity, HttpMethod.POST);
+		
+		JsonNode addSubscriptionResponseJson = null;
+
+		try {
+			addSubscriptionResponseJson = JsonUtils.convertToJson(responseEntity);
+			ApiPlatformUtils.apiPlatformErrorMessageCheck(addSubscriptionResponseJson);
+		} catch (ServiceBrokerException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 
 }

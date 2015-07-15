@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.openpaas.servicebroker.apiplatform.common.APIPlatformAPI;
 import org.openpaas.servicebroker.common.BindingBody;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.springframework.http.HttpEntity;
@@ -19,14 +20,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import org.springframework.security.crypto.codec.Base64;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class BindingRestTest {
 
 private static Properties prop = new Properties();
-	
+
 	@BeforeClass
 	public static void init() {
 
@@ -45,6 +45,76 @@ private static Properties prop = new Properties();
 			e.printStackTrace();
 	 		System.err.println(e);
 	 	}
+		
+		APIPlatformAPI api = new APIPlatformAPI();
+		//스토어 로그인
+		String cookie =null;
+		String uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.Login");
+		String parameters = "action=login&username=test-user&password=openpaas";
+		cookie = api.login(uri, parameters);
+
+	//정상 파라미터 입력된 케이스
+		//어플리케이션 생성
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddAnApplication");
+		parameters = 
+				"action=addApplication&application="+prop.getProperty("test_instance_id")+"&tier=Unlimited&description=&callbackUrl=";	
+		api.addApplication(uri, parameters, cookie);
+		
+		//사용등록
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddSubscription");
+		parameters = 
+				"action=addAPISubscription&name=Naver&version=1.0.0&provider=apicreator&tier=Unlimited&applicationName="+prop.getProperty("test_instance_id");
+		api.addSubscription(uri, parameters, cookie);
+		
+		
+		
+		
+		
+	//어플리케이션 삭제된 케이스
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.RemoveApplication");
+		parameters = "action=removeApplication&application="+prop.getProperty("removed_app_instance_id");
+		api.removeApplication(uri, parameters, cookie);
+		
+	//사용등록 해제된 케이스
+		//어플리케이션 생성
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddAnApplication");
+		parameters = 
+				"action=addApplication&application="+prop.getProperty("removed_subs_instance_id")+"&tier=Unlimited&description=&callbackUrl=";	
+		api.addApplication(uri, parameters, cookie);
+		
+		//사용등록 해제
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.GetAPIsByApplication");
+		parameters = "action=getSubscriptionByApplication&app="+prop.getProperty("removed_subs_instance_id");
+		api.removeSubscription(uri, parameters, cookie);
+	
+		
+	//라이프사이클 변경된 케이스
+		//퍼블리셔 로그인
+		String cookie2 =null;
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.PublisherLogin");
+		parameters = "action=login&username=apipublisher&password=qwer1234";
+		cookie2 = api.login(uri, parameters);
+		//라이프사이클 변경 PUBLISHED -> CREATED
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.LifecycleChange");
+		parameters ="action=updateStatus&name=PhoneVerification&version=2.0.0&provider=apicreator&status=PUBLISHED&publishToGateway=true&requireResubscription=true";
+		api.lifecycleChange(uri, parameters, cookie2);
+	
+		//어플리케이션 생성
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddAnApplication");
+		parameters = 
+				"action=addApplication&application="+prop.getProperty("lifecycle_change_instance_id")+"&tier=Unlimited&description=&callbackUrl=";	
+		api.addApplication(uri, parameters, cookie);
+		//사용등록
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddSubscription");
+		parameters = 
+				"action=addAPISubscription&name=PhoneVerification&version=2.0.0&provider=apicreator&tier=Unlimited&applicationName="+prop.getProperty("lifecycle_change_instance_id");
+		api.addSubscription(uri, parameters, cookie);
+	
+		
+		//라이프사이클 변경 PUBLISHED -> CREATED
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.LifecycleChange");
+		parameters ="action=updateStatus&name=PhoneVerification&version=2.0.0&provider=apicreator&status=CREATED&publishToGateway=true&requireResubscription=true";
+		api.lifecycleChange(uri, parameters, cookie2);
 		
 	}
 	
@@ -217,7 +287,7 @@ private static Properties prop = new Properties();
 	@Test
 	public void B009_lifecycle_changed_API_test() {
 		
-		System.out.println("Start - lifecycle_changed_API_test");
+		System.out.println("B009 Start - lifecycle_changed_API_test");
 		
 		String instance_id = prop.getProperty("lifecycle_change_instance_id");
 		String plan_id = prop.getProperty("lifecycle_change_plan_id");
@@ -243,13 +313,13 @@ private static Properties prop = new Properties();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 		assertTrue(response.getBody().contains("APIPlatform API not published"));
 		
-		System.out.println("End - lifecycle_changed_API_test");
+		System.out.println("B009 End - lifecycle_changed_API_test");
 	}
 	
 	//B010 API플랫폼에서 API의 사용등록이 해제된 경우 - 500 INTERNAL_SERVER_ERROR
 	@Test
 	public void B010_subscription_removed_API_test() {
-		System.out.println("Start - subscription_removed_API_test");
+		System.out.println("B010 Start - subscription_removed_API_test");
 		
 		String instance_id = prop.getProperty("removed_subs_instance_id");
 		String plan_id = prop.getProperty("test_plan_id");
@@ -276,7 +346,7 @@ private static Properties prop = new Properties();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 		assertTrue(response.getBody().contains("no subscribed API."));
 
-		System.out.println("End - subscription_removed_API_test");
+		System.out.println("B010 End - subscription_removed_API_test");
 	}
 	
 	//B011 각각의 파라미터가 빈값으로 요청된 케이스

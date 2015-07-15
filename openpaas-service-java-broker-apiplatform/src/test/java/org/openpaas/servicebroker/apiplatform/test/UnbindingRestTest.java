@@ -19,8 +19,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.codec.Base64;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class UnbindingRestTest {
@@ -343,7 +343,7 @@ public class UnbindingRestTest {
 		System.out.println(response.getStatusCode());
 		System.out.println(response.getBody());
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-		assertTrue(response.getBody().contains("already removed Service Instance"));
+		assertTrue(response.getBody().contains("not found APIPlatform user information. Instance ID : ["+instance_id+"]"));
 		
 		System.out.println("U010 === End - removed_user_DB_test");
 	}

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.UUID;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -20,9 +21,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.test.annotation.Rollback;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DeprovisionRestTest {
@@ -74,16 +75,15 @@ public class DeprovisionRestTest {
 		
 		//어플리케이션삭제, 			사용등록 해제 API를 각각 사용하여 테스트 환경을 만든다. ->  
 		//removed_app_instance_id	removed_subs_instance_id
-		
-		
-		
-		
-		
-		
+
+	}
+	@AfterClass
+	public static void finale(){
 		
 		
 		
 	}
+	
 	
 	//D001 잘못된 플랜아이디로 요청이 들어온 케이스
 	@Test
@@ -281,6 +281,36 @@ public class DeprovisionRestTest {
 		assertTrue(response.getBody().equals("{}"));
 		
 		System.out.println("D007 == End - changed_lifecycle_test");
+	}
+	
+	
+	@Test
+	public void D008_removed_user_DB_test() {
+		System.out.println("D008 == Start - removed_user_DB_test");
+		
+		String plan_id = prop.getProperty("test_plan_id");
+		String service_id= prop.getProperty("test_service_id");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);		
+		ResponseEntity<String> response = null;
+
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/"
+					+prop.getProperty("removed_user_instance_id_DB")+"?service_id="+service_id+"&plan_id="+plan_id;
+		
+		response = HttpClientUtils.sendUnbinding(url, entity, HttpMethod.DELETE);
+		System.out.println(response.getStatusCode());
+		
+		System.out.println(response.getBody());
+
+		assertEquals(HttpStatus.GONE, response.getStatusCode());
+		assertTrue(response.getBody().equals("{}"));
+		
+		System.out.println("D008 == End - removed_user_DB_test");
 	}
 	
 	//D010 적절한 데이터로 요청이 들어온 케이스 - 200 OK

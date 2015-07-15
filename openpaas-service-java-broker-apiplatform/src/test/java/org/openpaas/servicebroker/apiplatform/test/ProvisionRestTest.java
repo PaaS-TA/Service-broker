@@ -19,10 +19,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.codec.Base64;
 
-
-
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 /**
  * 시작전에 Spring Boot로 Service Broker를 띄워 놓구 진행합니다.
@@ -554,7 +552,7 @@ public class ProvisionRestTest {
 		System.out.println("P015_End - duplicate_all_except_instanceID");
 	}
 	
-	//P017 API플랫폼 DB에서 이미 삭제처리된 인스턴스 아이디로 요청이 들어온 경우 
+	//P017 API플랫폼 DB에서 이미 삭제처리된(delyn값이 Y인) 인스턴스 아이디로 요청이 들어온 경우 
 	@Test
 	public void P017_removed_instance_id() {
 		
@@ -580,7 +578,7 @@ public class ProvisionRestTest {
 
 		System.out.println(response.getBody());
 
-		assertTrue(response.getBody().contains("already removed Service Instance "));
+		assertTrue(response.getBody().contains("already removed Service Instance"));
 		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
 		System.out.println("P017_End - removed_instance_id");
 	}

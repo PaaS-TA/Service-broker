@@ -477,11 +477,11 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 			apiUser = dao.getAPIUserByOrgID(organizationGuid);
 		} catch (EmptyResultDataAccessException e) {
 			//해당 orgID에 해당하는 유저정보가 DB에 저장 되어 있어야 하지만 그렇지 않은 경우이다. - U010
-			logger.error("Database error - not found instance information. Instance ID : ["+serviceInstanceId+"] - U010");
-			throw new ServiceBrokerException("not found instance information");
+			logger.error("not found APIPlatform user information. Instance ID : ["+serviceInstanceId+"] - U010");
+			throw new ServiceBrokerException("not found APIPlatform user information. Instance ID : ["+serviceInstanceId+"] - U010");
 		} catch (Exception e){
-			logger.error("Database Error - getAPIInfoByInstanceId");
-			throw new ServiceBrokerException("APIPlatform Error :"+e.getMessage());
+			logger.error("Database Error - getAPIUserByOrgID");
+			throw new ServiceBrokerException("Database Error :"+e.getMessage());
 		}
 		
 		String serviceId = request.getServiceId();

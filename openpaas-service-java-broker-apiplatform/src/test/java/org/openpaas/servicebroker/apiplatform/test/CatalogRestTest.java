@@ -17,11 +17,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.util.StringUtils;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 /**
  * 시작전에 Spring Boot로 Service Broker를 띄워 놓구 진행합니다.

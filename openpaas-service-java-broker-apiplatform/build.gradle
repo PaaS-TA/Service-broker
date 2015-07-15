@@ -52,7 +52,8 @@ dependencies {
     compile("org.apache.commons:commons-dbcp2")
     runtime "mysql:mysql-connector-java:5.1.27"
     compile "org.springframework:spring-jdbc:4.0.0.M3"
-
+	testCompile 'junit:junit:4.12'
+	testCompile("org.apache.httpcomponents:httpclient:4.4.1")
 }
 
 task wrapper(type: Wrapper) {
