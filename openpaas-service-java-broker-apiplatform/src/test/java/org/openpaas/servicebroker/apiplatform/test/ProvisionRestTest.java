@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.openpaas.servicebroker.apiplatform.common.APIPlatformAPI;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.ProvisionBody;
 import org.springframework.http.HttpEntity;
@@ -33,6 +34,11 @@ public class ProvisionRestTest {
 	
 	private static Properties prop = new Properties();
 	
+	private static String uri;
+	private static String parameters;
+	private static APIPlatformAPI api = new APIPlatformAPI();
+	private static String cookie;
+	
 	@BeforeClass
 	public static void init() {
 		
@@ -50,7 +56,33 @@ public class ProvisionRestTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 	 		System.err.println(e);
-	 	}		
+	 	}
+		//스토어 로그인
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.Login");
+		parameters = "action=login&username=test-user&password=openpaas";
+		cookie = api.login(uri, parameters);
+		
+		//삭제된 어플리케이션
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.RemoveApplication");
+		parameters = "action=removeApplication&application="+prop.getProperty("removed_app_instance_id");
+		api.removeApplication(uri, parameters, cookie);
+		
+		//사용등록 해제
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.RemoveSubscription");
+		parameters = "action=removeSubscription&name=Naver&version=1.0.0&provider=apicreator&applicationId=421";
+		api.removeSubscription(uri, parameters, cookie);
+		
+	//라이프사이클 변경 케이스
+		//퍼블리셔로그인
+		String cookie2 =null;
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.PublisherLogin");
+		parameters = "action=login&username=apipublisher&password=qwer1234";
+		cookie2 = api.login(uri, parameters);
+		
+		//라이프사이클 변경 PUBLISHED -> CREATED
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.LifecycleChange");
+		parameters ="action=updateStatus&name=PhoneVerification&version=2.0.0&provider=apicreator&status=CREATED&publishToGateway=true&requireResubscription=true";
+		api.lifecycleChange(uri, parameters, cookie2);
 	}
 	//P001 적절한 데이터로 요청이 들어온 케이스 - 201 CREATED
 //	@Test

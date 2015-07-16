@@ -31,8 +31,7 @@ public class ApiPlatformUtils {
 			}
 			
 			//Add an Application API
-			else if(json.get("message").asText().contains("A duplicate application already exists by the name")){			
-				
+			else if(json.get("message").asText().contains("A duplicate application already exists by the name")){		
 				//API플랫폼 Add an Application 에러
 				//어플리케이션 이름이 중복될때, "error": false, "message":" A duplicate application already exists ..."			
 				throw new ServiceBrokerException("Duplication");	

@@ -27,6 +27,12 @@ public class BindingRestTest {
 
 private static Properties prop = new Properties();
 
+private static String uri;
+private static String parameters;
+private static APIPlatformAPI api = new APIPlatformAPI();
+private static String cookie;
+
+
 	@BeforeClass
 	public static void init() {
 
@@ -46,29 +52,10 @@ private static Properties prop = new Properties();
 	 		System.err.println(e);
 	 	}
 		
-		APIPlatformAPI api = new APIPlatformAPI();
 		//스토어 로그인
-		String cookie =null;
-		String uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.Login");
-		String parameters = "action=login&username=test-user&password=openpaas";
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.Login");
+		parameters = "action=login&username=test-user&password=openpaas";
 		cookie = api.login(uri, parameters);
-
-	//정상 파라미터 입력된 케이스
-		//어플리케이션 생성
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddAnApplication");
-		parameters = 
-				"action=addApplication&application="+prop.getProperty("test_instance_id")+"&tier=Unlimited&description=&callbackUrl=";	
-		api.addApplication(uri, parameters, cookie);
-		
-		//사용등록
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddSubscription");
-		parameters = 
-				"action=addAPISubscription&name=Naver&version=1.0.0&provider=apicreator&tier=Unlimited&applicationName="+prop.getProperty("test_instance_id");
-		api.addSubscription(uri, parameters, cookie);
-		
-		
-		
-		
 		
 	//어플리케이션 삭제된 케이스
 		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.RemoveApplication");
@@ -81,10 +68,14 @@ private static Properties prop = new Properties();
 		parameters = 
 				"action=addApplication&application="+prop.getProperty("removed_subs_instance_id")+"&tier=Unlimited&description=&callbackUrl=";	
 		api.addApplication(uri, parameters, cookie);
+		//어플리케이션 아이디
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.GetApplications");
+		parameters = "action=getApplications";
+		int appId = api.getAppID(uri, parameters, cookie, prop.getProperty("removed_subs_instance_id"));
 		
 		//사용등록 해제
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.GetAPIsByApplication");
-		parameters = "action=getSubscriptionByApplication&app="+prop.getProperty("removed_subs_instance_id");
+		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.RemoveSubscription");
+		parameters = "action=removeSubscription&name=Naver&version=1.0.0&provider=apicreator&applicationId="+appId;
 		api.removeSubscription(uri, parameters, cookie);
 	
 		
@@ -94,16 +85,12 @@ private static Properties prop = new Properties();
 		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.PublisherLogin");
 		parameters = "action=login&username=apipublisher&password=qwer1234";
 		cookie2 = api.login(uri, parameters);
-		//라이프사이클 변경 PUBLISHED -> CREATED
+		
+		//라이프사이클 변경 CREATED --> PUBLISHED
 		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.LifecycleChange");
 		parameters ="action=updateStatus&name=PhoneVerification&version=2.0.0&provider=apicreator&status=PUBLISHED&publishToGateway=true&requireResubscription=true";
 		api.lifecycleChange(uri, parameters, cookie2);
-	
-		//어플리케이션 생성
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddAnApplication");
-		parameters = 
-				"action=addApplication&application="+prop.getProperty("lifecycle_change_instance_id")+"&tier=Unlimited&description=&callbackUrl=";	
-		api.addApplication(uri, parameters, cookie);
+		
 		//사용등록
 		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddSubscription");
 		parameters = 

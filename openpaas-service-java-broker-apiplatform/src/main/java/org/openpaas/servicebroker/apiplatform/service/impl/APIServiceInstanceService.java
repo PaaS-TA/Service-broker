@@ -30,8 +30,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import sun.security.jca.ServiceId;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
@@ -74,7 +72,6 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		HttpHeaders headers;
 		
 		String cookie = "";
-		
 
 	//설정된 플랜명중에서 요청된 플랜명이 존재하는지 확인, 설정되어있는 플랜명이라면, 플랜명이 적절한지 확인한다.
 		//TODO
@@ -247,7 +244,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			ApiPlatformUtils.apiPlatformErrorMessageCheck(addApplicationResponseJson);
 			applicationExsists = true;
 			//어플리케이션이 정상적으로 생성 되었다면 넘어간다.
-			logger.info("Application "+serviceInstanceId+" created");		
+			logger.info("Application "+serviceInstanceId+" created");
 		} catch (ServiceBrokerException e) {
 			if(e.getMessage().equals("Duplication")){
 				//어플리케이션이 이미 존재하는 경우이므로 applicatioExsists를 true로 변경한다.
@@ -294,10 +291,6 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			}
 		}
 		logger.info("API Platform Generate Key finished. Application : "+serviceInstanceId);
-
-		
-		
-		
 		
 	//Add Subscription API를 사용하여 API플랫폼 어플리케이션에 API를 사용등록한다.
 
@@ -631,7 +624,34 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		String planId = request.getPlanId();
 		String planName = planId.split(" ")[2];
 		APIServiceInstance apiServiceInstance = null;
-
+	
+	//업데이트 요청이 들어온 플랜명이 사용가능한 플랜명인지 확인한다.
+		boolean planAvailable = false;
+		String nextPlan = null;
+		int i =1;
+		do{
+			if(env.getProperty("AvailablePlan"+i).equals(planName)){
+				planAvailable =true;
+				logger.debug("Plan :["+planName+"] availbale");
+				break;
+			}
+			else {
+				i++;
+				nextPlan= env.getProperty("AvailablePlan"+i);
+			}
+		} while(planAvailable==false&&nextPlan!=null);
+		
+		//한개의 플랜만이 사용가능한 케이스 UP011
+		if(env.getProperty("AvailablePlan2")==null){
+			throw new ServiceInstanceUpdateNotSupportedException("Plan update not supported. Plan :["+env.getProperty("AvailablePlan1")+"] supported only - UP11");
+		}
+		//요청된 플랜아이디에 포함된 플랜명이 설정되어 있지 않은 플랜명인 케이스 - UP03
+		if(!planAvailable){
+			logger.error("not supported Plan :["+planName+"]");
+			throw new ServiceInstanceUpdateNotSupportedException("not supported Plan :["+planName+"] - UP03");
+		}
+		
+		
 	//요청된 서비스 인스턴스에 대해 DB에 저장된 정보를 가져온다.
 		try {
 			apiServiceInstance =dao.getAPIInfoByInstanceID(serviceInstanceId);			
@@ -645,6 +665,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 				throw new ServiceBrokerException("Service Instnace information not found. ServiceInstanceID :["+serviceInstanceId+"] - UP09");
 			}
 			String organizationGuid = apiServiceInstance.getOrganization_id();
+			
 			try {
 				dao.getAPIUserByOrgID(organizationGuid);
 			} catch (EmptyResultDataAccessException e2) {
@@ -658,16 +679,17 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		}
 		
 		String serviceId = apiServiceInstance.getService_id();
+
 		//DB에 저장된 플랜 아이디와 요청된 플랜아이디가 같을 경우 예외를 발생시킨다. - UP02
 		if(apiServiceInstance.getPlan_id().equals(planId)){
 			logger.info("already setted plan requseted");
-			throw new ServiceBrokerException("Plan :["+planName+"] already setted");
+			throw new ServiceBrokerException("Plan :["+planName+"] already setted - UP02");
 		}
 		//요청된 플랜아이디가 적절한지 확인한다.
 		else if(!serviceId.equals(planId.split(" ")[0]+" "+planId.split(" ")[1])){
-			//플랜아이디에 포함된 서비스 명과 버전이 DB에 저장된 서비스 아이디의 서비스명, 버전과 다른 경우 예외를 발생시킨다.
+			//플랜아이디에 포함된 서비스 명과 버전이 DB에 저장된 서비스 아이디의 서비스명, 버전과 다른 경우 예외를 발생시킨다. - UP04
 			logger.debug("invalid PlanID :["+planId+"]");
-			throw new ServiceBrokerException("invalid PlanID :["+planId+"]. valid PlanID :["+serviceId+" 'Valid PlanName']");
+			throw new ServiceBrokerException("invalid PlanID :["+planId+"]. valid PlanID :["+serviceId+" 'Valid PlanName'] - UP04");
 		}
 /*		
 //	플랜의 업데이트 가능 여부를 확인한다.
@@ -681,27 +703,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		}
 	
 */	
-	//업데이트 요청이 들어온 플랜명이 사용가능한 플랜명인지 확인한다.
-		boolean planAvailable = false;
-		String nextPlan = null;
-		int i =1;
-		do{
-			if(env.getProperty("AvailablePlan"+i).equals(planName)){
-				planAvailable =true;
-				logger.debug("Plan :["+planName+"] availbale");
-			}
-			else {
-				i++;
-				nextPlan= env.getProperty("AvailablePlan"+i);
-			}
-		} while(planAvailable==false&&nextPlan!=null);
-		
-		//요청된 플랜아이디에 포함된 플랜명이 설정되어 있지 않은 플랜명인 케이스 - UP03
-		if(!planAvailable){
-			logger.error("not supported Plan :["+planName+"]");
-			throw new ServiceInstanceUpdateNotSupportedException("not supported Plan :["+planName+"] - UP03");
-		}
-		
+
 	//API플랫폼 어플리케이션의 티어값을 업데이트한다.
 		//요청된 인스턴스에 대한 API플랫폼 유저아이디와 패스워드로 API플랫폼에 로그인한다.
 		String userId = apiServiceInstance.getUser_id();
@@ -720,8 +722,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			logger.info("API Platform login error - UserID : ["+userId+"]");
 			throw new ServiceBrokerException(e.getMessage());
 		}
-
-		//Update an Application API를 사용한다.
+		//사용등록된 API의 라이프사이클을 확인한다. Get Published APIs by Application
 		HttpEntity<String> entity;
 		ResponseEntity<String> response;
 		HttpHeaders headers = new HttpHeaders();
@@ -729,165 +730,185 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		headers.set("Cookie", cookie);
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		
-		String updateApplicationUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.UpdateApplication");
-		String updateApplicationParameters = "action=updateApplication&applicationOld="+serviceInstanceId+"&applicationNew="+serviceInstanceId+"&callbackUrlNew=&descriptionNew=&tier="+planName;
-		
-		entity = new HttpEntity<String>(updateApplicationParameters, headers);
-		response = HttpClientUtils.send(updateApplicationUri, entity, HttpMethod.POST);
-		
-		JsonNode updateApplicationResponseJson = null;
-		
-		try {
-			updateApplicationResponseJson =JsonUtils.convertToJson(response);
-			ApiPlatformUtils.apiPlatformErrorMessageCheck(updateApplicationResponseJson);
-			
-		} catch (Exception e) {
-			throw new ServiceBrokerException(e.getMessage());
-		}
-		logger.debug("Update an Application completed.");
-		
-		//Update an Application API는 에러메시지를 보내지 않기 때문에 Get Apllications API를 사용하여 API플랫폼에서 플랜업데이트가 정상적으로 이루어졌는지 확인한다. 
-		String getApplicationsUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetApplications");
-		String getApplicationParameter = "action=getApplications";
+		String listAPIsUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAPIsByApplication");
+		String listAPIsParameters = "action=getSubscriptionByApplication&app="+serviceInstanceId;		
 		
 		entity = new HttpEntity<String>("", headers);
-		response = HttpClientUtils.send(getApplicationsUri+"?"+getApplicationParameter, entity, HttpMethod.GET);
+		response = HttpClientUtils.send(listAPIsUri+"?"+listAPIsParameters, entity, HttpMethod.GET);
 		
-		JsonNode getApplicationsResponseJson = null;
-		
+		JsonNode getAPIsResponseJson = null;
+		boolean somthingWrong = false;
 		try {
-			getApplicationsResponseJson =JsonUtils.convertToJson(response);
-			ApiPlatformUtils.apiPlatformErrorMessageCheck(getApplicationsResponseJson);
-			logger.debug("Get Applications completed");
-		} catch (Exception e) {
-			throw new ServiceBrokerException(e.getMessage());
-		}
-
-		
-		//Json객체를 통해 API플랫폼에 등록된 어플리케이션과 플랜값이 업데이트를 요청한 어플리케이션, 플랜값과 일치하는지 확인한다.
-		JsonNode applications =getApplicationsResponseJson.get("applications");
-		String applicationName = null;
-		String applicationTier=null;
-		int applicationId = 0;
-		boolean applicationExists=false;
-		boolean applicationUpdateSuccess =false;
-		for(JsonNode application: applications){
-			applicationName = application.get("name").asText();
-			if(applicationName.equals(serviceInstanceId)){
-				applicationTier = application.get("tier").asText();
-				applicationId = application.get("id").asInt();
-				if(applicationTier.equals(planName)){
-					applicationUpdateSuccess = true;
-					break;
-				}
-				else{
-					applicationExists=true;
-					break;
-				}
+			getAPIsResponseJson = JsonUtils.convertToJson(response);
+			ApiPlatformUtils.apiPlatformErrorMessageCheck(getAPIsResponseJson);
+		} catch (ServiceBrokerException e) {
+			//API사용등록이 정상적으로 처리되어 있는지 확인한다.
+			if(e.getMessage().equals("No subscribed API")) {
+				logger.error("Application or subscription dose not exist. UserID: ["+userId+"], ApplicationName: ["+serviceInstanceId+"], API ["+serviceId+"]");
+				//이미 사용등록이 해제 되었거나 어플리케이션이 삭제된 경우이다. 아직 확인할 수 없다.
+				somthingWrong = true;
 			}
-		}
-		
-	//API의 Tier를 업데이트하는 기능이 없으므로, 사용등록을 해제하고 다시 사용등록을 한다.
-		//API의 공급자 정보를 가져오기 위해 Get Published API를 사용한다.
-		String getApisUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAllPaginatedPublishedAPIs");
-		String getApisParameters ="action=getAllPaginatedPublishedAPIs&tenant=carbon.super&start=1&end=100";
-		
-		entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> getApisResponseHttp;
-		
-		getApisResponseHttp = HttpClientUtils.send(getApisUri+"?"+getApisParameters, entity, HttpMethod.GET);
-		
-		JsonNode getApisResponseJson = null;
-		
-		try {
-			getApisResponseJson = JsonUtils.convertToJson(getApisResponseHttp);
-			ApiPlatformUtils.apiPlatformErrorMessageCheck(getApisResponseJson);
-		} catch (Exception e) {			
-			throw new ServiceBrokerException(e.getMessage());
-		}
-		
-		JsonNode apis = getApisResponseJson.get("apis");
-		String serviceName = serviceId.split(" ")[0];
-		String serviceProvider = null;
-		for (JsonNode api : apis) {
-			if(api.get("name").asText().equals(serviceName)){
-				serviceProvider = api.get("provider").asText();
-				break;
-			}
-		}
-	
-		//API의 사용등록을 해제한다.
-		String serviceVersion = serviceId.split(" ")[1];
-		String removeSubscriptionUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.RemoveSubscription");
-		String removeSubscriptionParameters = "action=removeSubscription&name="+serviceName+"&version="+serviceVersion+"&provider="+serviceProvider+"&applicationId="+applicationId;
-		
-		entity = new HttpEntity<String>(removeSubscriptionParameters, headers);
-		response = HttpClientUtils.send(removeSubscriptionUri, entity, HttpMethod.POST);
-		
-		JsonNode removeSubscriptionResponseJson = null;
-
-		try {
-			removeSubscriptionResponseJson =JsonUtils.convertToJson(response);
-			ApiPlatformUtils.apiPlatformErrorMessageCheck(removeSubscriptionResponseJson);
-		} catch(ServiceBrokerException e){
-			throw new ServiceBrokerException("APIPlatform Error :"+e.getMessage());
-		}
-		logger.debug("Remove a Subscription completed");
-		
-		//Add Subscription API를 사용하여 API플랫폼 어플리케이션에 API를 사용등록한다.
-
-		logger.info("API Platform Add a Subscription started");
-		String addSubscriptionUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddSubscription");
-		String addSubscriptionParameters = 
-				"action=addAPISubscription&name="+serviceName+"&version="+serviceVersion+"&provider="+serviceProvider+"&tier="+planName+"&applicationName="+serviceInstanceId;
-		
-		headers.set("Cookie", cookie);
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		entity = new HttpEntity<String>(addSubscriptionParameters, headers);
-
-		ResponseEntity<String> addSubscriptionResponseHttp = HttpClientUtils.send(addSubscriptionUri, entity, HttpMethod.POST);
-		
-		JsonNode addSubscriptionResponseJson = null;
-
-		try {
-			addSubscriptionResponseJson = JsonUtils.convertToJson(addSubscriptionResponseHttp);
-			ApiPlatformUtils.apiPlatformErrorMessageCheck(addSubscriptionResponseJson);	
-		} catch (ServiceBrokerException e){
-			logger.error("API Platform response error - Add a Subscription");
-			throw new ServiceBrokerException(e.getMessage());
-		}
-		logger.info("API Platform Subscription finished");
-		
-	
-		//API플랫폼에 해당 어플리케이션이 존재하지 않거나 요청된 플랜명을 API플랫폼의 티어에서 찾을 수 없는 경우이다.
-		if(!applicationUpdateSuccess) {
-			//어플리케이션은 생성되어 있으나 업데이트가 정상적으로 이루어지지 않은 케이스이다. 서비스 브로커에서 설정한 플랜명을 APIPlatform Tier 목록에서 찾을 수 없는 경우 발생할 수 있다.
-			if(applicationExists){
-				logger.error("APIPlatform update failed. ApplicationName :["+serviceInstanceId+"], PlanName :["+planName+"]" );
-				throw new ServiceBrokerException("APIPlatform update failed. ApplicationName :["+serviceInstanceId+"],Current PlanName :["+applicationTier+"], Requested PlanName :["+planName+"]");
-			} 
-			//인스턴스 아이디에 해당하는 어플리케이션이 삭제된 경우
 			else {
-				logger.error("APIPlatform application not found. UserId :["+userId+"], Application :["+serviceInstanceId+"]");
-				//요청이 들어온 플랜으로 어플리케이션을 생성한다. 
-				String addApplicationUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddAnApplication");
-				String addApplicationParameters = 
-						"action=addApplication&application="+serviceInstanceId+"&tier="+planName+"&description=&callbackUrl=";
-				entity = new HttpEntity<String>(addApplicationParameters, headers);
+				//위의 경우를 제외한 나머지 예외가 발생한 경우
+				logger.error("API Platform response error - Get Published APIs by Application");
+				throw new ServiceBrokerException(e.getMessage());
+			}
+		}
+		String serviceProvider = null;
+		String serviceName = serviceId.split(" ")[0];
+		String serviceVersion = serviceId.split(" ")[1];
+		
+		//사용등록이 되어있고 문제없이 API의 라이프사이클 정보를 가져온 케이스이다.
+		if(!somthingWrong){
+			//Get Published APIs by Application API를 통해 가져온 API정보에서 공급자명을 찾아 변수에 담는다.
+			String lifecycle = null;
+			JsonNode apis = getAPIsResponseJson.get("apis");
+			
+			for(JsonNode api :apis){
+				if(serviceId.equals(api.get("apiName").asText()+" "+api.get("apiVersion").asText())){
+					serviceProvider = api.get("apiProvider").asText();
+					lifecycle = api.get("status").asText();
+					logger.debug("API ["+serviceId+"] found");
+					break;
+				}
+			}
+			//API의 라이프사이클을 확인한다. 라이프사이클 변경되어 있는 경우는 플랜 업데이트가 불가능하다. UP10
+			if(!lifecycle.equals("PUBLISHED")){
+				logger.error("API lifecycle changed. API :["+serviceName+"], Lifecycle :["+lifecycle+"]");
+				throw new ServiceBrokerException("API lifecycle changed. API :["+serviceName+"], Lifecycle :["+lifecycle+"] - UP10");
+			}
+			
+			//어플리케이션의 존재, API의 사용등록 여부, 라이프사이클 변경 여부를 모두 확인했으므로 플랜 업데이트 절차를 진행한다.
+			//Update an Application API를 사용한다.
 
-				response= HttpClientUtils.send(addApplicationUri, entity, HttpMethod.POST);
+			
+			String updateApplicationUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.UpdateApplication");
+			String updateApplicationParameters = "action=updateApplication&applicationOld="+serviceInstanceId+"&applicationNew="+serviceInstanceId+"&callbackUrlNew=&descriptionNew=&tier="+planName;
+			
+			entity = new HttpEntity<String>(updateApplicationParameters, headers);
+			response = HttpClientUtils.send(updateApplicationUri, entity, HttpMethod.POST);
+			
+			JsonNode updateApplicationResponseJson = null;
+			
+			try {
+				updateApplicationResponseJson =JsonUtils.convertToJson(response);
+				ApiPlatformUtils.apiPlatformErrorMessageCheck(updateApplicationResponseJson);
 				
-				JsonNode addApplicationResponseJson = null;
+			} catch (Exception e) {
+				throw new ServiceBrokerException(e.getMessage());
+			}
+			logger.debug("Update an Application completed.");
+			
+			//Update an Application API는 에러메시지를 보내지 않기 때문에 Get Apllications API를 사용하여 API플랫폼에서 플랜업데이트가 정상적으로 이루어졌는지 확인한하고 어플리케이션 아이디와 상태값을 받아온다.
+			String getApplicationsUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetApplications");
+			String getApplicationParameter = "action=getApplications";
+			
+			entity = new HttpEntity<String>("", headers);
+			response = HttpClientUtils.send(getApplicationsUri+"?"+getApplicationParameter, entity, HttpMethod.GET);
+			
+			JsonNode getApplicationsResponseJson = null;
+			
+			try {
+				getApplicationsResponseJson =JsonUtils.convertToJson(response);
+				ApiPlatformUtils.apiPlatformErrorMessageCheck(getApplicationsResponseJson);
+				logger.debug("Get Applications completed");
+			} catch (Exception e) {
+				throw new ServiceBrokerException(e.getMessage());
+			}
+		
+			//Json객체를 통해 API플랫폼에 등록된 어플리케이션과 플랜값이 업데이트를 요청한 어플리케이션, 플랜값과 일치하는지 확인한다.
+			JsonNode applications =getApplicationsResponseJson.get("applications");
+			String applicationName = null;
+			String applicationTier = null;
+			int applicationId = 0;
+			boolean applicationUpdateSuccess = false;
+			for(JsonNode application: applications){
+				applicationName = application.get("name").asText();
+				if(applicationName.equals(serviceInstanceId)){
+					applicationTier = application.get("tier").asText();
+					applicationId = application.get("id").asInt();
+					if(applicationTier.equals(planName)){
+						applicationUpdateSuccess = true;
+						break;
+					}
+				}
+			}
+			//미상의 에러가 발생하여 플랜업데이트가 정상적으로 이루어지지 않은 경우이다.
+			if(!applicationUpdateSuccess){
+				throw new ServiceBrokerException("APIPlatform application plan update error");
+			}
+			//API플랫폼에서 사용등록된 API의 플랜을 업데이트하는 API를 지원하지 않기 때문에 사용등록을 해제하고 다시 등록한다.
+			//사용등록을 해제한다.
+			String removeSubscriptionUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.RemoveSubscription");
+			String removeSubscriptionParameters = "action=removeSubscription&name="+serviceName+"&version="+serviceVersion+"&provider="+serviceProvider+"&applicationId="+applicationId;
+			
+			entity = new HttpEntity<String>(removeSubscriptionParameters, headers);
+			response = HttpClientUtils.send(removeSubscriptionUri, entity, HttpMethod.POST);
+			
+			JsonNode removeSubscriptionResponseJson = null;
+	
+			try {
+				removeSubscriptionResponseJson =JsonUtils.convertToJson(response);
+				ApiPlatformUtils.apiPlatformErrorMessageCheck(removeSubscriptionResponseJson);
+			} catch(ServiceBrokerException e){
+				throw new ServiceBrokerException("APIPlatform Error :"+e.getMessage());
+			}
+			logger.debug("Remove a Subscription completed");
+			
+			//Add Subscription API를 사용하여 API플랫폼 어플리케이션에 API를 사용등록한다.
+			logger.info("API Platform Add a Subscription started");
+			String addSubscriptionUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddSubscription");
+			String addSubscriptionParameters = 
+					"action=addAPISubscription&name="+serviceName+"&version="+serviceVersion+"&provider="+serviceProvider+"&tier="+planName+"&applicationName="+serviceInstanceId;
+			
+			headers.set("Cookie", cookie);
+			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+			entity = new HttpEntity<String>(addSubscriptionParameters, headers);
 
-				try {
-					addApplicationResponseJson = JsonUtils.convertToJson(response);
-					ApiPlatformUtils.apiPlatformErrorMessageCheck(addApplicationResponseJson);
-				} catch (ServiceBrokerException e) {
+			ResponseEntity<String> addSubscriptionResponseHttp = HttpClientUtils.send(addSubscriptionUri, entity, HttpMethod.POST);
+			
+			JsonNode addSubscriptionResponseJson = null;
+
+			try {
+				addSubscriptionResponseJson = JsonUtils.convertToJson(addSubscriptionResponseHttp);
+				ApiPlatformUtils.apiPlatformErrorMessageCheck(addSubscriptionResponseJson);	
+			} catch (ServiceBrokerException e){
+				logger.error("API Platform response error - Add a Subscription");
+				throw new ServiceBrokerException(e.getMessage());
+			}
+			logger.info("API Platform Subscription finished");	
+
+		}
+		else {
+			//요청된 플랜으로 어플리케이션을 생성한다.
+			boolean applicationExists =false;
+			String addApplicationUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddAnApplication");
+			String addApplicationParameters = 
+					"action=addApplication&application="+serviceInstanceId+"&tier="+planName+"&description=&callbackUrl=";
+			entity = new HttpEntity<String>(addApplicationParameters, headers);
+
+			response= HttpClientUtils.send(addApplicationUri, entity, HttpMethod.POST);
+			
+			JsonNode addApplicationResponseJson = null;
+
+			try {
+				addApplicationResponseJson = JsonUtils.convertToJson(response);
+				ApiPlatformUtils.apiPlatformErrorMessageCheck(addApplicationResponseJson);
+			} catch (ServiceBrokerException e) {
+				//어플리케이션이 이미 생성되어있는 경우이다.
+				if(e.getMessage().equals("Duplication")){
+					logger.debug("API Platform application exists. ApplicationName :["+serviceInstanceId+"]");
+					applicationExists = true;
+				}
+				else {
 					logger.error("API Platform response error - Add an Application");
 					throw new ServiceBrokerException(e.getMessage());
 				}
-				logger.info("Application "+serviceInstanceId+" created");	
-				
+			}
+			logger.info("Application "+serviceInstanceId+" exists");
+			
+			//어플리케이션을 새로 생성했다면 키생성도 함께 해준다.
+			if(!applicationExists){
 				//Generate Key API를 사용하여 API플랫폼 어플리케이션의 키값을 생성한다.
 				logger.info("API Platform Generate Key Started. Application : "+serviceInstanceId);
 				//두가지 키타입으로 키를 생성해야하기 때문에 두번 실행한다.
@@ -920,40 +941,63 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 					}
 				}
 				logger.info("API Platform Generate Key finished. Application : "+serviceInstanceId);
-
-			//Add Subscription API를 사용하여 API플랫폼 어플리케이션에 API를 사용등록한다.
-
-				logger.info("API Platform Add a Subscription started");
-				addSubscriptionUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddSubscription");
-				addSubscriptionParameters = 
-						"action=addAPISubscription&name="+serviceName+"&version="+serviceVersion+"&provider="+serviceProvider+"&tier="+planName+"&applicationName="+serviceInstanceId;
-				
-				headers.set("Cookie", cookie);
-				headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-				entity = new HttpEntity<String>(addSubscriptionParameters, headers);
-
-				response = HttpClientUtils.send(addSubscriptionUri, entity, HttpMethod.POST);
-				
-				addSubscriptionResponseJson = null;
-
-				try {
-					
-					addSubscriptionResponseJson = JsonUtils.convertToJson(response);
-					ApiPlatformUtils.apiPlatformErrorMessageCheck(addSubscriptionResponseJson);
-					//사용등록이 정상적으로 이루어진 경우
-				} catch (ServiceBrokerException e){
-					logger.error("API Platform response error - Add a Subscription");
-					throw new ServiceBrokerException(e.getMessage());
-				}
-				logger.info("API Platform Subscription finished");
-				
 			}
+			//API의 공급자 정보를 가져오기 위해, API를 사용한다. Get all Paginated Published APIs
+			String getApisUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.GetAllPaginatedPublishedAPIs");
+			String getApisParameters ="action=getAllPaginatedPublishedAPIs&tenant=carbon.super&start=1&end=100";		
+			entity = new HttpEntity<String>("", headers);
+			response =  HttpClientUtils.send(getApisUri+"?"+getApisParameters, entity, HttpMethod.GET);
+			JsonNode getApisResponseJson = null;
+			
+			try {
+				getApisResponseJson = JsonUtils.convertToJson(response);
+				ApiPlatformUtils.apiPlatformErrorMessageCheck(getApisResponseJson);
+			} catch (Exception e) {			
+				throw new ServiceBrokerException(e.getMessage());
+			}
+			
+			JsonNode apis = getApisResponseJson.get("apis");
+			for(JsonNode api:apis){
+				if(api.get("name").asText().equals(serviceName)){
+					serviceProvider=api.get("provider").asText();
+					break;
+				}
+			}
+			
+			//서비스 공급자가 없는 경우는 API의 사용등록이 해제되었고  API의 라이프사이클이 변경된 경우로 볼 수있다. UP13
+			if(serviceProvider==null){
+				logger.error("removed subscrition and API lifecycle changed. Application :["+serviceInstanceId+"], API :["+serviceName+"] - UP13");
+				throw new ServiceBrokerException("removed subscrition and API lifecycle changed. Application :["+serviceInstanceId+"], API :["+serviceName+"] - UP13");
+			}
+			
+			//Add Subscription API를 사용하여 API플랫폼 어플리케이션에 API를 사용등록한다.
+			logger.info("API Platform Add a Subscription started");
+			String addSubscriptionUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.AddSubscription");
+			String addSubscriptionParameters = 
+					"action=addAPISubscription&name="+serviceName+"&version="+serviceVersion+"&provider="+serviceProvider+"&tier="+planName+"&applicationName="+serviceInstanceId;
+			
+			headers.set("Cookie", cookie);
+			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+			entity = new HttpEntity<String>(addSubscriptionParameters, headers);
+
+			ResponseEntity<String> addSubscriptionResponseHttp = HttpClientUtils.send(addSubscriptionUri, entity, HttpMethod.POST);
+			
+			JsonNode addSubscriptionResponseJson = null;
+
+			try {
+				addSubscriptionResponseJson = JsonUtils.convertToJson(addSubscriptionResponseHttp);
+				ApiPlatformUtils.apiPlatformErrorMessageCheck(addSubscriptionResponseJson);	
+			} catch (ServiceBrokerException e){
+				logger.error("API Platform response error - Add a Subscription");
+				throw new ServiceBrokerException(e.getMessage());
+			}
+			logger.info("API Platform Subscription finished");	
 		}
 		
 		//DB에 수정된 정보를 업데이트 한다.
 		try {
 			dao.updateAPIServiceInstance(serviceInstanceId, planId);
-			logger.debug("updateAPIServiceInstance() completed. InstanceID : "+serviceInstanceId+" Plan : "+planId);
+			logger.debug("updateAPIServiceInstance() completed. InstanceID : ["+serviceInstanceId+"] Plan : ["+planId+"]");
 		} catch (Exception e) {
 			logger.error("Database Error - updateAPIServiceInstance");
 			throw new ServiceBrokerException("Database Error - updateAPIServiceInstance");
@@ -968,6 +1012,9 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 	}
 
 
+	
+	
+
 //API 플랫폼의 유저생성을 위해 30자 이내의 유니크 유저아이디를 생성 
 	private String makeUserId(){
 		
@@ -979,6 +1026,9 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 		return userId;
 	}
 	
+	
+	
+
 //API플랫폼의 유저를 생성하고  아이디 중복여부를 판단
 	public boolean userSignup(String userId, String userPassword) throws ServiceBrokerException{
 		logger.info("API Platform UserSignup started");
