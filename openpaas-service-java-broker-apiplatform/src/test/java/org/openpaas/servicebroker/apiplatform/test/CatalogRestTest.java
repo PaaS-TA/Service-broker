@@ -70,7 +70,7 @@ public class CatalogRestTest {
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		boolean bException = false;
 		try{
-			response = HttpClientUtils.send(url, entity, HttpMethod.PUT);			
+			response = HttpClientUtils.testSend(url, entity, HttpMethod.PUT);			
 		}
 		catch(Exception e){
 			assertTrue(e.getMessage().contains(":cannot retry due to server authentication"));
@@ -97,7 +97,7 @@ public class CatalogRestTest {
 			
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 			
-		response = HttpClientUtils.send(url, entity, HttpMethod.GET);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.GET);
 			
 		System.out.println(response.getBody());
 
@@ -130,7 +130,7 @@ public class CatalogRestTest {
 		ResponseEntity<String> response = null;
 		
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-		response = HttpClientUtils.send(url, entity, HttpMethod.GET);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.GET);
 		
 		System.out.println(response.getBody());
 
@@ -162,7 +162,7 @@ public class CatalogRestTest {
 			
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		
-		response = HttpClientUtils.send(url, entity, HttpMethod.GET);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.GET);
 		
 		System.out.println(response.getBody());
 
@@ -197,7 +197,7 @@ public class CatalogRestTest {
 
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		
-		response = HttpClientUtils.send(url, entity, HttpMethod.GET);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.GET);
 		
 		System.out.println(response.getBody());
 
@@ -230,7 +230,7 @@ public class CatalogRestTest {
 
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		
-		response = HttpClientUtils.send(url, entity, HttpMethod.GET);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.GET);
 	
 		JsonNode json = null;
 		
@@ -323,7 +323,7 @@ public class CatalogRestTest {
 
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		
-		response = HttpClientUtils.send(url, entity, HttpMethod.POST);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.POST);
 		
 		System.out.println(response.getBody());
 
@@ -361,7 +361,7 @@ public class CatalogRestTest {
 			
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		
-		response = HttpClientUtils.send(url, entity, HttpMethod.PUT);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.PUT);
 		System.out.println(response.getBody());
 
 		JsonNode json = null;
@@ -396,7 +396,7 @@ public class CatalogRestTest {
 
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		
-		response = HttpClientUtils.send(url, entity, HttpMethod.DELETE);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.DELETE);
 		
 		System.out.println(response.getBody());
 
@@ -432,7 +432,7 @@ public class CatalogRestTest {
 
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		try {
-			response = HttpClientUtils.send(url, entity, HttpMethod.PATCH);
+			response = HttpClientUtils.testSend(url, entity, HttpMethod.PATCH);
 			
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -463,7 +463,7 @@ public class CatalogRestTest {
 
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 
-		response = HttpClientUtils.send(url, entity, HttpMethod.OPTIONS);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.OPTIONS);
 		System.out.println(response.getHeaders());
 		System.out.println(response.getBody());
 		System.out.println(response.getStatusCode());
@@ -494,7 +494,7 @@ public class CatalogRestTest {
 
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		try {
-			response = HttpClientUtils.send(url, entity, HttpMethod.HEAD);
+			response = HttpClientUtils.testSend(url, entity, HttpMethod.HEAD);
 			
 		} catch (Exception e) {
 			System.out.println(e.getMessage());

@@ -25,7 +25,7 @@ public class APIPlatformAPI {
 		ResponseEntity<String> loginResponseHttp = null;
 		
 		HttpEntity<String> httpEntity = new HttpEntity<String>(loginParameters, headers);
-		loginResponseHttp = HttpClientUtils.send(loginUri, httpEntity, HttpMethod.POST);
+		loginResponseHttp = HttpClientUtils.testSend(loginUri, httpEntity, HttpMethod.POST);
 		try {
 			JsonNode loginResponseJson = JsonUtils.convertToJson(loginResponseHttp);
 			ApiPlatformUtils.apiPlatformErrorMessageCheck(loginResponseJson);
@@ -47,7 +47,7 @@ public class APIPlatformAPI {
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		
 		httpEntity = new HttpEntity<String>(removeApplicationParameters, headers);
-		responseEntity = HttpClientUtils.send(removeApplicationUri, httpEntity, HttpMethod.POST);
+		responseEntity = HttpClientUtils.testSend(removeApplicationUri, httpEntity, HttpMethod.POST);
 		
 		JsonNode removeApplicationResponseJson = null;
 		
@@ -68,7 +68,7 @@ public class APIPlatformAPI {
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		
 		httpEntity = new HttpEntity<String>(addApplicationParameters, headers);
-		responseEntity = HttpClientUtils.send(addApplicationUri, httpEntity, HttpMethod.POST);
+		responseEntity = HttpClientUtils.testSend(addApplicationUri, httpEntity, HttpMethod.POST);
 		
 		JsonNode addApplicationResponseJson = null;
 		
@@ -89,7 +89,7 @@ public class APIPlatformAPI {
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		
 		httpEntity = new HttpEntity<String>(generateKeyParameters, headers);
-		responseEntity = HttpClientUtils.send(generateKeyUri, httpEntity, HttpMethod.POST);
+		responseEntity = HttpClientUtils.testSend(generateKeyUri, httpEntity, HttpMethod.POST);
 
 		JsonNode generateKeyResponseJson = null;
 		
@@ -112,7 +112,7 @@ public class APIPlatformAPI {
 
 		
 		httpEntity = new HttpEntity<String>(removeSubscriptionParameters, headers);
-		responseEntity = HttpClientUtils.send(removeSubscriptionUri, httpEntity, HttpMethod.POST);
+		responseEntity = HttpClientUtils.testSend(removeSubscriptionUri, httpEntity, HttpMethod.POST);
 		
 		JsonNode removeSubscriptionResponseJson = null;
 
@@ -139,7 +139,7 @@ public class APIPlatformAPI {
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 	
 		httpEntity = new HttpEntity<String>("", headers);
-		responseEntity = HttpClientUtils.send(getApplicationsUri+"?"+getApplicationParameter, httpEntity, HttpMethod.GET);
+		responseEntity = HttpClientUtils.testSend(getApplicationsUri+"?"+getApplicationParameter, httpEntity, HttpMethod.GET);
 		
 		JsonNode getApplicationsResponseJson = null;
 		
@@ -174,7 +174,7 @@ public class APIPlatformAPI {
 		
 		httpEntity = new HttpEntity<String>(lifecycleChangeParameters, headers);
 
-		responseEntity = HttpClientUtils.send(lifecycleChangeUri, httpEntity, HttpMethod.POST);
+		responseEntity = HttpClientUtils.testSend(lifecycleChangeUri, httpEntity, HttpMethod.POST);
 		
 		JsonNode lifecycleChangeResponseJson = null;
 
@@ -196,7 +196,7 @@ public class APIPlatformAPI {
 		
 		httpEntity = new HttpEntity<String>(addSubscriptionParameters, headers);
 
-		responseEntity = HttpClientUtils.send(addSubscriptionUri, httpEntity, HttpMethod.POST);
+		responseEntity = HttpClientUtils.testSend(addSubscriptionUri, httpEntity, HttpMethod.POST);
 		
 		JsonNode addSubscriptionResponseJson = null;
 
