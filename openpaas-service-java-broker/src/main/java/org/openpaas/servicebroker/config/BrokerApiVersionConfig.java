@@ -21,6 +21,10 @@ public class BrokerApiVersionConfig extends WebMvcConfigurerAdapter {
 	@Autowired
 	private BrokerApiVersion brokerApiVersion;
 
+	/**
+	 * 'v2/**'로 들어오는 모든 요청에 대해 인터셉터를 추가한다.
+	 * 
+	 */
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(new BrokerApiVersionInterceptor(brokerApiVersion)).addPathPatterns("/v2/**");

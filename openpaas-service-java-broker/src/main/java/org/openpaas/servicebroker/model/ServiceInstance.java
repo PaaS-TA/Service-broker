@@ -9,10 +9,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 
 /**
- * An instance of a ServiceDefinition.
+ * *ServiceDefinition의 인스턴스
  * 
- * @author sgreenberg@gopivotal.com
- *
+ * 2015.07.17
+ * @author 송창학 수석
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ServiceInstance {

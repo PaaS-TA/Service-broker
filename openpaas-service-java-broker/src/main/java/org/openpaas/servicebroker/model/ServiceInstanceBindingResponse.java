@@ -10,10 +10,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * The response sent to the cloud controller when a bind
- * request is successful.
+ * *바인드 요청이 성공적일때, 클라우드 컨트롤러로 전달되는 응답
  * 
- * @author sgreenberg@gopivotal.com
+ * 2015.07.17
+ * @author 송창학 수석
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)

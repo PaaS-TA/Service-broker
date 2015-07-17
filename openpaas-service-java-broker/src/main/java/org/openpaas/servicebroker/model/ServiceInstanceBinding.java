@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A binding to a service instance
+ * *서비스 인스턴스의 바인딩
  * 
- * @author sgreenberg@gopivotal.com
- *
+ * 2015.07.17
+ * @author 송창학 수석
  */
 public class ServiceInstanceBinding {
 

@@ -11,9 +11,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * A service plan available for a ServiceDefinition
+ * ServiceDefinition 클래스에서 사용하는 플랜  
  * 
- * @author sgreenberg@gopivotal.com
+ * 2015.07.17
+ * @author 송창학 수석
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)

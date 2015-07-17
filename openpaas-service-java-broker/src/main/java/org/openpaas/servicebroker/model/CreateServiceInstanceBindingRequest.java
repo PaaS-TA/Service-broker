@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * Request sent from the cloud controller to bind to a service 
- * instance.
+ * *서비스 인스턴스를 바인드하기 위해 클라우드 컨트롤러로부터 전달된 요청 (Bind)
  * 
- * @author sgreenberg@gopivotal.com
+ * 2015.07.17
+ * @author 송창학 수석
  *
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)

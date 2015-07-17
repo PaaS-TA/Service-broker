@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * A request sent by the cloud controller to create a new instance
- * of a service.
+ * *새로운 서비스 인스턴스를 생성하기 위해 클라우드 컨트롤러로부터 전달된 요청 (Provision)
  * 
- * @author sgreenberg@gopivotal.com
+ * 2015.07.17
+ * @author 송창학 수석
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CreateServiceInstanceRequest {
