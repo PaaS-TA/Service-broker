@@ -44,7 +44,7 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  */
 @Service
-@PropertySource("/WEB-INF/classes/application-mvc.properties")
+@PropertySource("classpath:application-mvc.properties")
 public class GlusterfsAdminService {
 
 	public static final String SERVICE_INSTANCES_FILDS = "instance_id, service_id, plan_id, organization_guid, space_guid, tenant_name, tenant_id";
