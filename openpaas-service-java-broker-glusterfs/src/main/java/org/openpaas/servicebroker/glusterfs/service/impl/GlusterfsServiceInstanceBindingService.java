@@ -1,9 +1,7 @@
 package org.openpaas.servicebroker.glusterfs.service.impl;
 
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.exception.ServiceInstanceBindingExistsException;

@@ -1,7 +1,5 @@
 package org.openpaas.servicebroker.glusterfs.service.impl;
 
-import static org.junit.Assert.assertEquals;
-
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.sql.ResultSet;
@@ -10,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
@@ -21,9 +18,10 @@ import org.openpaas.servicebroker.model.CreateServiceInstanceBindingRequest;
 import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
 import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.ServiceInstanceBinding;
-import org.openpaas.servicebroker.service.CatalogService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -36,10 +34,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 /**
  * Utility class for manipulating a Glusterfs database.
@@ -47,8 +43,8 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
  * @author 
  *
  */
-@PropertySource("classpath:datasource.properties")
 @Service
+@PropertySource("/WEB-INF/classes/application-mvc.properties")
 public class GlusterfsAdminService {
 
 	public static final String SERVICE_INSTANCES_FILDS = "instance_id, service_id, plan_id, organization_guid, space_guid, tenant_name, tenant_id";
@@ -289,7 +285,7 @@ public class GlusterfsAdminService {
 			
 			try{
 					
-				String url = env.getProperty("glusterfs.endpoint") + env.getProperty("glusterfs.uri.deletetenant");
+				String url = env.getRequiredProperty("glusterfs.endpoint") + env.getRequiredProperty("glusterfs.uri.deletetenant");
 
 				url = url.replace("#TENANT_ID", gfInstance.getTenantId());
 				
@@ -302,7 +298,7 @@ public class GlusterfsAdminService {
 				if (e.getMessage().equals("401 Unauthorized")) {
 					setGlusterfsAuthToken();
 					deleteTenant(serviceInstance);
-				}else{ // if(e.getMessage().equals("API Platform Error: API Platform Server Not Found")){
+				}else{// if(e.getMessage().equals("API Platform Error: API Platform Server Not Found")){
 					throw new ServiceBrokerException("Tennant exception occurred during deletion.");
 				}
 			}
@@ -336,11 +332,11 @@ public class GlusterfsAdminService {
 		String body = 	"{" + 
 							"\"auth\": " +
 							    "{" + 
-								"\"tenantName\": \"" + env.getProperty("glusterfs.tenantname") + "\"," + 
+								"\"tenantName\": \"" + env.getRequiredProperty("glusterfs.tenantname") + "\"," + 
 								"\"passwordCredentials\": " + 
 								"{" + 
-									"\"username\": \"" + env.getProperty("glusterfs.username") + "\"," + 
-									"\"password\": \"" + env.getProperty("glusterfs.password") + "\"" + 
+									"\"username\": \"" + env.getRequiredProperty("glusterfs.username") + "\"," + 
+									"\"password\": \"" + env.getRequiredProperty("glusterfs.password") + "\"" + 
 									"}" + 
 								"}" + 
 						"}";
@@ -350,7 +346,7 @@ public class GlusterfsAdminService {
 		
 		try{
 				
-			String url = env.getProperty("glusterfs.authurl") + env.getProperty("glusterfs.uri.auth");
+			String url = env.getRequiredProperty("glusterfs.authurl") + env.getRequiredProperty("glusterfs.uri.auth");
 			
 			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
 			
@@ -393,7 +389,7 @@ public class GlusterfsAdminService {
 		System.out.println("body : " + body);
 		try{
 				
-			String url = env.getProperty("glusterfs.swiftproxy") + env.getProperty("glusterfs.uri.account");
+			String url = env.getRequiredProperty("glusterfs.swiftproxy") + env.getRequiredProperty("glusterfs.uri.account");
 			System.out.println("url : " + url);
 			url = url.replace("#TENANT_ID", tenantId);
 			
@@ -425,7 +421,7 @@ public class GlusterfsAdminService {
 		
 		try{
 				
-			String url = env.getProperty("glusterfs.endpoint") + env.getProperty("glusterfs.uri.userinfo");
+			String url = env.getRequiredProperty("glusterfs.endpoint") + env.getRequiredProperty("glusterfs.uri.userinfo");
 
 			url = url.replace("#USER_NAME", username);
 			
@@ -480,7 +476,7 @@ public class GlusterfsAdminService {
 		
 		try{
 				
-			String url = env.getProperty("glusterfs.endpoint") + env.getProperty("glusterfs.uri.createtenant");
+			String url = env.getRequiredProperty("glusterfs.endpoint") + env.getRequiredProperty("glusterfs.uri.createtenant");
 			System.out.println("url : " + url);
 			
 			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
@@ -622,7 +618,7 @@ public class GlusterfsAdminService {
 		
 		try{
 				
-			String url = env.getProperty("glusterfs.endpoint") + env.getProperty("glusterfs.uri.createusers");
+			String url = env.getRequiredProperty("glusterfs.endpoint") + env.getRequiredProperty("glusterfs.uri.createusers");
 			System.out.println("url : " + url);
 			
 			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
@@ -668,7 +664,7 @@ public class GlusterfsAdminService {
 		
 		try{
 				
-			String url = env.getProperty("glusterfs.endpoint") + env.getProperty("glusterfs.uri.deleteusers");
+			String url = env.getRequiredProperty("glusterfs.endpoint") + env.getRequiredProperty("glusterfs.uri.deleteusers");
 			System.out.println("url : " + url);
 			System.out.println("userId : " + userId);
 			url = url.replace("#USER_ID", userId);

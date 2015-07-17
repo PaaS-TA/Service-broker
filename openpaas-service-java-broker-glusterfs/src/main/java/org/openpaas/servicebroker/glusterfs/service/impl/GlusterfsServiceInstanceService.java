@@ -1,9 +1,6 @@
 package org.openpaas.servicebroker.glusterfs.service.impl;
 
 
-import java.util.List;
-import java.util.Map;
-
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.exception.ServiceInstanceDoesNotExistException;
 import org.openpaas.servicebroker.exception.ServiceInstanceExistsException;
