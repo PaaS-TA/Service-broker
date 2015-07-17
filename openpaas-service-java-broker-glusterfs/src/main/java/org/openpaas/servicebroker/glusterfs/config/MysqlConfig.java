@@ -49,7 +49,6 @@ public class MysqlConfig {
 		dataSource.setUrl(env.getRequiredProperty("jdbc.url"));
 		dataSource.setUsername(env.getRequiredProperty("jdbc.username"));
 		dataSource.setPassword(env.getRequiredProperty("jdbc.pwd"));
-
 		return dataSource;
         // instantiate, configure and return DataSource
     }
