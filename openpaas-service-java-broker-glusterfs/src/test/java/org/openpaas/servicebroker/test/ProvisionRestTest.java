@@ -363,7 +363,7 @@ public class ProvisionRestTest {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		UpdateProvisionBody body = new UpdateProvisionBody(prop.getProperty("broker.apitest.info.planIdC"));
+		UpdateProvisionBody body = new UpdateProvisionBody(prop.getProperty("broker.apitest.info.planIdD"));
 		
 		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);
 		ResponseEntity<String> response = null;

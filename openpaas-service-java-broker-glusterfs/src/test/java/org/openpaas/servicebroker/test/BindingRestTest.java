@@ -329,7 +329,7 @@ public class BindingRestTest {
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		//HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		BindingBody bindingbody = new BindingBody(prop.getProperty("broker.apitest.info.serviceId"), 
-				prop.getProperty("broker.apitest.info.planIdC"), 
+				prop.getProperty("broker.apitest.info.planIdD"), 
 				prop.getProperty("broker.apitest.info.appGuidB"));
 		
 		HttpEntity<BindingBody> entity = new HttpEntity<BindingBody>(bindingbody, headers);
@@ -427,6 +427,7 @@ public class BindingRestTest {
 		} catch (ServiceBrokerException sbe) { 
 			assertEquals(sbe.getMessage(), "410 Gone");
 			bException = true;
+			sendProvision_Provision_delete();
 		}
 		
 		if (!bException) assertFalse("Error", true);
