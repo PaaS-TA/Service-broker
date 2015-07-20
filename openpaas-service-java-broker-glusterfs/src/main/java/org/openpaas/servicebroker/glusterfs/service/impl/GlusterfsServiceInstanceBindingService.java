@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
  * @author kkanzo@bluedigm.com
  *
  */
-@PropertySource("classpath:application-mvc.properties")
+@PropertySource("classpath:glusterfs.properties")
 @Service
 public class GlusterfsServiceInstanceBindingService implements ServiceInstanceBindingService {
 

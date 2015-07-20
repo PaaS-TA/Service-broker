@@ -11,6 +11,7 @@ import java.util.Map;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
+import org.openpaas.servicebroker.exception.ServiceInstanceExistsException;
 import org.openpaas.servicebroker.glusterfs.common.ConstantsAuthToken;
 import org.openpaas.servicebroker.glusterfs.exception.GlusterfsServiceException;
 import org.openpaas.servicebroker.glusterfs.model.GlusterfsServiceInstance;
@@ -43,8 +44,9 @@ import com.fasterxml.jackson.databind.JsonNode;
  * @author 
  *
  */
+@PropertySource("classpath:glusterfs.properties")
 @Service
-@PropertySource("/WEB-INF/classes/application-mvc.properties")
+//@PropertySource("/WEB-INF/classes/application-mvc.properties")
 public class GlusterfsAdminService {
 
 	public static final String SERVICE_INSTANCES_FILDS = "instance_id, service_id, plan_id, organization_guid, space_guid, tenant_name, tenant_id";
@@ -93,10 +95,10 @@ public class GlusterfsAdminService {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 	
-	@Autowired
+	/*@Autowired
 	public GlusterfsAdminService(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
-	}
+	}*/
 		
 	private final RowMapper<ServiceInstance> mapper = new ServiceInstanceRowMapper();
 	
@@ -374,15 +376,18 @@ public class GlusterfsAdminService {
 		
 	}
 	
-	public void setGlusterfsQuota(String planId, String tenantId) throws GlusterfsServiceException{
+	public void setGlusterfsQuota(String planId, String tenantId) throws ServiceBrokerException{
 		
 		System.out.println("GlusterfsAdminService.getGlusterfsAuthToken");
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 		headers.set("X-Auth-Token", ConstantsAuthToken.AUTH_TOKEN);
-		headers.set("X-Account-Meta-Quota-Bytes", planAsize+"");
-		if(planId.equals(planB)) headers.set("X-Account-Meta-Quota-Bytes", planBsize+"");
-		if(planId.equals(planC)) headers.set("X-Account-Meta-Quota-Bytes", planCsize+"");
+		if(planId.equals(planA)) {headers.set("X-Account-Meta-Quota-Bytes", planAsize+"");}
+		else if(planId.equals(planB)) {headers.set("X-Account-Meta-Quota-Bytes", planBsize+"");}
+		else if(planId.equals(planC)) {headers.set("X-Account-Meta-Quota-Bytes", planCsize+"");}
+		else{
+			throw new ServiceBrokerException("");
+		}
 		String body = 	"";
 		
 		HttpEntity<String> entity = new HttpEntity<String>(body, headers);
@@ -455,7 +460,7 @@ public class GlusterfsAdminService {
 		
 	}
 	
-	public GlusterfsServiceInstance createTenant(ServiceInstance serviceInstance) throws GlusterfsServiceException{
+	public GlusterfsServiceInstance createTenant(ServiceInstance serviceInstance) throws ServiceInstanceExistsException, ServiceBrokerException{
 		
 		System.out.println("GlusterfsAdminService.createTenant");
 		
@@ -498,9 +503,9 @@ public class GlusterfsAdminService {
 				setGlusterfsAuthToken();
 				glusterfsServiceInstance = createTenant(serviceInstance);
 			}else if(e.getMessage().equals("409 Conflict")){
-				throw new GlusterfsServiceException("Tennant exception occurred during creation.(duplicated)");
+				throw new ServiceInstanceExistsException(serviceInstance);
 			}else { 
-				throw new GlusterfsServiceException("Tennant exception occurred during creation.");
+				throw new ServiceBrokerException("Tennant exception occurred during creation.");
 			}
 			
 		} catch (Exception e) {

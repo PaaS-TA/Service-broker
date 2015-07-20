@@ -32,7 +32,7 @@ public class CatalogMockTest {
 	@Mock
 	CatalogService catalogService;
 
-//	@Before
+	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 
@@ -40,7 +40,7 @@ public class CatalogMockTest {
 	            .setMessageConverters(new MappingJackson2HttpMessageConverter()).build();
 	}
 	
-//	@Test
+	@Test
 	public void catalogIsRetrievedCorrectly() throws Exception {
 	    when(catalogService.getCatalog()).thenReturn(CatalogFixture.getCatalog());
 	
