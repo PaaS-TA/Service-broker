@@ -6,17 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-
-
-
-
-
-
-
-
-
-
-
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -45,7 +34,7 @@ public class ProvisionRestTest {
 	@BeforeClass
 	public static void init() {
 		
-		System.out.println("== Started test Catalog API ==");
+		System.out.println("== Started test Provision API ==");
 
 		// Initialization
 		// Get properties information
@@ -68,7 +57,7 @@ public class ProvisionRestTest {
 	 * POST요청
 	 */
 	@Test	
-	public void sendProvision_AA_methodPOST() {
+	public void TC001_Provision_methodPOST() {
 		
 		System.out.println("Start - POST");
 		
@@ -105,10 +94,10 @@ public class ProvisionRestTest {
 
 
 	/**
-	 * OPTIONS요청
+	 * OPTIONS 요청
 	 */
 	@Test	
-	public void sendProvision_AB_methodOPTIONS() {
+	public void TC002_Provision_methodOPTIONS() {
 		
 		System.out.println("Start - OPTIONS");
 		
@@ -144,10 +133,10 @@ public class ProvisionRestTest {
 	}
 
 	/**
-	 * HEAD요청
+	 * HEAD 요청
 	 */
 	@Test	
-	public void sendProvision_AC_methodHEAD() {
+	public void TC003_Provision_methodHEAD() {
 		
 		System.out.println("Start - HEAD");
 		
@@ -186,7 +175,7 @@ public class ProvisionRestTest {
 	 *  필수값 누락 체크 : service_id 누락
 	 */
 	@Test	
-	public void sendProvision_AD_provision_mandatory_check() {
+	public void TC004_Provision_mandatory_param_check() {
 		
 		System.out.println("Start - provision_mandatory_check");
 		
@@ -228,7 +217,7 @@ public class ProvisionRestTest {
 	 * Provision_create
 	 */
 	@Test	
-	public void sendProvision_BA_Provision_create() {
+	public void TC005_Provision_create() {
 		
 		System.out.println("Start - Provision_create");
 		
@@ -274,7 +263,7 @@ public class ProvisionRestTest {
 	 * Provision_same_info_create
 	 */
 	@Test	
-	public void sendProvision_BB_Provision_same_info_create() {
+	public void TC006_Provision_duplication_create() {
 		
 		System.out.println("Start - Provision_same_info_create");
 		
@@ -318,7 +307,7 @@ public class ProvisionRestTest {
 	 * Provision_chang
 	 */
 	@Test	
-	public void sendProvision_CA_Provision_chang() {
+	public void TC007_Provision_plan_change() {
 		
 		System.out.println("Start - Provision_chang");
 		
@@ -355,7 +344,7 @@ public class ProvisionRestTest {
 	 * Provision_chang_invalid_planId
 	 */
 	@Test	
-	public void sendProvision_CB_Provision_chang_invalid_planId() {
+	public void TC008_Provision_change_invalid_planId() {
 		
 		System.out.println("Start - Provision_chang_invalid_planId");
 		
@@ -394,7 +383,7 @@ public class ProvisionRestTest {
 	 * Provision_delete
 	 */
 	@Test
-	public void sendProvision_DA_Provision_delete(){
+	public void TC009_Provision_delete(){
 		System.out.println("Start - Provision_delete");
 		
 		HttpHeaders headers = new HttpHeaders();	
@@ -428,7 +417,7 @@ public class ProvisionRestTest {
 	 * Provision_delete_non_instanceId
 	 */
 	@Test
-	public void sendProvision_DB_Provision_delete_non_instanceId(){
+	public void TC010_Provision_delete_invalid_instanceId(){
 		System.out.println("Start - Provision_delete_non_instanceId");
 		
 		HttpHeaders headers = new HttpHeaders();	

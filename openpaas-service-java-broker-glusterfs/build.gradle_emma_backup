@@ -66,22 +66,25 @@ configurations {
 }
 
 dependencies {
+    compile files('libs/openpaas-service-java-broker.jar')
+    
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat:${springBootVersion}")
+
     compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
     compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
-    compile("org.hibernate:hibernate-validator:${hibernateValidatorVersion}")
+    compile("org.apache.httpcomponents:httpclient:4.4.1")
+	compile("org.apache.commons:commons-dbcp2")
+    compile "org.springframework:spring-jdbc:4.0.0.M3"
+    //compile("org.hibernate:hibernate-validator:${hibernateValidatorVersion}")
 
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
     testCompile("com.jayway.jsonpath:json-path:${jsonPathVersion}")
-    
-    
+	testCompile("org.apache.httpcomponents:httpclient:4.4.1")
+    testCompile 'junit:junit:4.12'
     // EMMS Code Coverage
-    //emma "emma:emma:2.1.5320"
-    //emma "emma:emma_ant:2.1.5320"
-        
-    compile("org.apache.commons:commons-dbcp2")
+    emma "emma:emma:2.1.5320"
+    emma "emma:emma_ant:2.1.5320"
     runtime "mysql:mysql-connector-java:5.1.27"
-    compile "org.springframework:spring-jdbc:4.0.0.M3"
 }
 
 /*

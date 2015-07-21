@@ -1,4 +1,4 @@
-package org.openpaas.servicebroker.test;
+package org.openpaas.servicebroker.test.rest;
 
 import static org.junit.Assert.*;
 
@@ -6,12 +6,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+
+
+
+
+
+
+
+
+
+
+
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.openpaas.servicebroker.common.BindingBody;
 import org.openpaas.servicebroker.common.HttpClientUtils;
+import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.common.ProvisionBody;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.springframework.http.HttpEntity;
@@ -183,7 +196,7 @@ public class BindingRestTest {
 	@Test	
 	public void TC004_binding_methodPATCH() {
 		
-		System.out.println("Start - PATCH");
+		System.out.println("Start - HEAD");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -214,7 +227,7 @@ public class BindingRestTest {
 		
 		if (!bException) assertFalse("Error", true);
 		
-		System.out.println("End - PATCH");
+		System.out.println("End - HEAD");
 	}
 	
 	/**
@@ -299,7 +312,7 @@ public class BindingRestTest {
 		
 		assertTrue("Success", true);
 		
-		System.out.println("End - binding_duplication_create");
+		System.out.println("End - Binding_create");
 	}
 	
 	/**
@@ -308,7 +321,7 @@ public class BindingRestTest {
 	@Test	
 	public void TC007_binding_create_invalid_planId() {
 		
-		System.out.println("Start - binding_create_invalid_planId");
+		System.out.println("Start - Binding_create");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -316,7 +329,7 @@ public class BindingRestTest {
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		//HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		BindingBody bindingbody = new BindingBody(prop.getProperty("broker.apitest.info.serviceId"), 
-				prop.getProperty("broker.apitest.info.planIdD"), 
+				prop.getProperty("broker.apitest.info.planIdC"), 
 				prop.getProperty("broker.apitest.info.appGuidB"));
 		
 		HttpEntity<BindingBody> entity = new HttpEntity<BindingBody>(bindingbody, headers);
@@ -341,7 +354,7 @@ public class BindingRestTest {
 		
 		if (!bException) assertFalse("Error", true);
 		
-		System.out.println("End - binding_create_invalid_planId");
+		System.out.println("End - binding_duplication_create");
 	}
 	
 	/**
@@ -414,7 +427,6 @@ public class BindingRestTest {
 		} catch (ServiceBrokerException sbe) { 
 			assertEquals(sbe.getMessage(), "410 Gone");
 			bException = true;
-			provisionDelete();
 		}
 		
 		if (!bException) assertFalse("Error", true);
@@ -478,7 +490,7 @@ public class BindingRestTest {
 	
 	private void provisionCreate() {
 		
-		System.out.println("Start - provisionCreate");
+		System.out.println("Start - Provision_create");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -504,11 +516,11 @@ public class BindingRestTest {
 		} catch (ServiceBrokerException sbe) {
 		}
 		
-		System.out.println("End - provisionCreate");
+		System.out.println("End - Provision_create");
 	}
 	
 	private void provisionDelete(){
-		System.out.println("Start - provisionDeletee");
+		System.out.println("Start - Provision_delete");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -528,6 +540,6 @@ public class BindingRestTest {
 			
 		} catch (ServiceBrokerException sbe) {
 		}
-		System.out.println("End - provisionDeletee");
+		System.out.println("End - Provision_delete");
 	}
 }
