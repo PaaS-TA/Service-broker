@@ -42,7 +42,7 @@ public class MongoServiceInstanceService implements ServiceInstanceService {
 	@Override
 	public ServiceInstance createServiceInstance(CreateServiceInstanceRequest request) 
 			throws ServiceInstanceExistsException, ServiceBrokerException {
-		logger.info("=====> CubridServiceInstanceService CLASS createServiceInstance");
+		logger.info("=====> MongoServiceInstanceService CLASS createServiceInstance");
 
 		// TODO MongoDB dashboard
 		MongoServiceInstance instance = repository.findOne(request.getServiceInstanceId());
@@ -70,7 +70,7 @@ public class MongoServiceInstanceService implements ServiceInstanceService {
 
 	@Override
 	public ServiceInstance deleteServiceInstance(DeleteServiceInstanceRequest request) throws MongoServiceException {
-		logger.info("=====> CubridServiceInstanceService CLASS deleteServiceInstance");
+		logger.info("=====> MongoServiceInstanceService CLASS deleteServiceInstance");
 
 		mongo.deleteDatabase(request.getServiceInstanceId());
 		ServiceInstance instance = repository.findOne(request.getServiceInstanceId());
@@ -81,7 +81,7 @@ public class MongoServiceInstanceService implements ServiceInstanceService {
 	@Override
 	public ServiceInstance updateServiceInstance(UpdateServiceInstanceRequest request)
 			throws ServiceInstanceUpdateNotSupportedException, ServiceBrokerException, ServiceInstanceDoesNotExistException {
-		logger.info("=====> CubridServiceInstanceService CLASS updateServiceInstance");
+		logger.info("=====> MongoServiceInstanceService CLASS updateServiceInstance");
 
 		ServiceInstance instance = repository.findOne(request.getServiceInstanceId());
 		if (instance == null) {
