@@ -1,8 +1,5 @@
 package org.openpaas.servicebroker.mongodb.service.impl;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -11,7 +8,6 @@ import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.exception.ServiceInstanceBindingExistsException;
 import org.openpaas.servicebroker.model.CreateServiceInstanceBindingRequest;
 import org.openpaas.servicebroker.model.DeleteServiceInstanceBindingRequest;
-import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.ServiceInstanceBinding;
 import org.openpaas.servicebroker.mongodb.repository.MongoServiceInstanceBindingRepository;
 import org.openpaas.servicebroker.service.ServiceInstanceBindingService;
@@ -48,7 +44,7 @@ public class MongoServiceInstanceBindingService implements ServiceInstanceBindin
 	public ServiceInstanceBinding createServiceInstanceBinding(
 			CreateServiceInstanceBindingRequest request)
 					throws ServiceInstanceBindingExistsException, ServiceBrokerException {
-		logger.info("=====> CubridServiceInstanceBindingService CLASS createServiceInstanceBinding");
+		logger.info("=====> MongoServiceInstanceBindingService CLASS createServiceInstanceBinding");
 
 		ServiceInstanceBinding binding = repository.findOne(request.getBindingId());
 		if (binding != null) {
@@ -80,7 +76,7 @@ public class MongoServiceInstanceBindingService implements ServiceInstanceBindin
 	@Override
 	public ServiceInstanceBinding deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request)
 			throws ServiceBrokerException {
-		logger.info("=====> CubridServiceInstanceBindingService CLASS deleteServiceInstanceBinding");
+		logger.info("=====> MongoServiceInstanceBindingService CLASS deleteServiceInstanceBinding");
 
 		ServiceInstanceBinding binding = getServiceInstanceBinding(request.getBindingId());
 		if (binding!= null) {

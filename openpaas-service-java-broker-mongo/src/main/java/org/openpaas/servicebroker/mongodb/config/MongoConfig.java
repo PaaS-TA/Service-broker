@@ -1,6 +1,7 @@
 package org.openpaas.servicebroker.mongodb.config;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import org.openpaas.servicebroker.mongodb.service.impl.MongoAdminService;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 
 @Configuration
 @EnableMongoRepositories(basePackages = "org.openpaas.servicebroker.mongodb.repository")
@@ -22,7 +25,8 @@ public class MongoConfig {
 	}
 
 	public @Bean MongoClient mongoClient() throws UnknownHostException {
-		return new MongoClient("localhost");
+		MongoCredential credential = MongoCredential.createCredential("root2", "admin", "qwer1234".toCharArray());
+		return new MongoClient(new ServerAddress("52.27.250.138", 27017), Arrays.asList(credential));
 	}
 
 	public @Bean MongoAdminService mongoAdminService() throws UnknownHostException {

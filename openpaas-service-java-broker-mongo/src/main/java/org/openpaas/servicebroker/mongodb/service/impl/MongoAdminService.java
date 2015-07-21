@@ -82,7 +82,7 @@ public static final String ADMIN_DB = "admin";
 			roles.add("readWrite");
 			DBObject command = BasicDBObjectBuilder.start("createUser", username)
 					.add("pwd", password)
-					.add("roles", new BasicDBList())
+					.add("roles", roles)
 					.get();
 			CommandResult result = db.command(command);
 			if (!result.ok()) {
@@ -105,6 +105,7 @@ public static final String ADMIN_DB = "admin";
 	}
 	
 	public String getConnectionString(String database, String username, String password) {
+		//mongodb://test_user:qwer1234@52.27.250.138:27017/pwdtest?authSource=pwdtest&authMechanism=MONGODB-CR
 		StringBuilder builder = new StringBuilder();
 		builder.append("mongodb://");
 		builder.append(username);
@@ -114,6 +115,13 @@ public static final String ADMIN_DB = "admin";
 		builder.append(getServerAddresses());
 		builder.append("/");
 		builder.append(database);
+		
+		/*builder.append("?");
+		builder.append("authSource=");
+		builder.append(database);
+		builder.append("&");
+		builder.append("authMechanism=");
+		builder.append("MONGODB-CR");*/
 		return builder.toString();
 	}
 	
