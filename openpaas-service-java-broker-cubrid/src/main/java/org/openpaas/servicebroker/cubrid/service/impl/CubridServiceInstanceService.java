@@ -124,27 +124,8 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		if ( instance == null ) {
 			throw new ServiceInstanceDoesNotExistException(request.getServiceInstanceId());
 		} else {
-			ServiceInstance updateInstance = new ServiceInstance(request);
-
-			String as_is = instance.getPlanId();
-			String to_be = updateInstance.getPlanId();
-
-			logger.debug("as-is : {}, to be : {}", instance.getPlanId(), updateInstance.getPlanId());
-
-			if ( ("100mb-utf8".equals(as_is) && "200mb-utf8".equals(to_be)) ||
-					("100mb-euckr".equals(as_is) && "200mb-euckr".equals(to_be)) ) {
-
-				cubridAdminService.addVolume(instance.getDatabaseName());
-				
-				instance.setPlanId(to_be);
-				cubridAdminService.update(instance);
-				
-			} else {
-				throw new ServiceInstanceUpdateNotSupportedException("Not Supported.");
-			}
+			throw new ServiceInstanceUpdateNotSupportedException("Not Supported.");
 		}
-
-		return instance;
 	}
 
 	private String getDatabaseName() {

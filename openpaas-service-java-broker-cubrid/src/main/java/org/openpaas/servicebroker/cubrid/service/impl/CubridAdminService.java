@@ -50,25 +50,13 @@ public class CubridAdminService {
 		//Plan A
 		plan.put("vol", "100M");
 		plan.put("charset", "ko_KR.utf8");
-		this.plans.put("100mb-utf8", plan);
-
-		plan = new HashMap<String, String>();
-		//Plan B
-		plan.put("vol", "200M");
-		plan.put("charset", "ko_KR.utf8");
-		this.plans.put("200mb-utf8", plan);
+		this.plans.put("utf8", plan);
 
 		plan = new HashMap<String, String>();
 		//Plan C
 		plan.put("vol", "100M");
 		plan.put("charset", "ko_KR.euckr");
-		this.plans.put("100mb-euckr", plan);
-
-		plan = new HashMap<String, String>();
-		//Plan D
-		plan.put("vol", "200M");
-		plan.put("charset", "ko_KR.euckr");
-		this.plans.put("200mb-euckr", plan);
+		this.plans.put("euckr", plan);
 
 	}
 
