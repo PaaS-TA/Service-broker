@@ -41,7 +41,7 @@ public class CatalogConfig {
 		sdMetadata.put("displayName", "MongoDB");
 		sdMetadata.put("imageUrl","http://info.mongodb.com/rs/mongodb/images/MongoDB_Logo_Full.png");
 		sdMetadata.put("longDescription","MongodDB Service");
-		sdMetadata.put("providerDisplayName","Pivotal");
+		sdMetadata.put("providerDisplayName","OpanPaas");
 		sdMetadata.put("documentationUrl","http://www.mongodb.org");
 		sdMetadata.put("supportUrl","http://www.mongodb.org");
 		return sdMetadata;
@@ -67,9 +67,7 @@ public class CatalogConfig {
 	}
 	
 	private List<String> getBullets() {
-		return Arrays.asList("Shared MongoDB server", 
-				"100 MB Storage (not enforced)", 
-				"40 concurrent connections (not enforced)");
+		return Arrays.asList("Shared MongoDB server");
 	}
 
 }
