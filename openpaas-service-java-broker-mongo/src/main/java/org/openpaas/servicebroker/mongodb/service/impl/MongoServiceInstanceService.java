@@ -47,7 +47,20 @@ public class MongoServiceInstanceService implements ServiceInstanceService {
 		// TODO MongoDB dashboard
 		MongoServiceInstance instance = repository.findOne(request.getServiceInstanceId());
 		if (instance != null) {
-			throw new ServiceInstanceExistsException(instance);
+			String as_is_id = instance.getServiceInstanceId();
+			String as_is_plan = instance.getPlanId();
+			String to_be_id = request.getServiceInstanceId();
+			String to_be_plan = request.getPlanId();
+
+			logger.debug("as-is : Instance ID = {}, Plan = {}", as_is_id, as_is_plan);
+			logger.debug("to-be : Instance ID = {}, Plan = {}", to_be_id, to_be_plan);
+
+			if( as_is_id.equals(to_be_id) && as_is_plan.equals(to_be_plan) ) {
+				instance.setHttpStatusOK();
+				return instance;
+			} else {
+				throw new ServiceInstanceExistsException(instance);
+			}
 		}
 		instance = new MongoServiceInstance(request);
 		if (mongo.databaseExists(request.getServiceInstanceId())) {
