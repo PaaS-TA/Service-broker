@@ -22,7 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 public class UnBindingRestTest {
 
@@ -55,7 +55,7 @@ public class UnBindingRestTest {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		headers.set("Authorization", "Basic " + new String(Base64.encodeBase64((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 
 		String organization_guid = UUID.randomUUID().toString();
 		String space_guid = UUID.randomUUID().toString();
@@ -63,7 +63,7 @@ public class UnBindingRestTest {
 		Map<String, String> bodyMap = new HashMap<String,String>();
 
 		bodyMap.put("service_id", "cubrid");
-		bodyMap.put("plan_id", "100mb-utf8");
+		bodyMap.put("plan_id", "utf8");
 		bodyMap.put("organization_guid", organization_guid);
 		bodyMap.put("space_guid", space_guid);
 
@@ -84,7 +84,7 @@ public class UnBindingRestTest {
 
 		//binding
 		bodyMap.clear();
-		bodyMap.put("plan_id", "100mb-utf8");
+		bodyMap.put("plan_id", "utf8");
 		bodyMap.put("service_id", "cubrid");
 		bodyMap.put("app_guid", "app-guid-here");
 
@@ -110,7 +110,7 @@ public class UnBindingRestTest {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		headers.set("Authorization", "Basic " + new String(Base64.encodeBase64((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;
@@ -139,7 +139,7 @@ public class UnBindingRestTest {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		headers.set("Authorization", "Basic " + new String(Base64.encodeBase64((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;
@@ -166,14 +166,14 @@ public class UnBindingRestTest {
 
 
 	@Test
-	public void unProvisionTest_410() {
+	public void unBindingTest_410Gone() {
 		
 		System.out.println("Start - not exist binding");
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		headers.set("Authorization", "Basic " + new String(Base64.encodeBase64((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 				
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;

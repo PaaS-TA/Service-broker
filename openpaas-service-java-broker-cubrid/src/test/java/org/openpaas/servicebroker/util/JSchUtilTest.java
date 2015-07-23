@@ -1,11 +1,10 @@
 package org.openpaas.servicebroker.util;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openpaas.servicebroker.cubrid.CubridConfiguration;
@@ -15,6 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = CubridConfiguration.class)
+@Ignore
 public class JSchUtilTest {
 	
 	@Autowired
