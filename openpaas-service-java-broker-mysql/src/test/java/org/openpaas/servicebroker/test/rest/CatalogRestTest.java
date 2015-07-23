@@ -1,4 +1,4 @@
-package org.openpaas.servicebroker.test;
+package org.openpaas.servicebroker.test.rest;
 
 import static org.junit.Assert.*;
 
@@ -7,7 +7,9 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
@@ -29,6 +31,7 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
  * 
  * @author ahnchan
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CatalogRestTest {
 	
 	private static Properties prop = new Properties();
@@ -55,10 +58,240 @@ public class CatalogRestTest {
 	}
 	
 	/**
+	 * POST로 요청
+	 */
+	@Test	
+	public void TC001_methodPOST() {
+		
+		System.out.println("Start - POST");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ResponseEntity<String> response = null;
+		
+		boolean bException = false;
+
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) {
+			
+			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
+			bException = true;
+			
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - POST");
+	}
+
+
+	/**
+	 * PUT으로 요청
+	 */
+	@Test	
+	public void TC002_methodPUT() {
+		
+		System.out.println("Start - POST");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ResponseEntity<String> response = null;
+		
+		boolean bException = false;
+
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.PUT);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) {
+			
+			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
+			bException = true;
+			
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - PUT");
+	}
+
+	/**
+	 * DELETE로 요청
+	 */
+	@Test	
+	public void TC003_methodDELETE() {
+		
+		System.out.println("Start - POST");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ResponseEntity<String> response = null;
+		
+		boolean bException = false;
+
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.DELETE);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) {
+			
+			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
+			bException = true;
+			
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - DELETE");
+	}
+
+	/**
+	 * PATCH로 요청
+	 */
+	@Test	
+	public void TC004_methodPATCH() {
+		
+		System.out.println("Start - PATCH");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ResponseEntity<String> response = null;
+		
+		boolean bException = false;
+
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.PATCH);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) {
+			
+			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
+			bException = true;
+			
+			sbe.printStackTrace();
+			
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - PATCH");
+	}
+	
+	
+	/**
+	 * OPTIONS로 요청
+	 */
+	@Test	
+	public void TC005_methodOPTIONS() {
+		
+		System.out.println("Start - OPTIONS");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ResponseEntity<String> response = null;
+		
+		boolean bException = false;
+
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.OPTIONS);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) {
+			
+			assertFalse(sbe.getMessage(), true);
+			bException = true;
+			
+			sbe.printStackTrace();
+			
+		}
+		
+		if (!bException) assertTrue("Success", true);
+		
+		System.out.println("End - OPTIONS");
+	}
+
+	/**
+	 * HEAD로 요청
+	 */
+	@Test	
+	public void TC006_methodHEAD() {
+		
+		System.out.println("Start - HEAD");
+		
+		HttpHeaders headers = new HttpHeaders();	
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
+		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
+		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		ResponseEntity<String> response = null;
+		
+		boolean bException = false;
+
+		try {
+			
+			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			
+			response = HttpClientUtils.send(url, entity, HttpMethod.HEAD);
+			
+			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+
+		} catch (ServiceBrokerException sbe) {
+			
+			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
+			bException = true;
+			
+			sbe.printStackTrace();
+			
+		}
+		
+		if (!bException) assertFalse("Error", true);
+		
+		System.out.println("End - HEAD");
+	}
+	
+	/**
 	 * 사용자 ID, 비밀번호가 없을 경우
 	 */
 	@Test	
-	public void getCatalogTest_noUser() {
+	public void TC007_noUser() {
 		
 		System.out.println("Start - no user");
 		
@@ -102,7 +335,7 @@ public class CatalogRestTest {
 	 * 사용자 ID, 비밀번호가 잘못 입력되었을 경우
 	 */
 	@Test	
-	public void getCatalogTest_invalidUser() {
+	public void TC008_invalidUser() {
 		
 		System.out.println("Start - invalid user");
 		
@@ -136,7 +369,7 @@ public class CatalogRestTest {
 	 * 사용자 ID, 비밀번호가 정상적으로 입력되었을 경우
 	 */
 	@Test	
-	public void getCatalogTest_correctUser() {
+	public void TC009_correctUser() {
 		
 		System.out.println("Start - correct user");
 		
@@ -170,7 +403,7 @@ public class CatalogRestTest {
 	 * Version이 잘못 입력되었을 경우
 	 */
 	@Test	
-	public void getCatalogTest_incorrectAPIVersion() {
+	public void TC010_incorrectAPIVersion() {
 		
 		System.out.println("Start - incorrect API Version");
 		
@@ -205,7 +438,7 @@ public class CatalogRestTest {
 	 * Mandatory 부분이 다 들어가 있는지 확인
 	 */
 	@Test	
-	public void getCatalogTest_validCatalog() {
+	public void TC011_validCatalog() {
 		
 		System.out.println("Start - valid catalog");
 		
@@ -240,6 +473,7 @@ public class CatalogRestTest {
 		System.out.println("End - valid catalog");
 	}
 
+	
 	private boolean checkValidCatalogJson(JsonNode json) {
 		boolean bResult = true;
 
@@ -291,236 +525,5 @@ public class CatalogRestTest {
 		}
 		
 		return bResult;
-	}
-	
-	
-	/**
-	 * POST로 요청
-	 */
-	@Test	
-	public void getCatalogTest_methodPOST() {
-		
-		System.out.println("Start - POST");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - POST");
-	}
-
-
-	/**
-	 * PUT으로 요청
-	 */
-	@Test	
-	public void getCatalogTest_methodPUT() {
-		
-		System.out.println("Start - POST");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.PUT);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - PUT");
-	}
-
-	/**
-	 * DELETE로 요청
-	 */
-	@Test	
-	public void getCatalogTest_methodDELETE() {
-		
-		System.out.println("Start - POST");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.DELETE);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - DELETE");
-	}
-
-	/**
-	 * PATCH로 요청
-	 */
-	@Test	
-	public void getCatalogTest_methodPATCH() {
-		
-		System.out.println("Start - PATCH");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.PATCH);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-			sbe.printStackTrace();
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - PATCH");
-	}
-	
-	
-	/**
-	 * OPTIONS로 요청
-	 */
-	@Test	
-	public void getCatalogTest_methodOPTIONS() {
-		
-		System.out.println("Start - OPTIONS");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.OPTIONS);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertFalse(sbe.getMessage(), true);
-			bException = true;
-			
-			sbe.printStackTrace();
-			
-		}
-		
-		if (!bException) assertTrue("Success", true);
-		
-		System.out.println("End - OPTIONS");
-	}
-
-	/**
-	 * HEAD로 요청
-	 */
-	@Test	
-	public void getCatalogTest_methodHEAD() {
-		
-		System.out.println("Start - HEAD");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.HEAD);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-			sbe.printStackTrace();
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - HEAD");
 	}
 }

@@ -1,4 +1,4 @@
-package org.openpaas.servicebroker.test;
+package org.openpaas.servicebroker.test.service;
 
 import static org.junit.Assert.*;
 
@@ -37,21 +37,21 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class ProvisionRestTest {
+//@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class ProvisionServiceTest {
 	
 	private static Properties prop = new Properties();
 	
-	@BeforeClass
+	//@BeforeClass
 	public static void init() {
 		
-		System.out.println("== Started test Catalog API ==");
+		System.out.println("== Started test Provision API ==");
 
 		// Initialization
 		// Get properties information
 		String propFile = "test.properties";
  
-		InputStream inputStream = ProvisionRestTest.class.getClassLoader().getResourceAsStream(propFile);
+		InputStream inputStream = ProvisionServiceTest.class.getClassLoader().getResourceAsStream(propFile);
 		
 		try {
 			prop.load(inputStream);
@@ -64,173 +64,17 @@ public class ProvisionRestTest {
 	}
 	
 
-	/**
-	 * POST요청
-	 */
-	@Test	
-	public void sendProvision_AA_methodPOST() {
-		
-		System.out.println("Start - POST");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
-			
-			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - POST");
-	}
-
-
-	/**
-	 * OPTIONS요청
-	 */
-	@Test	
-	public void sendProvision_AB_methodOPTIONS() {
-		
-		System.out.println("Start - OPTIONS");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
-			
-			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.OPTIONS);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertFalse(sbe.getMessage(), true);
-			bException = true;
-			
-		}
-		
-		if (!bException) assertTrue("Success", true);
-		
-		System.out.println("End - OPTIONS");
-	}
-
-	/**
-	 * HEAD요청
-	 */
-	@Test	
-	public void sendProvision_AC_methodHEAD() {
-		
-		System.out.println("Start - HEAD");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
-			
-			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.HEAD);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) { 
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - HEAD");
-	}
 	
-	/**
-	 *  필수값 누락 체크 : service_id 누락
-	 */
-	@Test	
-	public void sendProvision_AD_provision_mandatory_check() {
-		
-		System.out.println("Start - provision_mandatory_check");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		//HttpEntity<String> entity = new HttpEntity<String>("", headers);
-		ProvisionBody body = new ProvisionBody("", 
-				prop.getProperty("broker.apitest.info.planIdA"), 
-				prop.getProperty("broker.apitest.info.organizationGuid"), 
-				prop.getProperty("broker.apitest.info.spaceGuid"));
-		
-		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);
-		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
-		
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("instance_path");
-			
-			url = url.replace("#INSTANCE_ID", prop.getProperty("broker.apitest.info.intanceId"));
-			
-			response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
-			
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "422 Unprocessable Entity");
-			bException = true;
-		}
-		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - provision_mandatory_check");
-	}
 
 	/**
 	 * Provision_create
 	 */
-	@Test	
-	public void sendProvision_BA_Provision_create() {
+	//@Test	
+	public void TC005_provision_create() {
 		
 		System.out.println("Start - Provision_create");
+		
+		deleteProvision(prop.getProperty("broker.apitest.info.intanceId"));
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -261,7 +105,8 @@ public class ProvisionRestTest {
 			
 			
 		} catch (ServiceBrokerException sbe) {
-			deleteProvision(prop.getProperty("broker.apitest.info.intanceId"));
+			sbe.printStackTrace();
+			
 			assertFalse(sbe.getMessage(), true);
 		}
 		
@@ -273,10 +118,10 @@ public class ProvisionRestTest {
 	/**
 	 * Provision_same_info_create
 	 */
-	@Test	
-	public void sendProvision_BB_Provision_same_info_create() {
+	//@Test	
+	public void TC006_provision_duplication_create() {
 		
-		System.out.println("Start - Provision_same_info_create");
+		System.out.println("Start - provision_duplication_create");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -311,16 +156,16 @@ public class ProvisionRestTest {
 		
 		assertTrue("Success", true);
 		
-		System.out.println("End - Provision_same_info_create");
+		System.out.println("End - provision_duplication_create");
 	}
 	
 	/**
 	 * Provision_chang
 	 */
-	@Test	
-	public void sendProvision_CA_Provision_chang() {
+	//@Test	
+	public void TC007_provision_change() {
 		
-		System.out.println("Start - Provision_chang");
+		System.out.println("Start - provision_change");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -348,16 +193,16 @@ public class ProvisionRestTest {
 		
 		assertTrue("Success", true);
 		
-		System.out.println("End - Provision_chang");
+		System.out.println("End - provision_change");
 	}
 	
 	/**
 	 * Provision_chang_invalid_planId
 	 */
-	@Test	
-	public void sendProvision_CB_Provision_chang_invalid_planId() {
+	//@Test	
+	public void TC008_provision_chang_invalid_planId() {
 		
-		System.out.println("Start - Provision_chang_invalid_planId");
+		System.out.println("Start - provision_chang_invalid_planId");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -387,15 +232,15 @@ public class ProvisionRestTest {
 		
 		if (!bException) assertFalse("Error", true);
 		
-		System.out.println("End - Provision_chang_invalid_planId");
+		System.out.println("End - provision_chang_invalid_planId");
 	}
 	
 	/**
 	 * Provision_delete
 	 */
-	@Test
-	public void sendProvision_DA_Provision_delete(){
-		System.out.println("Start - Provision_delete");
+	//@Test
+	public void TC009_provision_delete(){
+		System.out.println("Start - provision_delete");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -421,15 +266,15 @@ public class ProvisionRestTest {
 			
 		}
 		
-		System.out.println("End - Provision_delete");
+		System.out.println("End - provision_delete");
 	}
 	
 	/**
 	 * Provision_delete_non_instanceId
 	 */
-	@Test
-	public void sendProvision_DB_Provision_delete_non_instanceId(){
-		System.out.println("Start - Provision_delete_non_instanceId");
+	//@Test
+	public void TC010_provision_delete_invalid_instanceId(){
+		System.out.println("Start - provision_delete_invalid_instanceId");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -456,7 +301,7 @@ public class ProvisionRestTest {
 		
 		if (!bException) assertFalse("Error", true);
 		
-		System.out.println("End - Provision_delete_non_instanceId");
+		System.out.println("End - provision_delete_invalid_instanceId");
 	}
 	
 	private void deleteProvision(String instanceId){
