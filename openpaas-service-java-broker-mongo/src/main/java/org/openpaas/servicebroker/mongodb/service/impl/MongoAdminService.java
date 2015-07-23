@@ -105,7 +105,6 @@ public static final String ADMIN_DB = "admin";
 	}
 	
 	public String getConnectionString(String database, String username, String password) {
-		//mongodb://test_user:qwer1234@52.27.250.138:27017/pwdtest?authSource=pwdtest&authMechanism=MONGODB-CR
 		StringBuilder builder = new StringBuilder();
 		builder.append("mongodb://");
 		builder.append(username);
@@ -116,12 +115,6 @@ public static final String ADMIN_DB = "admin";
 		builder.append("/");
 		builder.append(database);
 		
-		/*builder.append("?");
-		builder.append("authSource=");
-		builder.append(database);
-		builder.append("&");
-		builder.append("authMechanism=");
-		builder.append("MONGODB-CR");*/
 		return builder.toString();
 	}
 	
