@@ -100,10 +100,14 @@ public class MongoServiceInstanceService implements ServiceInstanceService {
 		if (instance == null) {
 			throw new ServiceInstanceDoesNotExistException(request.getServiceInstanceId());
 		}
+		
+		throw new ServiceInstanceUpdateNotSupportedException("Not Support");
+		
+		/*
 		repository.delete(request.getServiceInstanceId());
 		MongoServiceInstance updatedInstance = new MongoServiceInstance(request);
 		repository.save(updatedInstance);
-		return updatedInstance;
+		return updatedInstance;*/
 	}
 
 }
