@@ -35,7 +35,7 @@ public class UnBindingRestTest {
 	@BeforeClass
 	static public void init() {
 
-		System.out.println("== Started test UnProvision API ==");
+		System.out.println("== Started test UnBinding API ==");
 
 		// Initialization
 		// Get properties information
@@ -127,7 +127,7 @@ public class UnBindingRestTest {
 
 		}
 
-		System.out.println("== End test UnProvision API ==");
+		System.out.println("== End test UnBinding API ==");
 
 	}
 

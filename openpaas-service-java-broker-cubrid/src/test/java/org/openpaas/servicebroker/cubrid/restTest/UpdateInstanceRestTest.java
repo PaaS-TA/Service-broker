@@ -24,7 +24,7 @@ import org.springframework.http.ResponseEntity;
 
 import org.apache.commons.codec.binary.Base64;
 
-public class updateInstanceRestTest {
+public class UpdateInstanceRestTest {
 
 	private static Properties prop = new Properties();
 	private static String instance_id = "103cb323-7400-4a87-9a2a-1e245e284c41";
@@ -34,7 +34,7 @@ public class updateInstanceRestTest {
 	@BeforeClass
 	static public void init() {
 
-		System.out.println("== Started test UnProvision API ==");
+		System.out.println("== Started test UpdateInstance API ==");
 
 		// Initialization
 		// Get properties information
@@ -106,14 +106,14 @@ public class updateInstanceRestTest {
 
 		}
 
-		System.out.println("== End test UnProvision API ==");
+		System.out.println("== End test UpdateInstance API ==");
 
 	}
 	
 	@Test
 	public void updateInstanceTest_500InternalServerError() {
 
-		System.out.println("Start - add volume. not exist instance_id");
+		System.out.println("Start - not exist instance_id");
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -145,7 +145,7 @@ public class updateInstanceRestTest {
 
 		if (!bException) assertFalse("Success", true);
 
-		System.out.println("End - add volume. not exist instance_id");
+		System.out.println("End - not exist instance_id");
 
 	}
 

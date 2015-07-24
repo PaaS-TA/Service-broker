@@ -336,7 +336,7 @@ public class CatalogRestTest {
 	@Test	
 	public void getCatalogTest_methodPUT() {
 		
-		System.out.println("Start - POST");
+		System.out.println("Start - PUT");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -373,7 +373,7 @@ public class CatalogRestTest {
 	@Test	
 	public void getCatalogTest_methodDELETE() {
 		
-		System.out.println("Start - POST");
+		System.out.println("Start - DELETE");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);

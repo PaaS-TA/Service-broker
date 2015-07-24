@@ -36,7 +36,7 @@ public class BindingRestTest {
 	@BeforeClass
 	static public void init() {
 
-		System.out.println("== Started test UnProvision API ==");
+		System.out.println("== Started test Binding API ==");
 
 		// Initialization
 		// Get properties information
@@ -157,7 +157,7 @@ public class BindingRestTest {
 
 		}
 
-		System.out.println("== End test UnProvision API ==");
+		System.out.println("== End test Binding API ==");
 
 	}
 
