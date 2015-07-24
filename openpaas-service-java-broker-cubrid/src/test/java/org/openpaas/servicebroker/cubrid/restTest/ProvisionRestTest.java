@@ -164,7 +164,7 @@ public class ProvisionRestTest {
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
 		
-		System.out.println("Start - not duplicate instance id");
+		System.out.println("End - not duplicate instance id");
 
 	}
 
