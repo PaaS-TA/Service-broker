@@ -25,8 +25,8 @@ public class MongoConfig {
 	}
 
 	public @Bean MongoClient mongoClient() throws UnknownHostException {
-		MongoCredential credential = MongoCredential.createCredential("root2", "admin", "qwer1234".toCharArray());
-		return new MongoClient(new ServerAddress("52.27.250.138", 27017), Arrays.asList(credential));
+		MongoCredential credential = MongoCredential.createCredential("root", "admin", "qwer1234".toCharArray());
+		return new MongoClient(new ServerAddress("54.68.129.72", 27017), Arrays.asList(credential));
 	}
 
 	public @Bean MongoAdminService mongoAdminService() throws UnknownHostException {
