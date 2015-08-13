@@ -12,6 +12,7 @@ import org.openpaas.servicebroker.model.CreateServiceInstanceBindingRequest;
 import org.openpaas.servicebroker.model.DeleteServiceInstanceBindingRequest;
 import org.openpaas.servicebroker.model.Plan;
 import org.openpaas.servicebroker.model.ServiceDefinition;
+import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.ServiceInstanceBinding;
 import org.openpaas.servicebroker.service.ServiceInstanceBindingService;
 import org.slf4j.Logger;
@@ -95,13 +96,13 @@ public class PublicAPIServiceInstanceBindingService implements ServiceInstanceBi
 			//요청된 서비스의 플랜명을 설정 파일에서 찾지 못한 케이스이다.
 			if(env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name")==null){
 				if(planNumber==1){
-					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[0]);
+					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[1]);
 				}
 				else{
 					throw new ServiceBrokerException("Invalid planID : "+planId);					
 				}
 			}
-			existPlanId= "Plan"+planNumber+" "+env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name")+" PlanID";
+			existPlanId= "Service"+serviceNumber+"Plan"+planNumber+" "+env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name")+" PlanID";
 			if(existPlanId.equals(planId)){
 				break;
 			}
@@ -120,14 +121,16 @@ public class PublicAPIServiceInstanceBindingService implements ServiceInstanceBi
 	}
 
 	@Override
-	public ServiceInstanceBinding deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest arg0)throws ServiceBrokerException {
+	public ServiceInstanceBinding deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request)throws ServiceBrokerException {
 
-		
-		
-		
-		
-		
-		return null;
+		String bindingId =request.getBindingId();
+		String servieceInstanceId = request.getInstance().getServiceInstanceId();
+		Map<String,Object> credentials = new LinkedHashMap<String, Object>();
+		String syslogDrainUrl = null;
+		String appGuid = "";
+		//TODO DB없이 appGuid를 갖고 있을 수 있는지?
+
+		return new ServiceInstanceBinding(bindingId,servieceInstanceId,credentials,syslogDrainUrl,appGuid);
 	}
 	
 	
