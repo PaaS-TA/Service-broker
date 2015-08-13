@@ -1,0 +1,149 @@
+package org.openpaas.servicebroker.publicapi.config;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.openpaas.servicebroker.model.Catalog;
+import org.openpaas.servicebroker.model.Plan;
+import org.openpaas.servicebroker.model.ServiceDefinition;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+
+
+@Configuration
+public class CatalogConfig {
+	
+	@Autowired
+	private Environment env;
+	
+	public int serviceNumber =1;
+	public int planNumber =1;
+	
+	@Bean
+	public Catalog catalog() {
+		
+		List<String> serviceNames = getServiceNames();
+		List<ServiceDefinition> serviceDefs = new ArrayList<ServiceDefinition>();	
+		
+		for(serviceNumber=1;serviceNumber<=serviceNames.size();serviceNumber++){
+			serviceDefs.add(
+					new ServiceDefinition(
+						"Service"+serviceNumber+" "+env.getProperty("Service"+serviceNumber+".Name")+" ServiceID",
+						env.getProperty("Service"+serviceNumber+".Name"),
+						env.getProperty("Service"+serviceNumber+".Description"),
+						true, 
+						false,
+						getPlans(),
+						Arrays.asList("Public API Service", env.getProperty("Service"+serviceNumber+".Name")),
+						getServiceDefinitionMetadata(),
+						null,
+						null
+					)
+				);		
+			}
+		return new Catalog(serviceDefs);
+	}
+
+	private Map<String,Object> getServiceDefinitionMetadata() {
+		Map<String,Object> sdMetadata = new HashMap<String,Object>();
+		sdMetadata.put("displayName", env.getProperty("Service"+serviceNumber+".Name"));
+		sdMetadata.put("imageUrl","no image");
+		sdMetadata.put("longDescription",env.getProperty("Service"+serviceNumber+".Description"));
+		sdMetadata.put("providerDisplayName",env.getProperty("Service"+serviceNumber+".Provider"));
+		sdMetadata.put("documentationUrl",env.getProperty("Service"+serviceNumber+".DocumentationURL"));
+		sdMetadata.put("supportUrl","http://www.openpaas.org");
+		return sdMetadata;
+	}
+
+	private Map<String,Object> getPlanMetadata(String planName) {		
+		Map<String,Object> planMetadata = new HashMap<String,Object>();
+		planMetadata.put("costs", getCosts());
+		planMetadata.put("bullets", getBullets(planName+" Plan"));
+		return planMetadata;
+	}
+
+	private List<Map<String,Object>> getCosts() {
+		Map<String,Object> costsMap = new HashMap<String,Object>();
+		Map<String,Object> amount = new HashMap<String,Object>();
+		amount.put("KRW", new Double(0.0));
+		costsMap.put("amount", amount);
+		costsMap.put("unit", env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Unit"));
+
+		return Arrays.asList(costsMap);
+	}
+
+	private List<String> getBullets(String planName) {
+		return Arrays.asList(env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Bullet"));
+	}
+
+	private List<Plan> getPlans() {
+
+		List<Plan> plans = new ArrayList<Plan>();
+		List<String> planNames = getPlanNames();
+//		int i=1;
+//		for(i=1;i<=planNames.size();i++){
+//			plans.add(
+//					new Plan(
+//						env.getProperty("PlanName"+i)+" Plan ID",
+//						env.getProperty("PlanName"+i),
+//						env.getProperty("PlanDescription"+i),
+//						getPlanMetadata(env.getProperty("PlanName")+i,i),
+//						true						
+//					)			
+//				);
+//		}
+		for(planNumber=1;planNumber<=planNames.size();planNumber++){
+			Map<String,Object> planMetadata = getPlanMetadata(env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name"));
+			plans.add(
+				new Plan(
+					"Plan"+planNumber+" "+env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name")+" PlanID",
+					env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name"),
+					env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Description"),
+					planMetadata,
+					isItFree(planMetadata)						
+				)			
+			);
+		}
+		return plans;
+	}
+	
+	private boolean isItFree(Map<String,Object> planMetadata){
+		boolean isItFree = false;
+		Map<String, Object> map = new HashMap<>();
+		map =(Map<String, Object>)((List<Map>)planMetadata.get("costs")).get(0).get("amount");
+		if(map.get("KRW").equals((double)0.0)){
+			isItFree = true;
+		};
+		return isItFree;
+	}
+	
+	private List<String> getServiceNames(){
+		List<String> serviceNames = new ArrayList<String>();
+		int i=1;
+		do{
+			serviceNames.add(env.getProperty("Service"+i+".Name"));
+			i++;
+		}while(env.getProperty("Service"+i+".Name")!=null);
+		
+		return serviceNames;
+	}
+
+	private List<String> getPlanNames(){
+		List<String> planNames = new ArrayList<String>();
+		int i=1;
+		do{
+			planNames.add(env.getProperty("Service"+serviceNumber+".Plan"+i+".Name"));
+			i++;
+		}while(env.getProperty("Service"+serviceNumber+".Plan"+i+".Name")!=null);
+		
+		return planNames;
+	}
+	
+	
+	
+}
