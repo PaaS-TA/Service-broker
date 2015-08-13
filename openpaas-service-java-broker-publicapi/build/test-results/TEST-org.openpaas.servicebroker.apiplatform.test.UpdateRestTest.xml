@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2015-07-24T04:14:11" hostname="김도준-HP" time="3.795">
+  <properties/>
+  <testcase name="UP01_valid_plan_id" classname="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" time="0.952"/>
+  <testcase name="UP02_same_plan_id" classname="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" time="0.11"/>
+  <testcase name="UP03_invalid_plan_name" classname="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" time="0.015"/>
+  <testcase name="UP04_invalid_plan_id" classname="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" time="0.125"/>
+  <testcase name="UP05_removed_user" classname="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" time="0.438"/>
+  <testcase name="UP06_removed_user_DB" classname="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" time="0.281"/>
+  <testcase name="UP07_removed_application" classname="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" time="0.609"/>
+  <testcase name="UP08_removed_subscription" classname="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" time="0.484"/>
+  <testcase name="UP09_removed_instance_id_DB" classname="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" time="0.202"/>
+  <testcase name="UP10_lifecycle_changed_test" classname="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" time="0.234"/>
+  <testcase name="UP13_no_subs_and_lifecycle_changed" classname="org.openpaas.servicebroker.apiplatform.test.UpdateRestTest" time="0.345"/>
+  <system-out><![CDATA[== Started test Update API ==
+2015-07-24 13:14:11.434 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created POST request for "http://115.68.46.28:9763/store/site/blocks/user/login/ajax/login.jag"
+2015-07-24 13:14:11.434 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:11.434 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [action=login&username=test-user&password=openpaas] as "application/x-www-form-urlencoded" using [org.springframework.http.converter.StringHttpMessageConverter@6a9c1826]
+2015-07-24 13:14:11.496 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : POST request for "http://115.68.46.28:9763/store/site/blocks/user/login/ajax/login.jag" resulted in 200 (OK)
+2015-07-24 13:14:11.496 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@6a9c1826]
+2015-07-24 13:14:11.496  INFO   --- [    Test worker] o.o.s.common.HttpClientUtils             : Get APIPlatform API Http Response
+2015-07-24 13:14:11.496  INFO   --- [    Test worker] o.o.servicebroker.common.JsonUtils       : Json Convert completed
+2015-07-24 13:14:11.543 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created POST request for "http://115.68.46.28:9763/store/site/blocks/application/application-remove/ajax/application-remove.jag"
+2015-07-24 13:14:11.543 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:11.543 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [action=removeApplication&application=no_application_test_instance_id] as "application/x-www-form-urlencoded" using [org.springframework.http.converter.StringHttpMessageConverter@2df59d78]
+2015-07-24 13:14:11.605 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : POST request for "http://115.68.46.28:9763/store/site/blocks/application/application-remove/ajax/application-remove.jag" resulted in 200 (OK)
+2015-07-24 13:14:11.605 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@2df59d78]
+2015-07-24 13:14:11.605  INFO   --- [    Test worker] o.o.s.common.HttpClientUtils             : Get APIPlatform API Http Response
+2015-07-24 13:14:11.605  INFO   --- [    Test worker] o.o.servicebroker.common.JsonUtils       : Json Convert completed
+2015-07-24 13:14:11.621 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created POST request for "http://115.68.46.28:9763/store/site/blocks/subscription/subscription-remove/ajax/subscription-remove.jag"
+2015-07-24 13:14:11.621 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:11.621 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [action=removeSubscription&name=Naver&version=1.0.0&provider=apicreator&applicationId=421] as "application/x-www-form-urlencoded" using [org.springframework.http.converter.StringHttpMessageConverter@583548da]
+2015-07-24 13:14:11.652 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : POST request for "http://115.68.46.28:9763/store/site/blocks/subscription/subscription-remove/ajax/subscription-remove.jag" resulted in 200 (OK)
+2015-07-24 13:14:11.652 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@583548da]
+2015-07-24 13:14:11.652  INFO   --- [    Test worker] o.o.s.common.HttpClientUtils             : Get APIPlatform API Http Response
+2015-07-24 13:14:11.652  INFO   --- [    Test worker] o.o.servicebroker.common.JsonUtils       : Json Convert completed
+2015-07-24 13:14:11.652 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created POST request for "http://115.68.46.28:9763/publisher/site/blocks/user/login/ajax/login.jag"
+2015-07-24 13:14:11.652 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:11.652 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [action=login&username=apipublisher&password=qwer1234] as "application/x-www-form-urlencoded" using [org.springframework.http.converter.StringHttpMessageConverter@12420d74]
+2015-07-24 13:14:11.761 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : POST request for "http://115.68.46.28:9763/publisher/site/blocks/user/login/ajax/login.jag" resulted in 200 (OK)
+2015-07-24 13:14:11.761 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@12420d74]
+2015-07-24 13:14:11.761  INFO   --- [    Test worker] o.o.s.common.HttpClientUtils             : Get APIPlatform API Http Response
+2015-07-24 13:14:11.761  INFO   --- [    Test worker] o.o.servicebroker.common.JsonUtils       : Json Convert completed
+2015-07-24 13:14:11.792 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created POST request for "http://115.68.46.28:9763/publisher/site/blocks/life-cycles/ajax/life-cycles.jag"
+2015-07-24 13:14:11.792 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:11.792 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [action=updateStatus&name=PhoneVerification&version=2.0.0&provider=apicreator&status=CREATED&publishToGateway=true&requireResubscription=true] as "application/x-www-form-urlencoded" using [org.springframework.http.converter.StringHttpMessageConverter@2e814409]
+2015-07-24 13:14:11.839 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : POST request for "http://115.68.46.28:9763/publisher/site/blocks/life-cycles/ajax/life-cycles.jag" resulted in 200 (OK)
+2015-07-24 13:14:11.839 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "text/plain;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@2e814409]
+2015-07-24 13:14:11.839  INFO   --- [    Test worker] o.o.s.common.HttpClientUtils             : Get APIPlatform API Http Response
+2015-07-24 13:14:11.855  INFO   --- [    Test worker] o.o.servicebroker.common.JsonUtils       : Json Convert completed
+UP01 Start - valid_plan_id
+2015-07-24 13:14:12.151 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id"
+2015-07-24 13:14:12.151 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:12.151 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@5f37b964] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@436c8512]
+2015-07-24 13:14:12.807 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id" resulted in 200 (OK)
+2015-07-24 13:14:12.807 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "text/plain;charset=ISO-8859-1" using [org.springframework.http.converter.StringHttpMessageConverter@499e542d]
+200
+{}
+UP01 End - valid_plan_id
+UP02 Start - same_plan_id
+2015-07-24 13:14:12.823 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id"
+2015-07-24 13:14:12.823 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:12.823 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@6bd62ed8] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@3a9d9e37]
+2015-07-24 13:14:12.901 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id" resulted in 500 (Internal Server Error)
+2015-07-24 13:14:12.901 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@35b0dad9]
+500
+{"description":"Plan :[Bronze] already setted - UP02"}
+UP02 End - same_plan_id
+UP03 Start - invalid_plan_name
+2015-07-24 13:14:12.932 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id"
+2015-07-24 13:14:12.932 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:12.932 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@4fa3fd6d] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@175327f4]
+2015-07-24 13:14:12.932 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id" resulted in 422 (Unprocessable Entity)
+2015-07-24 13:14:12.932 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@755f5376]
+422
+{"description":"not supported Plan :[Limited] - UP03"}
+UP03 End - invalid_plan_name
+UP04 Start - invalid_plan_id
+2015-07-24 13:14:12.948 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id"
+2015-07-24 13:14:12.948 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:12.948 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@4beaf267] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@2dd06f21]
+2015-07-24 13:14:13.057 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id" resulted in 500 (Internal Server Error)
+2015-07-24 13:14:13.057 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@538d702e]
+500
+{"description":"invalid PlanID :[Neighbor 1.0.0 Unlimited]. valid PlanID :[Naver 1.0.0 'Valid PlanName'] - UP04"}
+UP04 End - invalid_plan_id
+UP05 Start - removed_user
+2015-07-24 13:14:13.073 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/removed_user_test_instance_id"
+2015-07-24 13:14:13.073 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:13.088 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@a46f82b] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@394ed452]
+2015-07-24 13:14:13.495 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/removed_user_test_instance_id" resulted in 200 (OK)
+2015-07-24 13:14:13.495 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "text/plain;charset=ISO-8859-1" using [org.springframework.http.converter.StringHttpMessageConverter@736639ea]
+200
+{}
+UP05 End - removed_user
+UP06 Start - removed_user_DB
+2015-07-24 13:14:13.510 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/removed_user_test_instance_id_DB"
+2015-07-24 13:14:13.526 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:13.526 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@7e0892c5] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@64dc0427]
+2015-07-24 13:14:13.760 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/removed_user_test_instance_id_DB" resulted in 500 (Internal Server Error)
+2015-07-24 13:14:13.760 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@41ef0d84]
+500
+{"description":"APIPlatform user information not found. OrganizationGUID :[removed_DB_test_org] - UP06"}
+UP06 End - removed_user_DB
+UP07 Start - removed_application
+2015-07-24 13:14:13.791 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/no_application_test_instance_id"
+2015-07-24 13:14:13.791 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:13.791 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@5be50bd5] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@1a6bfc15]
+2015-07-24 13:14:14.385 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/no_application_test_instance_id" resulted in 200 (OK)
+2015-07-24 13:14:14.385 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "text/plain;charset=ISO-8859-1" using [org.springframework.http.converter.StringHttpMessageConverter@19e0b0ed]
+200
+{}
+UP07 End - removed_application
+UP08 Start - removed_subscription
+2015-07-24 13:14:14.401 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/no_subscription_test_instance_id"
+2015-07-24 13:14:14.416 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:14.416 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@534ddbc5] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@1c978d3d]
+2015-07-24 13:14:14.869 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/no_subscription_test_instance_id" resulted in 200 (OK)
+2015-07-24 13:14:14.869 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "text/plain;charset=ISO-8859-1" using [org.springframework.http.converter.StringHttpMessageConverter@256c949f]
+200
+{}
+UP08 End - removed_subscription
+UP09 Start - removed_instance_id_DB
+2015-07-24 13:14:14.900 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id_fail"
+2015-07-24 13:14:14.900 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:14.900 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@26d4f204] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@665cf886]
+2015-07-24 13:14:15.071 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id_fail" resulted in 500 (Internal Server Error)
+2015-07-24 13:14:15.071 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@70eb4f20]
+500
+{"description":"Service Instnace information not found. ServiceInstanceID :[test_instance_id_fail] - UP09"}
+UP09 End - removed_instance_id_DB
+UP10 Start - lifecycle_changed_test
+2015-07-24 13:14:15.087 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/lifecycle_changed_test_instance_id"
+2015-07-24 13:14:15.087 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:15.103 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@35d2165f] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@73bad293]
+2015-07-24 13:14:15.305 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/lifecycle_changed_test_instance_id" resulted in 500 (Internal Server Error)
+2015-07-24 13:14:15.305 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@cb09658]
+500
+{"description":"API lifecycle changed. API :[PhoneVerification], Lifecycle :[CREATED] - UP10"}
+UP10 End - lifecycle_changed_test
+UP13 Start - no_subs_and_lifecycle_changed
+2015-07-24 13:14:15.321 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/lifecycle_change_and_no_subs_instance_id"
+2015-07-24 13:14:15.321 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:15.321 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@693136f3] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@1e0ec179]
+2015-07-24 13:14:15.650 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/lifecycle_change_and_no_subs_instance_id" resulted in 500 (Internal Server Error)
+2015-07-24 13:14:15.650 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@72d3b39a]
+500
+{"description":"removed subscrition and API lifecycle changed. Application :[lifecycle_change_and_no_subs_instance_id], API :[PhoneVerification] - UP13"}
+UP13 End - no_subs_and_lifecycle_changed
+2015-07-24 13:14:15.665 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id"
+2015-07-24 13:14:15.665 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:15.665 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@bf841f8] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@57b306eb]
+2015-07-24 13:14:16.242 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/test_instance_id" resulted in 200 (OK)
+2015-07-24 13:14:16.258 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "text/plain;charset=ISO-8859-1" using [org.springframework.http.converter.StringHttpMessageConverter@2315e9ca]
+{}
+====================
+2015-07-24 13:14:16.289 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/removed_user_test_instance_id"
+2015-07-24 13:14:16.289 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:16.289 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@bf841f8] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@433faf4d]
+2015-07-24 13:14:16.774 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/removed_user_test_instance_id" resulted in 200 (OK)
+2015-07-24 13:14:16.774 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "text/plain;charset=ISO-8859-1" using [org.springframework.http.converter.StringHttpMessageConverter@1fe1fcd7]
+====================
+2015-07-24 13:14:16.774 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/no_subscription_test_instance_id"
+2015-07-24 13:14:16.774 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:16.774 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@52380405] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@5b900e6e]
+2015-07-24 13:14:17.226 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/no_subscription_test_instance_id" resulted in 200 (OK)
+2015-07-24 13:14:17.242 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "text/plain;charset=ISO-8859-1" using [org.springframework.http.converter.StringHttpMessageConverter@51e1c25d]
+====================
+2015-07-24 13:14:17.242 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/no_application_test_instance_id"
+2015-07-24 13:14:17.242 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:17.257 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@254e0df1] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@27755c59]
+2015-07-24 13:14:17.777 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/no_application_test_instance_id" resulted in 200 (OK)
+2015-07-24 13:14:17.777 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "text/plain;charset=ISO-8859-1" using [org.springframework.http.converter.StringHttpMessageConverter@3fecfb6]
+2015-07-24 13:14:17.792 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Created PATCH request for "http://localhost:8080/v2/service_instances/no_application_test_instance_id"
+2015-07-24 13:14:17.792 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Setting request Accept header to [text/plain, application/json, application/*+json, */*]
+2015-07-24 13:14:17.792 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Writing [org.openpaas.servicebroker.common.UpdateProvisionBody@254e0df1] as "application/json" using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@54ab30c0]
+2015-07-24 13:14:17.870 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : PATCH request for "http://localhost:8080/v2/service_instances/no_application_test_instance_id" resulted in 500 (Internal Server Error)
+2015-07-24 13:14:17.886 DEBUG   --- [    Test worker] o.s.web.client.RestTemplate              : Reading [java.lang.String] as "application/json;charset=UTF-8" using [org.springframework.http.converter.StringHttpMessageConverter@8f453b6]
+{"description":"Plan :[Unlimited] already setted - UP02"}
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
