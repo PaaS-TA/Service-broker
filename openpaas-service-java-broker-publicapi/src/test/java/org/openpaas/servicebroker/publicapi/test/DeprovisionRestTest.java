@@ -6,16 +6,12 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.UUID;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.openpaas.servicebroker.common.HttpClientUtils;
-import org.openpaas.servicebroker.common.ProvisionBody;
-import org.openpaas.servicebroker.publicapi.common.APIPlatformAPI;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,10 +26,6 @@ import org.springframework.test.annotation.Rollback;
 public class DeprovisionRestTest {
 
 	private static Properties prop = new Properties();
-	private static String uri;
-	private static String parameters;
-	private static APIPlatformAPI api = new APIPlatformAPI();
-	private static String cookie;
 	
 	private static String instance_id ="deprovision-test";
 	@BeforeClass
@@ -54,45 +46,6 @@ public class DeprovisionRestTest {
 			e.printStackTrace();
 	 		System.err.println(e);
 	 	}
-		
-		//스토어 로그인
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.Login");
-		parameters = "action=login&username=test-user&password=openpaas";
-		cookie = api.login(uri, parameters);
-		
-		//삭제된 어플리케이션
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.RemoveApplication");
-		parameters = "action=removeApplication&application="+prop.getProperty("removed_app_instance_id");
-		api.removeApplication(uri, parameters, cookie);
-		
-		//어플리케이션 생성
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddAnApplication");
-		parameters = 
-				"action=addApplication&application="+prop.getProperty("removed_subs_instance_id")+"&tier=Unlimited&description=&callbackUrl=";	
-		api.addApplication(uri, parameters, cookie);
-		//어플리케이션 아이디
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.GetApplications");
-		parameters = "action=getApplications";
-		int appId = api.getAppID(uri, parameters, cookie, prop.getProperty("removed_subs_instance_id"));
-		
-		//사용등록 해제
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.RemoveSubscription");
-		parameters = "action=removeSubscription&name=Naver&version=1.0.0&provider=apicreator&applicationId=462";
-		api.removeSubscription(uri, parameters, cookie);
-		
-	//라이프사이클 변경 케이스
-		//퍼블리셔로그인
-		String cookie2 =null;
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.PublisherLogin");
-		parameters = "action=login&username=apipublisher&password=qwer1234";
-		cookie2 = api.login(uri, parameters);
-		
-		//라이프사이클 변경 PUBLISHED -> CREATED
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.LifecycleChange");
-		parameters ="action=updateStatus&name=PhoneVerification&version=2.0.0&provider=apicreator&status=CREATED&publishToGateway=true&requireResubscription=true";
-		api.lifecycleChange(uri, parameters, cookie2);
-		
-
 	}
 	
 	
@@ -380,68 +333,4 @@ public class DeprovisionRestTest {
 		
 		System.out.println("End - D011_valid_parameters_removed_test");
 	}
-	
-	
-	
-	
-//	@AfterClass
-	public static void application_recover() {
-	//DB까지 복구해야하지만 TEST시에는 DB를 변경하지 않도록 조건을 걸어두었기 때문에 API플랫폼만 복구한다.
-	//스토어 로그인
-	uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.Login");
-	parameters = "action=login&username=test-user&password=openpaas";
-	cookie = api.login(uri, parameters);
-		
-	//라이프사이클 변경 케이스 복구
-	//어플리케이션 생성
-	uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddAnApplication");
-	parameters = 
-			"action=addApplication&application="+prop.getProperty("lifecycle_change_instance_id")+"&tier=Unlimited&description=&callbackUrl=";	
-	api.addApplication(uri, parameters, cookie);
-	
-	//퍼블리셔로그인
-	String cookie2 =null;
-	uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.PublisherLogin");
-	parameters = "action=login&username=apipublisher&password=qwer1234";
-	cookie2 = api.login(uri, parameters);
-	
-	//라이프사이클 변경  CREATED -> PUBLISHED
-	uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.LifecycleChange");
-	parameters ="action=updateStatus&name=PhoneVerification&version=2.0.0&provider=apicreator&status=PUBLISHED&publishToGateway=true&requireResubscription=true";
-	api.lifecycleChange(uri, parameters, cookie2);
-	
-	//사용등록
-	uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddSubscription");
-	parameters = 
-			"action=addAPISubscription&name=PhoneVerification&version=2.0.0&provider=apicreator&tier=Unlimited&applicationName="+prop.getProperty("lifecycle_change_instance_id");
-	api.addSubscription(uri, parameters, cookie);
-	
-	//라이프사이클 변경 PUBLISHED -> CREATED
-	uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.LifecycleChange");
-	parameters ="action=updateStatus&name=PhoneVerification&"
-			+ "version=2.0.0&provider=apicreator&status=CREATED&publishToGateway=true&requireResubscription=true";
-	api.lifecycleChange(uri, parameters, cookie2);
-	
-//사용등록 해제 케이스 복구
-	//어플리케이션 생성
-	uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddAnApplication");
-	parameters = 
-			"action=addApplication&application="+prop.getProperty("removed_subs_instance_id")+"&tier=Unlimited&description=&callbackUrl=";	
-	api.addApplication(uri, parameters, cookie);
-	
-
-	//정상작동 복구
-	//어플리케이션 생성
-	uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddAnApplication");
-	parameters = 
-			"action=addApplication&application="+prop.getProperty("test_instance_id")+"&tier=Unlimited&description=&callbackUrl=";	
-	api.addApplication(uri, parameters, cookie);
-	
-	//사용등록
-	uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.AddSubscription");
-	parameters = 
-			"action=addAPISubscription&name=Naver&version=1.0.0&provider=apicreator&tier=Unlimited&applicationName="+prop.getProperty("test_instance_id");
-	api.addSubscription(uri, parameters, cookie);
-	}
-
 }	

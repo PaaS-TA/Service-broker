@@ -32,9 +32,6 @@ public class PublicAPIServiceInstanceBindingService implements ServiceInstanceBi
 	
 	@Autowired
 	private Environment env;
-	
-	@Autowired
-	private PublicAPIServiceInstanceService serviceInstanceService;
 
 	@Override
 	public ServiceInstanceBinding createServiceInstanceBinding(CreateServiceInstanceBindingRequest request)throws ServiceInstanceBindingExistsException,ServiceBrokerException {
@@ -67,52 +64,53 @@ public class PublicAPIServiceInstanceBindingService implements ServiceInstanceBi
 //				throw new ServiceBrokerException("Invalid ServiceID : "+serviceId);
 //			}
 //		}
-
-	//요청된 서비스ID와 플랜ID의 유효성 확인
+		
+		//요청된 서비스ID와 플랜ID의 유효성 확인
 		String existServiceId;
-		int serviceNumber=0;
+		int sNumber=0;
 		//서비스ID 유효성 확인
 		do{
 			//요청된 서비스명을 설정 파일에서 찾지 못한 케이스이다.
-			serviceNumber++;
-			if(env.getProperty("Service"+serviceNumber+".Name")==null){
-				if(serviceNumber==1){
+			sNumber++;
+			if(env.getProperty("Service"+sNumber+".Name")==null){
+				if(sNumber==1){
 					throw new ServiceBrokerException("There is no service information at 'application-mvc-properties'");
 				}
 				else{
 					throw new ServiceBrokerException("Invalid ServiceID : "+serviceId);					
 				}
 			}
-			existServiceId="Service"+serviceNumber+" "+env.getProperty("Service"+serviceNumber+".Name")+" ServiceID";
+			existServiceId="Service"+sNumber+" "+env.getProperty("Service"+sNumber+".Name")+" ServiceID";
 			if(existServiceId.equals(serviceId)){
 				break;
 			}
-		}while(env.getProperty("Service"+serviceNumber+".Name")!=null);
+		}while(env.getProperty("Service"+sNumber+".Name")!=null);
+		
 		//플랜ID 유효성확인
 		String existPlanId;
-		int planNumber=0;
+		int pNumber=0;
 		do{
-			planNumber++;
-			//요청된 서비스의 플랜명을 설정 파일에서 찾지 못한 케이스이다.
-			if(env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name")==null){
-				if(planNumber==1){
+			pNumber++;
+			//요청된 서비스의 플랜명을 설정 파일에서 찾지 못한 케이스
+			if(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")==null){
+				if(pNumber==1){
 					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[1]);
 				}
 				else{
-					throw new ServiceBrokerException("Invalid planID : "+planId);					
+					throw new ServiceBrokerException("Invalid PlanID : "+planId);					
 				}
 			}
-			existPlanId= "Service"+serviceNumber+"Plan"+planNumber+" "+env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name")+" PlanID";
+			existPlanId= "Service"+sNumber+" Plan"+pNumber+" "+env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")+" PlanID";
 			if(existPlanId.equals(planId)){
 				break;
 			}
-		}while(env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name")!=null);
+		}while(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")!=null);
 
 		//credential 값을 넣는다.
 		Map<String,Object> credentials = new LinkedHashMap<String, Object>();
-		credentials.put("url", env.getProperty("Service"+serviceNumber+".Endpoint"));
-		credentials.put("serviceKey", env.getProperty("Service"+serviceNumber+".ServiceKey"));
-		credentials.put("supportUrl", env.getProperty("Service"+serviceNumber+".SupportUrl"));
+		credentials.put("url", env.getProperty("Service"+sNumber+".Endpoint"));
+		credentials.put("serviceKey", env.getProperty("Service"+sNumber+".ServiceKey"));
+		credentials.put("supportUrl", env.getProperty("Service"+sNumber+".SupportUrl"));
 		String syslogDrainUrl = null;
 		
 		ServiceInstanceBinding binding = new ServiceInstanceBinding(bindingId, instanceId, credentials, syslogDrainUrl, appGuid);

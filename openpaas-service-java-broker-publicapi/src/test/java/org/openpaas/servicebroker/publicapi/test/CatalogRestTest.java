@@ -211,7 +211,7 @@ public class CatalogRestTest {
 		}
 		
 		assertEquals(response.getStatusCode(), HttpStatus.PRECONDITION_FAILED);
-		assertTrue(json.get("description").asText().equals("The provided service broker API version is not supported: Expected Version = 2.4, Provided Version = "+prop.getProperty("api_version_fail")));
+		assertTrue(json.get("description").asText().equals("The provided service broker API version is not supported: Expected Version = 2.5, Provided Version = "+prop.getProperty("api_version_fail")));
 		
 		System.out.println("End - C005_getCatalogTest_incorrectAPIVersion");
 	}

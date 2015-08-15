@@ -7,14 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.UpdateProvisionBody;
-import org.openpaas.servicebroker.publicapi.common.APIPlatformAPI;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,12 +25,7 @@ import org.springframework.security.crypto.codec.Base64;
 public class UpdateRestTest {
 	
 private static Properties prop = new Properties();
-	
-	private static String uri;
-	private static String parameters;
-	private static APIPlatformAPI api = new APIPlatformAPI();
-	private static String cookie;
-	
+
 	@BeforeClass
 	public static void init() {
 
@@ -51,32 +44,6 @@ private static Properties prop = new Properties();
 			e.printStackTrace();
 	 		System.err.println(e);
 	 	}
-		//스토어 로그인
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.Login");
-		parameters = "action=login&username=test-user&password=openpaas";
-		cookie = api.login(uri, parameters);
-		
-		//삭제된 어플리케이션
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.RemoveApplication");
-		parameters = "action=removeApplication&application="+prop.getProperty("removed_app_instance_id");
-		api.removeApplication(uri, parameters, cookie);
-		
-		//사용등록 해제
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.RemoveSubscription");
-		parameters = "action=removeSubscription&name=Naver&version=1.0.0&provider=apicreator&applicationId=421";
-		api.removeSubscription(uri, parameters, cookie);
-		
-	//라이프사이클 변경 케이스
-		//퍼블리셔로그인
-		String cookie2 =null;
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.PublisherLogin");
-		parameters = "action=login&username=apipublisher&password=qwer1234";
-		cookie2 = api.login(uri, parameters);
-		
-		//라이프사이클 변경 PUBLISHED -> CREATED
-		uri = prop.getProperty("APIPlatformServer")+":"+prop.getProperty("APIPlatformPort")+prop.getProperty("URI.LifecycleChange");
-		parameters ="action=updateStatus&name=PhoneVerification&version=2.0.0&provider=apicreator&status=CREATED&publishToGateway=true&requireResubscription=true";
-		api.lifecycleChange(uri, parameters, cookie2);
 	}
 	
 	
@@ -428,53 +395,5 @@ private static Properties prop = new Properties();
 		assertTrue(response.getBody().contains("removed subscrition and API lifecycle changed. Application"));
 		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
 		System.out.println("UP13 End - no_subs_and_lifecycle_changed");
-	}
-		
-	@AfterClass
-	public static void plan_recover() {
-		
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		//정상 동작 케이스 플랜복구
-		String instance_id = prop.getProperty("test_instance_id");
-		String plan_id = prop.getProperty("test_plan_id");
-		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
-		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-		ResponseEntity<String> response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println(response.getBody());
-		System.out.println("====================");
-		
-		//유저삭제 케이스 플랜 복구
-		instance_id = prop.getProperty("removed_user_instance_id");
-		plan_id = prop.getProperty("test_plan_id");
-		entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-		HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println("====================");
-		
-		//사용등록 해제 케이스 플랜 복구
-		instance_id = prop.getProperty("removed_subs_instance_id");
-		plan_id = prop.getProperty("test_plan_id");
-		body = new UpdateProvisionBody(plan_id);
-		entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-		HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println("====================");
-		
-		
-		//어플리케이션 삭제 케이스 플랜 복구
-		instance_id = prop.getProperty("removed_app_instance_id");
-		plan_id = prop.getProperty("test_plan_id");
-		body = new UpdateProvisionBody(plan_id);
-		entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-		HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println(response.getBody());
-		
 	}
 }
