@@ -30,37 +30,13 @@ public class PublicAPIServiceInstanceService implements ServiceInstanceService {
 
 	@Override
 	public ServiceInstance createServiceInstance(CreateServiceInstanceRequest request) throws ServiceInstanceExistsException, ServiceBrokerException {
-		
+		logger.debug("Start - PublicAPIServiceInstanceService.createServiceInstance()");
 		String serviceId = request.getServiceDefinitionId();
 		String planId = request.getPlanId();
 		
-//		String serviceKey = null;
-//		try{
-//			serviceKey = request.getParameters().get("serviceKey").toString();			
-//		} catch(NullPointerException e){
-//			serviceKey = null;
-//		}
-//		boolean instanceExsists = dao.insertServiceInstance(instanceId, serviceId, planId, organizationGuid, spaceGuid, serviceKey);
-//	
-//		ServiceInstance instance = new ServiceInstance(request);
-//		if(instanceExsists){
-//			List<Map<String,Object>> databases = dao.getServiceInstancAtDB(instanceId);
-//			//인스턴스 아이디가 이미 존재할 경우 나머지 값들을 검증, 모두같으면 200 OK, 하나라도 다르면 exception
-//			if(
-//				databases.get(0).get("service_id").equals(serviceId)&&
-//				databases.get(0).get("plan_id").equals(planId)&&
-//				databases.get(0).get("organization_guid").equals(organizationGuid)&&
-//				databases.get(0).get("space_guid").equals(spaceGuid))
-//			{
-//				instance.setHttpStatusOK();
-//				return instance.withDashboardUrl(env.getProperty("DashboardURL"));
-//			}
-//			else{
-//				throw new ServiceInstanceExistsException(instance);
-//			}
-//		}
-		//서비스ID에 대한 유효성은 이미 확인이 완료된 상태이다.
+		//서비스ID에 대한 유효성은 이미 확인이 완료된 상태
 		//플랜ID 유효성확인
+		
 		String existPlanId;
 		String serviceAndNumber = serviceId.split(" ")[0];
 		int pNumber=0;
@@ -68,12 +44,14 @@ public class PublicAPIServiceInstanceService implements ServiceInstanceService {
 			pNumber++;
 			//요청된 서비스의 플랜명을 설정 파일에서 찾지 못한 케이스이다.
 			if(env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name")==null){
-				//해당 서비스에 대해서 한개의 플랜도 정의 되어있지 않은 케이스
+				//해당 서비스에 대해서 하나의 플랜도 정의 되어있지 않은 케이스
 				if(pNumber==1){
-					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[1]);
+					logger.error("no Plan information for Service : ["+serviceId.split(" ")[0]+"] at Properties File: 'application-mvc-properties'");
+					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service : ["+serviceId.split(" ")[0]+"], Plan : ["+planId.split(" ")[1]+"]");
 				}
 				else{
-					throw new ServiceBrokerException("Invalid PlanID : "+planId);			
+					logger.error("Invalid PlanID : ["+planId+"]");
+					throw new ServiceBrokerException("Invalid PlanID : ["+planId+"]");			
 				}
 			}
 			existPlanId= serviceAndNumber+" Plan"+pNumber+" "+env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name")+" PlanID";
@@ -83,12 +61,13 @@ public class PublicAPIServiceInstanceService implements ServiceInstanceService {
 		}while(env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name")!=null);
 		
 		ServiceInstance instance = new ServiceInstance(request);
+		logger.debug("End - PublicAPIServiceInstanceService.createServiceInstance()");
 		return instance.withDashboardUrl(env.getProperty("DashboardURL"));
 	}
 
 	@Override
 	public ServiceInstance deleteServiceInstance(DeleteServiceInstanceRequest request) throws ServiceBrokerException {
-
+		logger.debug("Start - PublicAPIServiceInstanceService.deleteServiceInstance()");
 		String serviceId = request.getServiceId();
 		String planId = request.getPlanId();
 		
@@ -100,18 +79,21 @@ public class PublicAPIServiceInstanceService implements ServiceInstanceService {
 			//요청된 서비스명을 설정 파일에서 찾지 못한 케이스이다.
 			sNumber++;
 			if(env.getProperty("Service"+sNumber+".Name")==null){
+				//프로퍼티 파일에 서비스가 정의 되어있지 않은 케이스
 				if(sNumber==1){
+					logger.error("no Service information at Properties File: 'application-mvc-properties'");
 					throw new ServiceBrokerException("There is no service information at 'application-mvc-properties'");
 				}
 				else{
-					throw new ServiceBrokerException("Invalid ServiceID : "+serviceId);					
+					logger.error("Invalid ServiceID : ["+planId+"]");
+					throw new ServiceBrokerException("Invalid ServiceID : ["+serviceId+"]");					
 				}
 			}
 			existServiceId="Service"+sNumber+" "+env.getProperty("Service"+sNumber+".Name")+" ServiceID";
 			if(existServiceId.equals(serviceId)){
 				break;
 			}
-		}while(env.getProperty(sNumber+".Name")!=null);
+		}while(env.getProperty("Service"+sNumber+".Name")!=null);
 		//플랜ID 유효성확인
 		String existPlanId;
 		int pNumber=0;
@@ -120,10 +102,12 @@ public class PublicAPIServiceInstanceService implements ServiceInstanceService {
 			//요청된 서비스의 플랜명을 설정 파일에서 찾지 못한 케이스
 			if(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")==null){
 				if(pNumber==1){
-					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[1]);
+					logger.error("no Plan information for Service : ["+serviceId.split(" ")[0]+"] at Properties File: 'application-mvc-properties'");
+					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service : ["+serviceId.split(" ")[0]+"], Plan : ["+planId.split(" ")[1]+"]");
 				}
 				else{
-					throw new ServiceBrokerException("Invalid PlanID : "+planId);					
+					logger.error("Invalid PlanID : ["+planId+"]");
+					throw new ServiceBrokerException("Invalid PlanID : ["+planId+"]");					
 				}
 			}
 			existPlanId= "Service"+sNumber+" Plan"+pNumber+" "+env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")+" PlanID";
@@ -131,54 +115,51 @@ public class PublicAPIServiceInstanceService implements ServiceInstanceService {
 				break;
 			}
 		}while(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")!=null);
-	
-		
-		
-		
-		
-		
-		
+
 		ServiceInstance instance = new ServiceInstance(request);
+		logger.debug("End - PublicAPIServiceInstanceService.deleteServiceInstance()");
 		return instance;
 	}
 
 	@Override
 	public ServiceInstance getServiceInstance(String instanceId) throws ServiceBrokerException {
-		//체크해서 예외처리
-		
-		//List<Map<String,Object>> databases =dao.getServiceInstancAtDB(instanceId);
-		
+		logger.debug("Start - PublicAPIServiceInstanceService.getServiceInstance()");
 		CreateServiceInstanceRequest request = new CreateServiceInstanceRequest();
 //		request.setServiceDefinitionId(databases.get(0).get("service_id").toString());
 //		request.setPlanId(databases.get(0).get("plan_id").toString());
 //		request.setOrganizationGuid(databases.get(0).get("organization_guid").toString());
 //		request.setSpaceGuid(databases.get(0).get("space_guid").toString());
 		ServiceInstance instance = new ServiceInstance(request);
+		logger.debug("End - PublicAPIServiceInstanceService.getServiceInstance()");
 		return instance;
 	}
 
 	@Override
 	public ServiceInstance updateServiceInstance(UpdateServiceInstanceRequest request) throws ServiceInstanceUpdateNotSupportedException,
 			ServiceBrokerException, ServiceInstanceDoesNotExistException {
-		
+		logger.debug("Start - PublicAPIServiceInstanceService.updateServiceInstance()");
 		String planId = request.getPlanId();
 		String existPlanId;
 		String serviceAndNumber = planId.split(" ")[0];
 		boolean findPlan	= false;
-
+		
 		List<String> planNames = getPlanNames(serviceAndNumber);
 		
 		//해당 서비스에 하나의 플랜만 정의되어 있는 케이스
 		if(planNames.size()==1){
+			logger.error("only one plan defined for Service : ["+env.getProperty(serviceAndNumber+".Name")+"] at Properties File: 'application-mvc-properties'");
 			throw new ServiceInstanceUpdateNotSupportedException("Service instance update not supported");
 		}
 		else if(planNames.isEmpty()){
-			//프로비전 이후에 서비스 브로커를 수정하며 설정파일에 플랜정보가 사라진 케이스
-			throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: ["+ planId.split(" ")[0]+"] Plan: ["+planId.split(" ")[1]+"]");
+			//해당 서비스에 대한 플랜이 정의되어 있지 않은 케이스
+			logger.error("no Plan information for Service : ["+env.getProperty(serviceAndNumber+".Name")+"] at Properties File: 'application-mvc-properties'");
+			throw new ServiceBrokerException("There is no plan information. Properties: 'application-mvc-properties', Service: ["+ planId.split(" ")[0]+"]");
 		}
 		else{
-			for(int pNumber =1;pNumber<planNames.size();pNumber++){
-				existPlanId= serviceAndNumber+" "+"Plan"+pNumber+" "+env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name")+" PlanID";	
+			for(int pNumber =1;pNumber<=planNames.size();pNumber++){
+				System.out.println(planNames.size());
+				System.out.println(serviceAndNumber);
+				existPlanId= serviceAndNumber+" Plan"+pNumber+" "+env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name")+" PlanID";	
 				if(existPlanId.equals(planId)){
 					findPlan =true;
 				}
@@ -186,23 +167,25 @@ public class PublicAPIServiceInstanceService implements ServiceInstanceService {
 		}
 		//해당 서비스에 대해서 2개 이상의 플랜이 정의되어 있지만 요청된 플랜ID를 정의된 플랜 목록에서 찾지 못한 케이스
 		if(!findPlan){
-			throw new ServiceBrokerException("Invalid planID : "+planId);		
+			throw new ServiceBrokerException("Invalid PlanID : ["+planId+"]");
 		}
 		ServiceInstance instance = new ServiceInstance(request);
+		logger.debug("End - PublicAPIServiceInstanceService.updateServiceInstance()");
 		return instance;
 	}
 	
 	
-	
-	
 	private List<String> getPlanNames(String serviceAndNumber){
+		logger.debug("Start - PublicAPIServiceInstanceService.getPlanNames()");
 		List<String> planNames = new ArrayList<String>();
-		int pNumber=1;
+		int i=0;
 		do{
-			planNames.add(env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name"));
-			pNumber++;
-		}while(env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name")!=null);
-		
+			i++;
+			if(env.getProperty(serviceAndNumber+".Plan"+i+".Name")!=null){
+				planNames.add(env.getProperty(serviceAndNumber+".Plan"+i+".Name"));				
+			}
+		}while(env.getProperty(serviceAndNumber+".Plan"+i+".Name")!=null);
+		logger.debug("End - PublicAPIServiceInstanceService.getPlanNames()");
 		return planNames;
 	}
 

@@ -87,37 +87,6 @@ public class ProvisionRestTest {
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
 		System.out.println("P001_End - valid data");
 	}
-
-	//P005 플랜ID에 포함된 플랜명이 잘못된(API플랫폼에 존재하지 않는, 사용가능 하도록 설정된 플랜이 아닌) 케이스  - 500 INTERNAL_SERVER_ERROR
-	@Test
-	public void P005_duplicate_instance_fail_planName() {
-		
-		System.out.println("P005_Start - duplicate_instance_fail_planName");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		String instance_id = prop.getProperty("test_instance_id");
-		String organization_guid = prop.getProperty("test_org_guid");
-		String space_guid = prop.getProperty("test_space_guid");
-		
-		ProvisionBody body = new ProvisionBody(prop.getProperty("test_service_id"), prop.getProperty("test_plan_id_plan_name_fail"), organization_guid, space_guid);
-		
-		HttpEntity<ProvisionBody> entity = new HttpEntity<ProvisionBody>(body, headers);		
-		ResponseEntity<String> response = null;
-
-		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-
-		response = HttpClientUtils.sendProvision(url, entity, HttpMethod.PUT);
-
-		System.out.println(response.getBody());
-
-		assertTrue(response.getBody().contains("Invalid PlanID : "+prop.getProperty("test_plan_id_plan_name_fail")));
-		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-		System.out.println("P005_End - duplicate_instance_fail_planName");
-	}
 	
 	//P010 각각의 파라미터들이 빈값으로 요청되었을 때
 	//인스턴스 아이디로 빈값이 들어왔을때 - 404 Not found
@@ -159,7 +128,7 @@ public class ProvisionRestTest {
 		String instance_id = prop.getProperty("test_instance_id");
 		String organization_guid ="";
 		String space_guid = prop.getProperty("test_space_guid");
-		String service_id= prop.getProperty("test_other_service_id");
+		String service_id= prop.getProperty("test_service_id");
 		String plan_id=prop.getProperty("test_plan_id");
 		
 		HttpHeaders headers = new HttpHeaders();	

@@ -21,27 +21,28 @@ public class CatalogConfig {
 	@Autowired
 	private Environment env;
 	
-	public int serviceNumber =1;
-	public int planNumber =1;
+	public int sNumber =1;
+	public int pNumber =1;
 	
 	@Bean
 	public Catalog catalog() {
 		
 		List<String> serviceNames = getServiceNames();
 		List<ServiceDefinition> serviceDefs = new ArrayList<ServiceDefinition>();	
-		
-		for(serviceNumber=1;serviceNumber<=serviceNames.size();serviceNumber++){
+		List<String> requires =new ArrayList<String>();
+		requires.add("syslog_drain");
+		for(sNumber=1;sNumber<=serviceNames.size();sNumber++){
 			serviceDefs.add(
 					new ServiceDefinition(
-						"Service"+serviceNumber+" "+env.getProperty("Service"+serviceNumber+".Name")+" ServiceID",
-						env.getProperty("Service"+serviceNumber+".Name"),
-						env.getProperty("Service"+serviceNumber+".Description"),
+						"Service"+sNumber+" "+env.getProperty("Service"+sNumber+".Name")+" ServiceID",
+						env.getProperty("Service"+sNumber+".Name"),
+						getServiceDescription(),
 						true, 
 						false,
 						getPlans(),
-						Arrays.asList("Public API Service", env.getProperty("Service"+serviceNumber+".Name")),
+						Arrays.asList("Public API Service", env.getProperty("Service"+sNumber+".Name")),
 						getServiceDefinitionMetadata(),
-						null,
+						requires,
 						null
 					)
 				);		
@@ -51,11 +52,11 @@ public class CatalogConfig {
 
 	private Map<String,Object> getServiceDefinitionMetadata() {
 		Map<String,Object> sdMetadata = new HashMap<String,Object>();
-		sdMetadata.put("displayName", env.getProperty("Service"+serviceNumber+".Name"));
+		sdMetadata.put("displayName", env.getProperty("Service"+sNumber+".Name"));
 		sdMetadata.put("imageUrl","no image");
-		sdMetadata.put("longDescription",env.getProperty("Service"+serviceNumber+".Description"));
-		sdMetadata.put("providerDisplayName",env.getProperty("Service"+serviceNumber+".Provider"));
-		sdMetadata.put("documentationUrl",env.getProperty("Service"+serviceNumber+".DocumentationURL"));
+		sdMetadata.put("longDescription",env.getProperty("Service"+sNumber+".Description"));
+		sdMetadata.put("providerDisplayName",env.getProperty("Service"+sNumber+".Provider"));
+		sdMetadata.put("documentationUrl",env.getProperty("Service"+sNumber+".DocumentationURL"));
 		sdMetadata.put("supportUrl","http://www.openpaas.org");
 		return sdMetadata;
 	}
@@ -72,13 +73,13 @@ public class CatalogConfig {
 		Map<String,Object> amount = new HashMap<String,Object>();
 		amount.put("KRW", new Double(0.0));
 		costsMap.put("amount", amount);
-		costsMap.put("unit", env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Unit"));
+		costsMap.put("unit", env.getProperty("Service"+sNumber+".Plan"+pNumber+".Unit"));
 
 		return Arrays.asList(costsMap);
 	}
 
 	private List<String> getBullets(String planName) {
-		return Arrays.asList(env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Bullet"));
+		return Arrays.asList(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Bullet"));
 	}
 
 	private List<Plan> getPlans() {
@@ -97,13 +98,13 @@ public class CatalogConfig {
 //					)			
 //				);
 //		}
-		for(planNumber=1;planNumber<=planNames.size();planNumber++){
-			Map<String,Object> planMetadata = getPlanMetadata(env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name"));
+		for(pNumber=1;pNumber<=planNames.size();pNumber++){
+			Map<String,Object> planMetadata = getPlanMetadata(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name"));
 			plans.add(
 				new Plan(
-					"Service"+serviceNumber+" "+"Plan"+planNumber+" "+env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name")+" PlanID",
-					env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Name"),
-					env.getProperty("Service"+serviceNumber+".Plan"+planNumber+".Description"),
+					"Service"+sNumber+" "+"Plan"+pNumber+" "+env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")+" PlanID",
+					env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name"),
+					getPlanDescription(),
 					planMetadata,
 					isItFree(planMetadata)						
 				)			
@@ -124,10 +125,12 @@ public class CatalogConfig {
 	
 	private List<String> getServiceNames(){
 		List<String> serviceNames = new ArrayList<String>();
-		int i=1;
+		int i=0;
 		do{
-			serviceNames.add(env.getProperty("Service"+i+".Name"));
 			i++;
+			if(env.getProperty("Service"+i+".Name")!=null){
+				serviceNames.add(env.getProperty("Service"+i+".Name"));				
+			}
 		}while(env.getProperty("Service"+i+".Name")!=null);
 		
 		return serviceNames;
@@ -135,15 +138,32 @@ public class CatalogConfig {
 
 	private List<String> getPlanNames(){
 		List<String> planNames = new ArrayList<String>();
-		int i=1;
+		int i=0;
 		do{
-			planNames.add(env.getProperty("Service"+serviceNumber+".Plan"+i+".Name"));
 			i++;
-		}while(env.getProperty("Service"+serviceNumber+".Plan"+i+".Name")!=null);
+			if(env.getProperty("Service"+sNumber+".Plan"+i+".Name")!=null){
+				planNames.add(env.getProperty("Service"+sNumber+".Plan"+i+".Name"));
+			}
+		}while(env.getProperty("Service"+sNumber+".Plan"+i+".Name")!=null);
 		
 		return planNames;
 	}
 	
+	private String getPlanDescription(){
+		
+		String planDescription ="no plan description";
+		if(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Description")!=null){
+			planDescription = env.getProperty("Service"+sNumber+".Plan"+pNumber+".Description");
+		}
+		return planDescription;
+	}
 	
-	
+	private String getServiceDescription(){
+		
+		String serviceDescription ="no service description";
+		if(env.getProperty("Service"+sNumber+".Description")!=null){
+			serviceDescription = env.getProperty("Service"+sNumber+".Description");
+		}
+		return serviceDescription;
+	}
 }

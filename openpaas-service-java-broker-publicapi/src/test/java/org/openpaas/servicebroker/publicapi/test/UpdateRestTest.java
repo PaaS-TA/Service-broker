@@ -75,36 +75,7 @@ private static Properties prop = new Properties();
 		assertEquals(response.getStatusCode(), HttpStatus.OK);
 		System.out.println("UP01 End - valid_plan_id");
 	}
-	
-	//UP02 이미 설정된 플랜아이디로 요청이 들어온 케이스
-	@Test
-	public void UP02_same_plan_id() {
-		
-		System.out.println("UP02 Start - same_plan_id");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		String instance_id = prop.getProperty("test_instance_id");
-		String plan_id = prop.getProperty("test_plan_id_other");
-		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
-		
-		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		ResponseEntity<String> response = null;
 
-		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-
-		response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println(response.getStatusCode());
-		System.out.println(response.getBody());
-
-		assertTrue(response.getBody().contains("Plan :["+plan_id.split(" ")[2]+"] already setted"));
-		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-		System.out.println("UP02 End - same_plan_id");
-	}
-	
 	//UP03 요청된 플랜아이디에 포함된 플랜명이 설정되어 있지 않은 플랜명인 케이스
 	@Test
 	public void UP03_invalid_plan_name() {
@@ -117,7 +88,7 @@ private static Properties prop = new Properties();
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
 		String instance_id = prop.getProperty("test_instance_id");
-		String plan_id = prop.getProperty("test_plan_id_plan_name_fail");
+		String plan_id = prop.getProperty("tets_invalid_plan_id");
 		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
 		
 		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
@@ -129,218 +100,13 @@ private static Properties prop = new Properties();
 		System.out.println(response.getStatusCode());
 		System.out.println(response.getBody());
 
-		assertTrue(response.getBody().contains("not supported Plan :["+plan_id.split(" ")[2]+"]"));
-		assertEquals(response.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
+		assertTrue(response.getBody().contains("Invalid PlanID : ["+plan_id+"]"));
+		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
 		System.out.println("UP03 End - invalid_plan_name");
 	}
-	
-	//UP04 요청된 플랜아이디에 포함된 서비스명과 서비스버전이 DB에 저장된 서비스 정보와 일치하지 않는 케이스
-	@Test
-	public void UP04_invalid_plan_id() {
-		
-		System.out.println("UP04 Start - invalid_plan_id");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		String instance_id = prop.getProperty("test_instance_id");
-		String plan_id = prop.getProperty("test_plan_id_fail");
-		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
-		
-		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		ResponseEntity<String> response = null;
 
-		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-
-		response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println(response.getStatusCode());
-		System.out.println(response.getBody());
-
-		assertTrue(response.getBody().contains("invalid PlanID :["+plan_id+"]. valid PlanID"));
-		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-		System.out.println("UP04 End - invalid_plan_id");
-	}
-	
-	//UP05 인스턴스에 해당하는 유저가 API플랫폼에서 삭제된 케이스
-	//API플랫폼 관리콘솔에서 유저를 직접 삭제하고 테스트해야한다.
-	@Test
-	public void UP05_removed_user() {
-		
-		System.out.println("UP05 Start - removed_user");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		String instance_id = prop.getProperty("removed_user_instance_id");
-		String plan_id = prop.getProperty("test_plan_id_other");
-		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
-		
-		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		ResponseEntity<String> response = null;
-
-		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-
-		response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println(response.getStatusCode());
-		System.out.println(response.getBody());
-
-		assertTrue(response.getBody().equals("{}"));
-		assertEquals(response.getStatusCode(), HttpStatus.OK);
-		System.out.println("UP05 End - removed_user");
-	}
-	
-	//UP06 유저정보를 DB에서 찾을 수 없는 케이스
-	@Test
-	public void UP06_removed_user_DB() {
-			
-		System.out.println("UP06 Start - removed_user_DB");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		String instance_id = prop.getProperty("removed_user_instance_id_DB");
-		String plan_id = prop.getProperty("test_plan_id_other");
-		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
-		
-		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		ResponseEntity<String> response = null;
-
-		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-
-		response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println(response.getStatusCode());
-		System.out.println(response.getBody());
-
-		assertTrue(response.getBody().contains("APIPlatform user information not found. OrganizationGUID "));
-		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-		System.out.println("UP06 End - removed_user_DB");
-	}
-	
-	//UP07 어플리케이션이 API플랫폼에서 삭제된 케이스
-	@Test
-	public void UP07_removed_application() {
-			
-		System.out.println("UP07 Start - removed_application");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		String instance_id = prop.getProperty("removed_app_instance_id");
-		String plan_id = prop.getProperty("test_plan_id_other");
-		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
-		
-		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		ResponseEntity<String> response = null;
-
-		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-
-		response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println(response.getStatusCode());
-		System.out.println(response.getBody());
-
-		assertTrue(response.getBody().contains("{}"));
-		assertEquals(response.getStatusCode(), HttpStatus.OK);
-		System.out.println("UP07 End - removed_application");
-		}
-	
-	//UP08 API의 사용등록이 API플랫폼에서 해제된 케이스
-	@Test
-	public void UP08_removed_subscription() {
-			
-		System.out.println("UP08 Start - removed_subscription");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		String instance_id = prop.getProperty("removed_subs_instance_id");
-		String plan_id = prop.getProperty("test_plan_id_other");
-		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
-		
-		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		ResponseEntity<String> response = null;
-
-		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-
-		response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println(response.getStatusCode());
-		System.out.println(response.getBody());
-
-		assertTrue(response.getBody().contains("{}"));
-		assertEquals(response.getStatusCode(), HttpStatus.OK);
-		System.out.println("UP08 End - removed_subscription");
-		}
-
-	//UP09 인스턴스 정보를 DB에서 찾을 수 없는 케이스
-	@Test
-	public void UP09_removed_instance_id_DB() {
-			
-		System.out.println("UP09 Start - removed_instance_id_DB");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		String instance_id = prop.getProperty("test_instance_id_fail");
-		String plan_id = prop.getProperty("test_plan_id");
-		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
-		
-		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		ResponseEntity<String> response = null;
-
-		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-
-		response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println(response.getStatusCode());
-		System.out.println(response.getBody());
-
-		assertTrue(response.getBody().contains("Service Instnace information not found. ServiceInstanceID "));
-		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-		System.out.println("UP09 End - removed_instance_id_DB");
-	}
-	
-	//UP10 사용등록된 API의 라이프사이클이 변경된 케이스
-	@Test
-	public void UP10_lifecycle_changed_test() {
-			
-		System.out.println("UP10 Start - lifecycle_changed_test");
-		
-		HttpHeaders headers = new HttpHeaders();	
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
-		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		
-		String instance_id = prop.getProperty("lifecycle_change_instance_id");
-		String plan_id = prop.getProperty("lifecycle_change_plan_id_other");
-		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
-		
-		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
-		ResponseEntity<String> response = null;
-		
-		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id;
-		
-		response = HttpClientUtils.sendUpdateProvision(url, entity, HttpMethod.PATCH);
-		System.out.println(response.getStatusCode());
-		System.out.println(response.getBody());
-		
-		assertTrue(response.getBody().contains("API lifecycle changed."));
-		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-		System.out.println("UP10 End - lifecycle_changed_test");
-	}
-	
 	//UP11 하나의 플랜만 사용가능하도록 설정된 케이스
-	//프로퍼티 파일 변경하고 테스트
-//	@Test
+	@Test
 	public void UP11_only_one_plan_available() {
 			
 		System.out.println("UP11 Start - only_one_plan_available");
@@ -351,7 +117,7 @@ private static Properties prop = new Properties();
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
 		String instance_id = prop.getProperty("test_instance_id");
-		String plan_id = prop.getProperty("test_plan_id_other");
+		String plan_id = prop.getProperty("test_one_plan_id");
 		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
 		
 		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
@@ -363,26 +129,26 @@ private static Properties prop = new Properties();
 		System.out.println(response.getStatusCode());
 		System.out.println(response.getBody());
 		
-		assertTrue(response.getBody().contains("Plan update not supported."));
+		assertTrue(response.getBody().contains("Service instance update not supported"));
 		assertEquals(response.getStatusCode(), HttpStatus.UNPROCESSABLE_ENTITY);
 		System.out.println("UP11 End - only_one_plan_available");
 	}
 	
-	//UP13 사용등록이 해제되었고 라이프사이클도 변경된 케이스
+	//UP04 해당 서비스에 사용가능한 플랜이 없는 케이스
 	@Test
-	public void UP13_no_subs_and_lifecycle_changed() {
+	public void UP04_no_plan_available() {
 			
-		System.out.println("UP13 Start - no_subs_and_lifecycle_changed");
+		System.out.println("UP04 Start - no plan available");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		
-		String instance_id = prop.getProperty("lifecycle_change_and_no_subs_instance_id");
-		String plan_id = prop.getProperty("lifecycle_change_plan_id_other");
+		String instance_id = prop.getProperty("test_instance_id");
+		String plan_id = prop.getProperty("test_no_plan_id");
 		UpdateProvisionBody body = new UpdateProvisionBody(plan_id);
-
+		
 		HttpEntity<UpdateProvisionBody> entity = new HttpEntity<UpdateProvisionBody>(body, headers);		
 		ResponseEntity<String> response = null;
 		
@@ -392,8 +158,8 @@ private static Properties prop = new Properties();
 		System.out.println(response.getStatusCode());
 		System.out.println(response.getBody());
 		
-		assertTrue(response.getBody().contains("removed subscrition and API lifecycle changed. Application"));
+		assertTrue(response.getBody().contains("There is no plan information."));
 		assertEquals(response.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-		System.out.println("UP13 End - no_subs_and_lifecycle_changed");
+		System.out.println("UP04 End - no plan available");
 	}
 }
