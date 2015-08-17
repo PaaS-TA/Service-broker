@@ -181,7 +181,8 @@ public class APICatalogService implements CatalogService {
 				
 				Plan plan = new Plan(pId, pName, pDescription, pMetadata, free);
 				plans.add(plan);
-			}	
+			}
+			requires.add("syslog_drain");
 			ServiceDefinition service = new ServiceDefinition(id, name, description, bindable, planUpdatable, plans, tags, metadata, requires, dashboardClient);
 			services.add(service);
 		}
