@@ -106,7 +106,7 @@ public class CatalogConfig {
 					env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name"),
 					getPlanDescription(),
 					planMetadata,
-					isItFree(planMetadata)						
+					isItFree(planMetadata)
 				)			
 			);
 		}
