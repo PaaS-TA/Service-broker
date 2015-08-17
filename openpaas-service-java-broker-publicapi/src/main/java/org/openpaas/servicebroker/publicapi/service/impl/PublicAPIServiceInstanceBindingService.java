@@ -91,7 +91,7 @@ public class PublicAPIServiceInstanceBindingService implements ServiceInstanceBi
 			if(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")==null){
 				if(pNumber==1){
 					logger.error("no Plan information for Service : ["+serviceId.split(" ")[1]+"] at Properties File: 'application-mvc-properties'");
-					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[1]);
+					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[2]);
 				}
 				else{
 					logger.error("Invalid ServiceID : ["+serviceId+"]");
@@ -161,7 +161,7 @@ public class PublicAPIServiceInstanceBindingService implements ServiceInstanceBi
 			if(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")==null){
 				if(pNumber==1){
 					logger.error("no Plan information for Service : ["+serviceId.split(" ")[1]+"] at Properties File: 'application-mvc-properties'");
-					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[1]);
+					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[2]);
 				}
 				else{
 					logger.error("Invalid PlanID : ["+planId+"]");

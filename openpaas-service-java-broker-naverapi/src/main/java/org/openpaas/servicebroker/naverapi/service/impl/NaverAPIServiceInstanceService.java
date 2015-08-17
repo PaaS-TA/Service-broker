@@ -54,7 +54,7 @@ public class NaverAPIServiceInstanceService implements ServiceInstanceService {
 					throw new ServiceBrokerException("Invalid PlanID : ["+planId+"]");			
 				}
 			}
-			existPlanId= serviceAndNumber+" Plan"+pNumber+" "+env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name")+" PlanID";
+			existPlanId= serviceAndNumber+" "+env.getProperty(serviceAndNumber+".Name")+" Plan"+pNumber+" "+env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name")+" PlanID";
 			if(existPlanId.equals(planId)){
 				break;
 			}
@@ -110,7 +110,7 @@ public class NaverAPIServiceInstanceService implements ServiceInstanceService {
 					throw new ServiceBrokerException("Invalid PlanID : ["+planId+"]");					
 				}
 			}
-			existPlanId= "Service"+sNumber+" Plan"+pNumber+" "+env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")+" PlanID";
+			existPlanId= "Service"+sNumber+" "+env.getProperty("Service"+sNumber+".Name")+" Plan"+pNumber+" "+env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")+" PlanID";
 			if(existPlanId.equals(planId)){
 				break;
 			}
@@ -159,7 +159,7 @@ public class NaverAPIServiceInstanceService implements ServiceInstanceService {
 			for(int pNumber =1;pNumber<=planNames.size();pNumber++){
 				System.out.println(planNames.size());
 				System.out.println(serviceAndNumber);
-				existPlanId= serviceAndNumber+" Plan"+pNumber+" "+env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name")+" PlanID";	
+				existPlanId= serviceAndNumber+" "+env.getProperty(serviceAndNumber+".Name")+" Plan"+pNumber+" "+env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name")+" PlanID";
 				if(existPlanId.equals(planId)){
 					findPlan =true;
 				}

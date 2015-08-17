@@ -1,6 +1,5 @@
 package org.openpaas.servicebroker.naverapi.service.impl;
 
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -35,30 +34,7 @@ public class NaverAPIServiceInstanceBindingService implements ServiceInstanceBin
 		
 		System.out.println(instanceId);
 		System.out.println(serviceId);
-		
-//		for(int i =0;i<catalog.getServiceDefinitions().size();i++){
-//			
-//			ServiceDefinition service = catalog.getServiceDefinitions().get(i);
-//			if(service.getId().equals(serviceId)){
-//				for(int j =0;j<service.getPlans().size();j++){
-//					Plan plan = service.getPlans().get(j);
-//					if(plan.getId().equals(planId)){
-//						break;
-//					}
-//					//서비스 브로커를 생성한 시점을 기준으로 요청된 서비스는 카탈로그 되었지만, 플랜이 존재하지 않는 케이스
-//					//서비스 브로커 생성이후에 프로퍼티 파일을 변경했다면, 서비스 브로커를 다시 생성하여야 한다.
-//					else{
-//						throw new ServiceBrokerException("Invalid PlanID : "+planId);
-//					}
-//				}		
-//			}
-//			//서비스 브로커를 생성한 시점을 기준으로 요청된 서비스가 카탈로그 되지 않은 케이스
-//			//서비스 브로커 생성이후에 프로퍼티 파일을 변경했다면, 서비스 브로커를 다시 생성하여야 한다.
-//			else{
-//				throw new ServiceBrokerException("Invalid ServiceID : "+serviceId);
-//			}
-//		}
-		
+
 		//요청된 서비스ID와 플랜ID의 유효성 확인
 		String existServiceId;
 		int sNumber=0;
@@ -91,14 +67,14 @@ public class NaverAPIServiceInstanceBindingService implements ServiceInstanceBin
 			if(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")==null){
 				if(pNumber==1){
 					logger.error("no Plan information for Service : ["+serviceId.split(" ")[1]+"] at Properties File: 'application-mvc-properties'");
-					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[1]);
+					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[2]);
 				}
 				else{
 					logger.error("Invalid ServiceID : ["+serviceId+"]");
 					throw new ServiceBrokerException("Invalid PlanID : ["+planId+"]");					
 				}
 			}
-			existPlanId= "Service"+sNumber+" Plan"+pNumber+" "+env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")+" PlanID";
+			existPlanId= "Service"+sNumber+" "+env.getProperty("Service"+sNumber+".Name")+" Plan"+pNumber+" "+env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")+" PlanID";
 			if(existPlanId.equals(planId)){
 				break;
 			}
@@ -161,14 +137,14 @@ public class NaverAPIServiceInstanceBindingService implements ServiceInstanceBin
 			if(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")==null){
 				if(pNumber==1){
 					logger.error("no Plan information for Service : ["+serviceId.split(" ")[1]+"] at Properties File: 'application-mvc-properties'");
-					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[1]);
+					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[2]);
 				}
 				else{
 					logger.error("Invalid PlanID : ["+planId+"]");
 					throw new ServiceBrokerException("Invalid PlanID : ["+planId+"]");					
 				}
 			}
-			existPlanId= "Service"+sNumber+" Plan"+pNumber+" "+env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")+" PlanID";
+			existPlanId= "Service"+sNumber+" "+env.getProperty("Service"+sNumber+".Name")+" Plan"+pNumber+" "+env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")+" PlanID";
 			if(existPlanId.equals(planId)){
 				break;
 			}

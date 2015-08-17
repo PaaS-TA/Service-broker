@@ -102,7 +102,7 @@ public class CatalogConfig {
 			Map<String,Object> planMetadata = getPlanMetadata(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name"));
 			plans.add(
 				new Plan(
-					"Service"+sNumber+" "+"Plan"+pNumber+" "+env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")+" PlanID",
+					"Service"+sNumber+" "+env.getProperty("Service"+sNumber+".Name")+" "+"Plan"+pNumber+" "+env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name")+" PlanID",
 					env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name"),
 					getPlanDescription(),
 					planMetadata,

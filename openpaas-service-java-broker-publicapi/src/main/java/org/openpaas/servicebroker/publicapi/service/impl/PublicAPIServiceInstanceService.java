@@ -47,7 +47,7 @@ public class PublicAPIServiceInstanceService implements ServiceInstanceService {
 				//해당 서비스에 대해서 하나의 플랜도 정의 되어있지 않은 케이스
 				if(pNumber==1){
 					logger.error("no Plan information for Service : ["+serviceId.split(" ")[0]+"] at Properties File: 'application-mvc-properties'");
-					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service : ["+serviceId.split(" ")[0]+"], Plan : ["+planId.split(" ")[1]+"]");
+					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service : ["+serviceId.split(" ")[0]+"], Plan : ["+planId.split(" ")[2]+"]");
 				}
 				else{
 					logger.error("Invalid PlanID : ["+planId+"]");
