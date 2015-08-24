@@ -125,10 +125,6 @@ public class PublicAPIServiceInstanceService implements ServiceInstanceService {
 	public ServiceInstance getServiceInstance(String instanceId) throws ServiceBrokerException {
 		logger.debug("Start - PublicAPIServiceInstanceService.getServiceInstance()");
 		CreateServiceInstanceRequest request = new CreateServiceInstanceRequest();
-//		request.setServiceDefinitionId(databases.get(0).get("service_id").toString());
-//		request.setPlanId(databases.get(0).get("plan_id").toString());
-//		request.setOrganizationGuid(databases.get(0).get("organization_guid").toString());
-//		request.setSpaceGuid(databases.get(0).get("space_guid").toString());
 		ServiceInstance instance = new ServiceInstance(request);
 		logger.debug("End - PublicAPIServiceInstanceService.getServiceInstance()");
 		return instance;
@@ -157,11 +153,12 @@ public class PublicAPIServiceInstanceService implements ServiceInstanceService {
 		}
 		else{
 			for(int pNumber =1;pNumber<=planNames.size();pNumber++){
-				System.out.println(planNames.size());
-				System.out.println(serviceAndNumber);
+
 				existPlanId= serviceAndNumber+" "+env.getProperty(serviceAndNumber+".Name")+" Plan"+pNumber+" "+env.getProperty(serviceAndNumber+".Plan"+pNumber+".Name")+" PlanID";	
+				
 				if(existPlanId.equals(planId)){
 					findPlan =true;
+					break;
 				}
 			}
 		}
