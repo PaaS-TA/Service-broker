@@ -40,7 +40,7 @@ public class CatalogConfig {
 						true, 
 						false,
 						getPlans(),
-						Arrays.asList("Public API Service", env.getProperty("Service"+sNumber+".Name")),
+						Arrays.asList("Public API Service"),
 						getServiceDefinitionMetadata(),
 						requires,
 						null
@@ -56,15 +56,15 @@ public class CatalogConfig {
 		sdMetadata.put("imageUrl","no image");
 		sdMetadata.put("longDescription",env.getProperty("Service"+sNumber+".Description"));
 		sdMetadata.put("providerDisplayName",env.getProperty("Service"+sNumber+".Provider"));
-		sdMetadata.put("documentationUrl",env.getProperty("Service"+sNumber+".DocumentationURL"));
-		sdMetadata.put("supportUrl","http://www.openpaas.org");
+		sdMetadata.put("documentationUrl",env.getProperty("Service"+sNumber+".DocumentationUrl"));
+		sdMetadata.put("supportUrl",env.getProperty("SupportUrl"));
 		return sdMetadata;
 	}
 
 	private Map<String,Object> getPlanMetadata(String planName) {		
 		Map<String,Object> planMetadata = new HashMap<String,Object>();
 		planMetadata.put("costs", getCosts());
-		planMetadata.put("bullets", getBullets(planName+" Plan"));
+		planMetadata.put("bullets", getBullets());
 		return planMetadata;
 	}
 
@@ -78,7 +78,7 @@ public class CatalogConfig {
 		return Arrays.asList(costsMap);
 	}
 
-	private List<String> getBullets(String planName) {
+	private List<String> getBullets() {
 		return Arrays.asList(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Bullet"));
 	}
 
@@ -86,18 +86,7 @@ public class CatalogConfig {
 
 		List<Plan> plans = new ArrayList<Plan>();
 		List<String> planNames = getPlanNames();
-//		int i=1;
-//		for(i=1;i<=planNames.size();i++){
-//			plans.add(
-//					new Plan(
-//						env.getProperty("PlanName"+i)+" Plan ID",
-//						env.getProperty("PlanName"+i),
-//						env.getProperty("PlanDescription"+i),
-//						getPlanMetadata(env.getProperty("PlanName")+i,i),
-//						true						
-//					)			
-//				);
-//		}
+
 		for(pNumber=1;pNumber<=planNames.size();pNumber++){
 			Map<String,Object> planMetadata = getPlanMetadata(env.getProperty("Service"+sNumber+".Plan"+pNumber+".Name"));
 			plans.add(
