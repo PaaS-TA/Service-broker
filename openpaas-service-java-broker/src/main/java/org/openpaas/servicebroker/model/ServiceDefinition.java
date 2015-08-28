@@ -13,10 +13,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * *브로커가 제공하는 서비스
+ * A service offered by this broker.
  * 
- * 2015.07.17
- * @author 송창학 수석
+ * @author sgreenberg@gopivotal.com
+ *
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)

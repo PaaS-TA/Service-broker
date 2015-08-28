@@ -102,6 +102,7 @@ public class PublicAPIServiceInstanceBindingService implements ServiceInstanceBi
 		String planId = request.getPlanId();
 		
 		Map<String,Object> credentials = new LinkedHashMap<String, Object>();
+		
 		String syslogDrainUrl = null;
 		String appGuid = "";
 		//TODO DB없이 appGuid를 갖고 있을 수 있는지?

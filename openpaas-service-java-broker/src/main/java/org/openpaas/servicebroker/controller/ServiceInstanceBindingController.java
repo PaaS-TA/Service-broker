@@ -72,7 +72,7 @@ public class ServiceInstanceBindingController extends BaseController {
 		logger.debug("ServiceInstanceBinding Created: " + binding.getId());
         return new ResponseEntity<ServiceInstanceBindingResponse>(
         		new ServiceInstanceBindingResponse(binding), 
-        		HttpStatus.CREATED);
+        		binding.getHttpStatus());
 	}
 	
 	@RequestMapping(value = BASE_PATH + "/{bindingId}", method = RequestMethod.DELETE)

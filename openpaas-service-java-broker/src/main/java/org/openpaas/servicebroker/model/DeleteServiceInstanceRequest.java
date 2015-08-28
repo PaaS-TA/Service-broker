@@ -1,10 +1,8 @@
 package org.openpaas.servicebroker.model;
 
 /**
- * 서비스 인스턴스를 삭제하기 위해 클라우드 컨트롤러로부터 전달된 요청 (Deprovision)
- * 
- * 2015.07.17
- * @author 송창학 수석
+ * A request sent by the cloud controller to remove a service.
+ * @author krujos
  *
  */
 public class DeleteServiceInstanceRequest {

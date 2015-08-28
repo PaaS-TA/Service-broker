@@ -1,15 +1,15 @@
 package org.openpaas.servicebroker.common;
 
 public class BindingBody {
-	
-	private String plan_id;
+
 	private String service_id;
+	private String plan_id;
 	private String app_guid;
 	
 	public BindingBody(String service_id, String plan_id, String app_guid) {
 		this.service_id = service_id;
 		this.plan_id = plan_id;
-		this.app_guid = app_guid;
+		this.app_guid  =app_guid;
 	}
 	
 	public String convertToJsonString() {
@@ -17,8 +17,7 @@ public class BindingBody {
 		
 		result = "{\"plan_id\":\""+plan_id+"\", "+
 					"\"service_id\":\""+service_id+"\", " +
-					"\"app_guid\":\""+app_guid+"\" " +
-			"}";
+					"\"app_guid\":\""+app_guid+"\"}";
 		
 		return result;
 	}
@@ -46,5 +45,4 @@ public class BindingBody {
 	public void setApp_guid(String app_guid) {
 		this.app_guid = app_guid;
 	}
-
 }

@@ -18,4 +18,5 @@ public class ServiceInstanceExistsException extends Exception {
 				"ServiceInstance.id = " + instance.getServiceInstanceId() +
 				", Service.id = " + instance.getServiceDefinitionId());
 	}
+
 }

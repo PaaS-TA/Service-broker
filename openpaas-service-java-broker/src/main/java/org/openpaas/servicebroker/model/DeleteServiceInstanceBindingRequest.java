@@ -3,10 +3,7 @@ package org.openpaas.servicebroker.model;
 /**
  *  A request sent by the cloud controller to remove a binding
  *  of a service.
- *  *서비스를 언바인드 하기 위해 클라우드 컨트롤러로부터 전달된 요청 (Unbind)
- *  
- *  2015.07.17
- * @author 송창학 수석
+ * @author krujos
  *
  */
 public class DeleteServiceInstanceBindingRequest {

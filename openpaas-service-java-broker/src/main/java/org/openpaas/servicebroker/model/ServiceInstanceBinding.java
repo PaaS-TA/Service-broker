@@ -3,11 +3,15 @@ package org.openpaas.servicebroker.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
- * *서비스 인스턴스의 바인딩
+ * A binding to a service instance
  * 
- * 2015.07.17
- * @author 송창학 수석
+ * @author sgreenberg@gopivotal.com
+ *
  */
 public class ServiceInstanceBinding {
 
@@ -16,7 +20,10 @@ public class ServiceInstanceBinding {
 	private Map<String,Object> credentials = new HashMap<String,Object>();
 	private String syslogDrainUrl;
 	private String appGuid;
-
+	
+	@JsonIgnore
+	private HttpStatus httpStatus = HttpStatus.CREATED;
+	
 	public ServiceInstanceBinding(String id, 
 			String serviceInstanceId, 
 			Map<String,Object> credentials,
@@ -31,6 +38,10 @@ public class ServiceInstanceBinding {
 	public String getId() {
 		return id;
 	}
+	
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public String getServiceInstanceId() {
 		return serviceInstanceId;
@@ -38,6 +49,10 @@ public class ServiceInstanceBinding {
 
 	public Map<String, Object> getCredentials() {
 		return credentials;
+	}
+
+	public void setServiceInstanceId(String serviceInstanceId) {
+		this.serviceInstanceId = serviceInstanceId;
 	}
 
 	private void setCredentials(Map<String, Object> credentials) {
@@ -54,6 +69,14 @@ public class ServiceInstanceBinding {
 	
 	public String getAppGuid() {
 		return appGuid;
+	}
+	
+	public void setHttpStatusOK(){
+		this.httpStatus=HttpStatus.OK;
+	}
+	
+	public HttpStatus getHttpStatus(){
+		return httpStatus;
 	}
 	
 }

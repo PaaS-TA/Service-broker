@@ -29,10 +29,10 @@ public class JsonUtils {
 			throw new ServiceBrokerException(getSwitchedMessage(3));
 		} catch (Exception e){
 			logger.warn("Json Convert: Exception");
-			throw new ServiceBrokerException("Json Convert Exception : " + e.getMessage());
+			throw new ServiceBrokerException("Json Convert: " + e.getMessage());
 		}
 		
-		logger.info("Json Convert completed");
+		logger.info("Json Convert: Complete");
 		
 		return json;
 	}

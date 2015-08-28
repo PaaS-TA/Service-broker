@@ -9,10 +9,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 
 /**
- * *ServiceDefinition의 인스턴스
+ * An instance of a ServiceDefinition.
  * 
- * 2015.07.17
- * @author 송창학 수석
+ * @author sgreenberg@gopivotal.com
+ *
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ServiceInstance {
@@ -93,12 +93,20 @@ public class ServiceInstance {
 		return serviceInstanceId;
 	}
 
+	public void setServiceInstanceId(String serviceInstanceId) {
+		this.serviceInstanceId = serviceInstanceId;
+	}
+
 	public String getServiceDefinitionId() {
 		return serviceDefinitionId;
 	}
 
 	public String getPlanId() {
 		return planId;
+	}
+
+	public void setPlanId(String planId) {
+		this.planId = planId;
 	}
 
 	public String getOrganizationGuid() {
