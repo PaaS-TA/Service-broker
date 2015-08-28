@@ -34,7 +34,7 @@ public class CatalogConfig {
 									getPlanMetadata("B"),false)),
 					Arrays.asList("mysql", "document"),
 					getServiceDefinitionMetadata(),
-					null,
+					getRequires(),
 					null)));
 	}
 	
@@ -94,5 +94,11 @@ public class CatalogConfig {
 		return Arrays.asList("Shared MysqlDB server", 
 				"10 concurrent connections (not enforced)");
 	}
+	
+	private List<String> getRequires() {
+		
+		return Arrays.asList("syslog_drain");
+	}
+	
 	
 }

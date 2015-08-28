@@ -38,7 +38,7 @@ public class CatalogConfig {
 									getPlanMetadata("C"),false)),
 					Arrays.asList("glusterfs", "document"),
 					getServiceDefinitionMetadata(),
-					null,
+					getRequires(),
 					null)));
 	}
 	
@@ -107,4 +107,8 @@ public class CatalogConfig {
 				"5Mb Storage Size");
 	}
 	
+	private List<String> getRequires() {
+		
+		return Arrays.asList("syslog_drain");
+	}
 }

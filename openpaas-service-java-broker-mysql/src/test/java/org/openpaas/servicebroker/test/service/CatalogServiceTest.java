@@ -71,7 +71,7 @@ public class CatalogServiceTest {
 		System.out.println("== Started test Catalog API ==");
 		try {
 			service.getCatalog();
-			service.getServiceDefinition("teat");
+			service.getServiceDefinition("test");
 		} catch (Exception e) {
 			// TODO: handle exception
 		}

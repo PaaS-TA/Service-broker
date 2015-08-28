@@ -12,7 +12,8 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
-apply plugin: 'war'
+//apply plugin: 'war'
+apply plugin: 'application'
 
 ext {
   springBootCfServiceBrokerVersion = "2.4.0"
@@ -24,9 +25,24 @@ ext {
   jsonPathVersion = '0.9.1'
 }
 
-war {
-    baseName = baseName
-    version =  version
+//war {
+//    baseName = baseName
+//    version =  version
+//}
+
+mainClassName = 'org.openpaas.servicebroker.mysql.config.Application'
+sourceCompatibility = 1.8
+version = '1.0'
+
+jar {
+    manifest {
+        attributes  'Title': 'Mysql Broker', 'Version': version, 'Main-Class': mainClassName
+    }
+    archiveName 'openpaas-service-java-broker-mysql.jar'
+    dependsOn configurations.runtime
+    from {
+        configurations.compile.collect {it.isDirectory()? it: zipTree(it)}
+    }
 }
 
 repositories {
@@ -54,7 +70,8 @@ dependencies {
     testCompile 'com.sun.xml.security:xml-security-impl:1.0'
     
 	compile("org.apache.commons:commons-dbcp2")
-    runtime "mysql:mysql-connector-java:5.1.27"
+    //runtime "mysql:mysql-connector-java:5.1.27"
+    runtime'org.mariadb.jdbc:mariadb-java-client:1.2.0'
     compile "org.springframework:spring-jdbc:4.0.0.M3"
 }
 

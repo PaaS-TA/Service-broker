@@ -21,32 +21,47 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.common.ProvisionBody;
 import org.openpaas.servicebroker.common.UpdateProvisionBody;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
+import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
+import org.openpaas.servicebroker.mysql.service.impl.MysqlAdminService;
+import org.openpaas.servicebroker.mysql.service.impl.MysqlServiceInstanceService;
+import org.openpaas.servicebroker.service.ServiceInstanceService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 //@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+//@SpringApplicationConfiguration
 public class ProvisionServiceTest {
 	
 	private static Properties prop = new Properties();
+	
+	//@Autowired
+	ServiceInstanceService instanceService;
 	
 	//@BeforeClass
 	public static void init() {
 		
 		System.out.println("== Started test Provision API ==");
-
 		// Initialization
 		// Get properties information
 		String propFile = "test.properties";
@@ -70,11 +85,24 @@ public class ProvisionServiceTest {
 	 * Provision_create
 	 */
 	//@Test	
-	public void TC005_provision_create() {
-		
+	public  void TC005_provision_create() {
+		//deleteProvision(prop.getProperty("broker.apitest.info.intanceId"));
 		System.out.println("Start - Provision_create");
+		CreateServiceInstanceRequest createInstance = new CreateServiceInstanceRequest();
+		createInstance.withServiceInstanceId(prop.getProperty("broker.apitest.info.intanceId"));
+		createInstance.setServiceDefinitionId(prop.getProperty("broker.apitest.info.serviceId"));
+		createInstance.setOrganizationGuid(prop.getProperty("broker.apitest.info.organizationGuid"));
+		createInstance.setPlanId(prop.getProperty("broker.apitest.info.planIdA"));
+		createInstance.setSpaceGuid(prop.getProperty("broker.apitest.info.spaceGuid"));
+		try {
+			instanceService.createServiceInstance(createInstance);
+		} catch (Exception e) {
+			e.printStackTrace();
+			assertFalse(e.getMessage(), true);
+		}
+		assertTrue("Success", true);
+		/*
 		
-		deleteProvision(prop.getProperty("broker.apitest.info.intanceId"));
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -111,7 +139,7 @@ public class ProvisionServiceTest {
 		}
 		
 		assertTrue("Success", true);
-		
+		*/
 		System.out.println("End - Provision_create");
 	}
 	

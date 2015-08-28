@@ -20,6 +20,11 @@ public class MysqlConfig {
 
 //	@Value("${jdbc.driver}")
 //	private String jdbcDriver;
+	//@Value("${jdbc.url}")
+	//private String url;
+	
+	//@Value("${jdbc.pwd}")
+	//private String pwd;
 	
 	@Autowired
 	private Environment env;
@@ -46,6 +51,7 @@ public class MysqlConfig {
 		dataSource.setDriverClassName(env.getRequiredProperty("jdbc.driver"));
 		//dataSource.setDriverClassName(env.getRequiredProperty("jdbc.driver"));
 		//dataSource.setUrl("jdbc:mysql://192.168.4.37:3306");10.30.40.219
+		//dataSource.setUrl(env.getRequiredProperty("jdbc.url"));
 		dataSource.setUrl(env.getRequiredProperty("jdbc.url"));
 		dataSource.setUsername(env.getRequiredProperty("jdbc.username"));
 		dataSource.setPassword(env.getRequiredProperty("jdbc.pwd"));

@@ -15,6 +15,7 @@ import org.openpaas.servicebroker.service.ServiceInstanceBindingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,9 @@ import org.springframework.stereotype.Service;
 public class MysqlServiceInstanceBindingService implements ServiceInstanceBindingService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MysqlServiceInstanceBindingService.class);
+	
+	//@Value("${jdbc.host}")
+	//private String jdbc_host;
 	
 	@Autowired
 	private Environment env;
@@ -116,7 +120,7 @@ public class MysqlServiceInstanceBindingService implements ServiceInstanceBindin
 		credentials.put("port", env.getRequiredProperty("jdbc.port"));
 		credentials.put("username", username);
 		credentials.put("password", password);
-		credentials.put("uri", mysqlAdminService.getConnectionString(database, username, password,env.getRequiredProperty("jdbc.host")));
+		credentials.put("uri", mysqlAdminService.getConnectionString(database, username, password, env.getRequiredProperty("jdbc.host")));
 		binding = new ServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, null, request.getAppGuid());
 		
 		// Binding 정보를 저장합니다.
@@ -186,7 +190,7 @@ public class MysqlServiceInstanceBindingService implements ServiceInstanceBindin
 		credentials.put("port", env.getRequiredProperty("jdbc.port"));
 		credentials.put("username", username);
 		credentials.put("password", password);
-		credentials.put("uri", mysqlAdminService.getConnectionString(database, username, password,env.getRequiredProperty("jdbc.host")));
+		credentials.put("uri", mysqlAdminService.getConnectionString(database, username, password, env.getRequiredProperty("jdbc.host")));
 		
 		return new ServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, null, request.getAppGuid());
 		

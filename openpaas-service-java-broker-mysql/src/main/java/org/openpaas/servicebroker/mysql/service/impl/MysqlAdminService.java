@@ -15,7 +15,6 @@ import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
 import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.ServiceInstanceBinding;
 import org.openpaas.servicebroker.mysql.exception.MysqlServiceException;
-import org.openpaas.servicebroker.service.CatalogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,9 +75,6 @@ public class MysqlAdminService {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 		
-	@Autowired
-	private CatalogService catalogService;
-	
 	private final RowMapper<ServiceInstance> mapper = new ServiceInstanceRowMapper();
 	
 	private final RowMapper<ServiceInstanceBinding> mapper2 = new ServiceInstanceBindingRowMapper();
