@@ -579,8 +579,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 	
 //서비스 인스턴스 정보를 가져온다.
 	@Override
-	public ServiceInstance getServiceInstance(String serviceInstanceId) throws ServiceBrokerException
-	{
+	public ServiceInstance getServiceInstance(String serviceInstanceId){
 		APIServiceInstance apiServiceInstance = new APIServiceInstance();		
 		CreateServiceInstanceRequest request = new CreateServiceInstanceRequest();
 	
@@ -588,10 +587,10 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			apiServiceInstance=dao.getAPIServiceByInstance(serviceInstanceId);
 			logger.debug("get API Information");
 			//이미 delete명령으로 제거한 서비스인스턴스의 인스턴스 아이디로 요청이 들어온 경우 - U009
-			//TODO 삭제된 인스턴스를 DB에서 어떻게 처리할지에 대해서 결정이 되면 수정
+			//TODO 삭제된 인스턴스를 DB에서 처리하는 방법이 달라지면 수정
 			if(apiServiceInstance.getDelyn().equals("Y")){
 				logger.info("Service Instance : ["+serviceInstanceId+"] already removed - U009");
-				throw new ServiceBrokerException("already removed Service Instance :["+serviceInstanceId+"] - U009");
+				return null;
 			}
 		} catch (EmptyResultDataAccessException e) {
 			//존재하지 않는 인스턴스 아이디가 요청된 경우 - U002
@@ -599,7 +598,7 @@ public class APIServiceInstanceService implements ServiceInstanceService {
 			return null;
 		} catch (Exception e){
 			logger.error("Database Error - getServiceInstanceByInstanceID()");
-			throw new ServiceBrokerException(e.getMessage());
+			return null;
 		}
 		String organizationGuid = apiServiceInstance.getOrganization_id();
 		String spaceId = apiServiceInstance.getSpace_guid();

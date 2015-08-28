@@ -12,7 +12,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.openpaas.servicebroker.common.BindingBody;
-import org.openpaas.servicebroker.common.HttpClientUtils;
+import org.openpaas.servicebroker.naverapi.common.HttpClientUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;

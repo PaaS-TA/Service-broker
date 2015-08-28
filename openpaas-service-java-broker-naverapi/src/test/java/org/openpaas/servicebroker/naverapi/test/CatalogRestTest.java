@@ -11,7 +11,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.openpaas.servicebroker.common.JsonUtils;
-import org.openpaas.servicebroker.common.HttpClientUtils;
+import org.openpaas.servicebroker.naverapi.common.HttpClientUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

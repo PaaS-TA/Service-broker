@@ -12,7 +12,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.openpaas.servicebroker.common.BindingBody;
-import org.openpaas.servicebroker.common.HttpClientUtils;
+import org.openpaas.servicebroker.publicapi.common.HttpClientUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -136,6 +136,7 @@ private static Properties prop = new Properties();
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id+"/"+prop.getProperty("binding_path")+"/"+binding_id;
 		
 		response = HttpClientUtils.sendBinding(url, entity, HttpMethod.PUT);
+
 		System.out.println(response.getStatusCode());
 		System.out.println(response.getBody());
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
@@ -201,8 +202,8 @@ private static Properties prop = new Properties();
 		ResponseEntity<String> response = null;
 
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id+"/"+prop.getProperty("binding_path")+"/"+binding_id;
-		
 		response = HttpClientUtils.sendBinding(url, entity, HttpMethod.PUT);
+	
 		System.out.println(response.getStatusCode());
 		System.out.println(response.getBody());
 		
@@ -233,8 +234,9 @@ private static Properties prop = new Properties();
 		ResponseEntity<String> response = null;
 
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id+"/"+prop.getProperty("binding_path")+"/"+binding_id;
-		
+
 		response = HttpClientUtils.sendBinding(url, entity, HttpMethod.PUT);
+
 		System.out.println(response.getStatusCode());
 		System.out.println(response.getBody());
 		
@@ -267,6 +269,7 @@ private static Properties prop = new Properties();
 		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("provision_path") + "/" + instance_id+"/"+prop.getProperty("binding_path")+"/"+binding_id;
 		
 		response = HttpClientUtils.sendBinding(url, entity, HttpMethod.PUT);
+
 		System.out.println(response.getStatusCode());
 		System.out.println(response.getBody());
 		

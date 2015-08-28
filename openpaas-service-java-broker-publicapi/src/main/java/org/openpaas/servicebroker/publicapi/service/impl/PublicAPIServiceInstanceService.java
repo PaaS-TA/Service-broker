@@ -122,7 +122,7 @@ public class PublicAPIServiceInstanceService implements ServiceInstanceService {
 	}
 
 	@Override
-	public ServiceInstance getServiceInstance(String instanceId) throws ServiceBrokerException {
+	public ServiceInstance getServiceInstance(String instanceId) {
 		logger.debug("Start - PublicAPIServiceInstanceService.getServiceInstance()");
 		CreateServiceInstanceRequest request = new CreateServiceInstanceRequest();
 		ServiceInstance instance = new ServiceInstance(request);

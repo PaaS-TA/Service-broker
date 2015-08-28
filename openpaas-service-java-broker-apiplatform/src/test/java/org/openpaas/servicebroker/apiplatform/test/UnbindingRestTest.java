@@ -14,7 +14,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.openpaas.servicebroker.apiplatform.common.APIPlatformAPI;
-import org.openpaas.servicebroker.common.HttpClientUtils;
+import org.openpaas.servicebroker.apiplatform.common.HttpClientUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -135,8 +135,8 @@ public class UnbindingRestTest {
 		response = HttpClientUtils.sendUnbinding(url, entity, HttpMethod.DELETE);
 		System.out.println(response.getStatusCode());
 		System.out.println(response.getBody());
-		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-		assertTrue(response.getBody().contains("ServiceInstance does not exist: id = " + instance_id));
+		assertEquals(HttpStatus.GONE, response.getStatusCode());
+		assertTrue(response.getBody().equals("{}"));
 		
 		System.out.println("U002 === End - invalid_parameters_instance_id_test");
 	}
@@ -345,8 +345,8 @@ public class UnbindingRestTest {
 		response = HttpClientUtils.sendUnbinding(url, entity, HttpMethod.DELETE);
 		System.out.println(response.getStatusCode());
 		System.out.println(response.getBody());
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-		assertTrue(response.getBody().contains("already removed Service Instance"));
+		assertEquals(HttpStatus.GONE, response.getStatusCode());
+		assertTrue(response.getBody().equals("{}"));
 		
 		System.out.println("U009 === End - removed_instance_id_DB_test");
 	}
