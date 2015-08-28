@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko" >
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>API 서비스 연계 - 샘플 어플리케이션</title>
+	<script type="text/javascript">
+		try {
+			document.execCommand('BackgroundImageCache', false, true);
+		} catch (e) {
+		}
+	</script>
+
+	<script th:inline="javascript">
+	//컨트롤러로 부터 API url이나 서비스 key등의 vcap 정보를 받아온다. 
+		var naverMapUrl =/*[[${naverMapUrl}]]*/'';
+		var naverMap_Key =/*[[${naverMap_Key}]]*/'';
+		var publicPerformance_Url =/*[[${publicPerformance_Url}]]*/'';
+		var publicPerformance_Key =/*[[${publicPerformance_Key}]]*/'';
+		var incheonCulture_Url =/*[[${incheonCulture_Url}]]*/'';
+		var incheonCulture_Key =/*[[${incheonCulture_Key}]]*/'';
+		var daejeonFestival_Url =/*[[${daejeonFestival_Url}]]*/'';
+		var daejeonFestival_Key =/*[[${daejeonFestival_Key}]]*/'';
+		var jeonnamPerformanceList_Url =/*[[${jeonnamPerformanceList_Url}]]*/'';
+		var jeonnamPerformanceList_Key =/*[[${jeonnamPerformanceList_Key}]]*/'';
+		var naverAddressToGPS_Url =/*[[${naverAddressToGPS_Url}]]*/'';
+		var naverAddressToGPS_Key =/*[[${naverAddressToGPS_Key}]]*/'';
+		var naverSearch_Url =/*[[${naverSearch_Url}]]*/'';
+		var naverSearch_Key =/*[[${naverSearch_Key}]]*/'';
+		
+	//XHTML 규약에 의해서 특수문자 사용이 제한되기 때문에 컨트롤러에서 값을 받아와 사용한다.
+		var mark ='"';
+		var script1 = /*[[${script1}]]*/'';
+		var script2 = /*[[${script2}]]*/'';
+		var script3 = /*[[${script3}]]*/'';
+		var script4 = /*[[${script4}]]*/'';
+		var script5 = /*[[${script5}]]*/'';
+		var script = script1+mark+script2+mark+script3+mark+naverMapUrl+mark+script4+'\x3C'+script5;
+	</script>
+	
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+	
+	<script type="text/javascript">
+	//네이버 지도 스크립트를 문서에 추가한다.
+		document.write(script);
+	</script>
+</head>
+
+	<![CDATA[<body>
+	<div id="testMap"
+		style="border: 1px solid #000; width: 1000px; height: 800px; margin: 20px;"></div>
+	<script type="text/javascript">
+		
+
+		var gpsY = 37.5010226;
+		var gpsX = 127.0396037;
+		var oPoint = new nhn.api.map.LatLng(gpsY, gpsX);
+		var oSize = new nhn.api.map.Size(28, 37);
+		var oOffset = new nhn.api.map.Size(14, 37);
+		var oIcon = new nhn.api.map.Icon('http://static.naver.com/maps2/icons/pin_spot2.png', oSize, oOffset);
+		var oMarker = new nhn.api.map.Marker(oIcon, {title : '지정: ' + oPoint.toString(),zIndex : 9999});
+		var markerExists = false;
+		var xmlContent;
+		var perforList;
+		var markerGroup = new nhn.api.map.GroupOverlay();
+		
+		
+		nhn.api.map.setDefaultPoint('LatLng');
+		oMap = new nhn.api.map.Map('testMap', {
+			point : oPoint,
+			zoom : 7,
+			enableWheelZoom : true,
+			enableDragPan : true,
+			enableDblClickZoom : false,
+			mapMode : 0,
+			activateTrafficMap : false,
+			activateBicycleMap : false,
+			minMaxLevel : [ 1, 14 ],
+			size : new nhn.api.map.Size(750, 600)
+		});
+
+		var mapInfoTestWindow = new nhn.api.map.InfoWindow(); // - info window 생성
+		mapInfoTestWindow.setVisible(false); // - infowindow 표시 여부 지정.
+		oMap.addOverlay(mapInfoTestWindow); // - 지도에 추가.     
+
+		var oLabel = new nhn.api.map.MarkerLabel(); // - 마커 라벨 선언.
+		oMap.addOverlay(oLabel); // - 마커 라벨 지도에 추가. 기본은 라벨이 보이지 않는 상태로 추가됨.
+
+		mapInfoTestWindow.attach('changeVisible', function(oCustomEvent) {
+			if (oCustomEvent.visible) {
+				oLabel.setVisible(false);
+			}
+		});
+
+		var oInfoWnd = new nhn.api.map.InfoWindow();
+
+		oInfoWnd.setVisible(false);
+		oMap.addOverlay(oInfoWnd);
+
+		oInfoWnd.setPosition({
+			top : 20,
+			left : 20
+		});
+
+		oInfoWnd.attach('changeVisible', function(oCustomEvent) {
+			if (oCustomEvent.visible) {
+				oLabel.setVisible(false);
+			}
+		});
+
+		var circle = new nhn.api.map.Circle({
+			strokeColor : "red",
+			strokeOpacity : 1,
+			strokeWidth : 1,
+			fillColor : "blue",
+			fillOpacity : 0.5
+		});
+
+		var setPoint = function(pos) { // - 클릭 이벤트 핸들러//클릭하면 클릭한 지점을 중심으로 지도 이동
+			if (markerExists == false) {
+				gpsY = pos.point.getY();
+				gpsX = pos.point.getX();
+				oPoint = new nhn.api.map.LatLng(gpsY, gpsX);
+				oMap.setCenter(oPoint);
+			}
+
+		};
+
+		var setMarkers = function() {
+			if (markerExists == false) {
+				oMarker.setPoint(oPoint);
+				oMap.addOverlay(oMarker);
+
+				//마커그룹 초기화
+				oMap.removeOverlay(markerGroup);
+				markerGroup = new nhn.api.map.GroupOverlay();
+				var url = publicPerformance_Url+"/area?serviceKey="+publicPerformance_Key+"&rows=999";
+
+				var yqlURL = ["http://query.yahooapis.com/v1/public/yql","?q="+ encodeURIComponent("select * from xml where url='"+ url + "'"), "&format=xml&callback=?" ].join("");
+
+				$.getJSON(yqlURL, function(data) {
+					xmlContent = $(data.results[0]);
+					perforList = $(xmlContent).find("perforList");
+					var length = perforList.length;
+					for (var i = 0; i < length; i++) {
+						var perform = perforList.eq(i);
+						var gpsY = perform.find("gpsY").text();
+						var gpsX = perform.find("gpsX").text();
+						var pPoint = new nhn.api.map.LatLng(gpsY, gpsX);
+						var pMarker = new nhn.api.map.Marker(oIcon, {
+							title : perform.find("title").text()});
+						pMarker.setPoint(pPoint);
+						pMarker.setZIndex(i);
+						markerGroup.addOverlay(pMarker);
+					}
+				});
+				var radius = 6000; // - radius의 단위는 meter
+				circle.setCenterPoint(oPoint); // - circle 의 중심점을 지정한다.
+				circle.setRadius(radius); // - circle 의 반지름을 지정하며 단위는 meter이다.
+				circle.setStyle("strokeColor", "blue"); // - 선의 색깔을 지정함.
+				circle.setStyle("strokeWidth", 3); // - 선의 두께를 지정함.
+				circle.setStyle("strokeOpacity", 1); // - 선의 투명도를 지정함.
+				circle.setStyle("fillColor", "skyblue"); // - 채우기 색상. none 이면 투명하게 된다.
+				circle.setStyle("fillOpacity", 0.3);
+				oMap.addOverlay(circle);
+
+				oMap.setCenterAndLevel(oPoint, 6);
+				oMap.addOverlay(markerGroup);
+
+				markerExists = true;
+			}
+		};
+
+		function areaChange(oCustomEvent) {
+			//마커그룹 초기화
+			oMap.removeOverlay(markerGroup);
+			markerGroup = new nhn.api.map.GroupOverlay();
+			if (area.options[area.selectedIndex].value == '') {
+
+				oPoint = new nhn.api.map.TM128('402803', '607355');
+				oMap.setCenterAndLevel(oPoint, 2);
+				markerExists = false;
+			}
+			;
+			if (area.options[area.selectedIndex].value == 'all') {
+				var url = publicPerformance_Url+"/area?serviceKey="+publicPerformance_Key+"&rows=999";
+				var yqlURL = ["http://query.yahooapis.com/v1/public/yql","?q="+ encodeURIComponent("select * from xml where url='"+ url + "'"), "&format=xml&callback=?" ].join("");
+
+				$.getJSON(yqlURL, function(data) {
+					xmlContent = $(data.results[0]);
+					perforList = $(xmlContent).find("perforList");
+					var length = perforList.length;
+
+					for (var i = 0; i < length; i++) {
+						var perform = perforList.eq(i);
+						gpsY = perform.find("gpsY").text();
+						gpsX = perform.find("gpsX").text();
+						var pPoint = new nhn.api.map.LatLng(gpsY, gpsX);
+						var pMarker = new nhn.api.map.Marker(oIcon, {
+							title : perform.find("title").text()
+						});
+						pMarker.setPoint(pPoint);
+						pMarker.setZIndex(i);
+						markerGroup.addOverlay(pMarker);
+					}
+				});
+
+				oPoint = new nhn.api.map.TM128('402803', '607355');
+				oMap.setCenterAndLevel(oPoint, 2);
+				oMap.addOverlay(markerGroup);
+				markerExists = true;
+			}
+
+			if (area.options[area.selectedIndex].value == '서울') {
+				var sido = '&sido=서울';
+
+				var url = publicPerformance_Url+"/area?serviceKey="+publicPerformance_Key+"&rows=999"+sido;
+				var yqlURL = ["http://query.yahooapis.com/v1/public/yql","?q="+ encodeURIComponent("select * from xml where url='"+ url + "'"), "&format=xml&callback=?" ].join("");
+
+				$.getJSON(yqlURL, function(data) {
+					xmlContent = $(data.results[0]);
+					perforList = $(xmlContent).find("perforList");
+					var length = perforList.length;
+
+					for (var i = 0; i < length; i++) {
+						var perform = perforList.eq(i);
+						gpsY = perform.find("gpsY").text();
+						gpsX = perform.find("gpsX").text();
+						
+						var pPoint = new nhn.api.map.LatLng(gpsY, gpsX);
+						
+						var pMarker = new nhn.api.map.Marker(oIcon, {
+							title : perform.find("title").text()
+						});
+						
+						pMarker.setPoint(pPoint);
+						pMarker.setZIndex(i);
+						markerGroup.addOverlay(pMarker);
+					}
+				});
+
+				gpsY = '552092';
+				gpsX = '309947';
+				oPoint = new nhn.api.map.TM128(gpsX, gpsY);
+				oMap.setCenterAndLevel(oPoint, 5);
+				oMap.addOverlay(markerGroup);
+				markerExists = true;
+			}
+
+			if (area.options[area.selectedIndex].value == '인천') {
+				
+				var today = new Date().yyyymmdd();
+				var url = incheonCulture_Url+"?apiKey="+incheonCulture_Key+"&svID=culture&resultType=xml&srh_feeCase=f&pSize=999&srh_periodType=p&srh_sDate="+today;
+				var yqlURL = ["http://query.yahooapis.com/v1/public/yql",
+						"?q="+encodeURIComponent("select * from xml where url='"+ url + "'"), "&format=json&callback=?" ].join("");
+				
+				$.getJSON(yqlURL, function(data) {
+					var content = data.query.results.iq;
+					perforList = $(content.item);
+					
+					$(perforList).each(
+						function(i) {
+							var perform = perforList[i];
+							var place = perform.place;
+							var channel;
+							var itemList;
+							
+							url = naverSearch_Url+"?key="+naverSearch_Key+"&query="+place+"&target=local&start=1&display=1";
+							yqlURL = ["http://query.yahooapis.com/v1/public/yql","?q="+ encodeURIComponent("select * from xml where url='"+ url+ "'"),
+									"&format=json&callback=?" ]
+									.join("");
+							if(perform.place_sido=='인천광역시'){
+								$.getJSON(yqlURL,function(data) {
+									if (data) {
+										channel = data.query.results.rss.channel;
+										itemList = $(channel.item);
+										if (itemList[0].roadAddress.search('인천') != -1){
+											if (itemList[0].mapy&&itemList[0].mapx) {
+												gpsY = itemList[0].mapy;
+												gpsX = itemList[0].mapx;
+												var pPoint = new nhn.api.map.TM128(gpsX,gpsY);
+												var pMarker = new nhn.api.map.Marker(oIcon,{title : perform.title});
+												pMarker.setPoint(pPoint);
+												pMarker.setZIndex(i);
+												markerGroup.addOverlay(pMarker);
+											};
+										};
+									};
+								});
+							}
+						});
+					});
+				
+				gpsY = '540119';
+				gpsX = '285639';
+				oPoint = new nhn.api.map.TM128(gpsX, gpsY);
+				oMap.setCenterAndLevel(oPoint, 5);
+				oMap.addOverlay(markerGroup);
+				markerExists = true;
+			};
+			
+			if (area.options[area.selectedIndex].value == '대전') {
+				var url = daejeonFestival_Url+"?ServiceKey="+daejeonFestival_Key+"&numOfRows=999";
+				var yqlURL = ["http://query.yahooapis.com/v1/public/yql","?q="+ encodeURIComponent("select * from xml where url='"+ url + "'"), "&format=xml&callback=?" ].join("");
+
+				$.getJSON(yqlURL,function(data) {xmlContent = $(data.results[0]);
+					perforList = $(xmlContent).find("item");
+					
+					$(perforList).each(function(i) {
+						var perform = perforList.eq(i);
+						var openPlace = perform.find("openPlace").text();
+						url = naverSearch_Url+"?key="+ naverSearch_Key+"&query="+ openPlace+ "&target=local&start=1&display=1";
+						yqlURL = ["http://query.yahooapis.com/v1/public/yql","?q="+ encodeURIComponent("select * from xml where url='"+ url+ "'"),"&format=json&callback=?" ].join("");
+						$.getJSON(yqlURL,function(data) {
+							if (data) {
+								var channel = data.query.results.rss.channel;
+								var itemList = $(channel.item);
+								if (itemList[0].roadAddress.search('대전') != -1) {
+									if (itemList[0].mapy&& itemList[0].mapx) {
+										gpsY = itemList[0].mapy;
+										gpsX = itemList[0].mapx;
+										var pPoint = new nhn.api.map.TM128(gpsX,gpsY);
+										var pMarker = new nhn.api.map.Marker(oIcon,{title : perform.find('title').text()});
+										pMarker.setPoint(pPoint);
+										pMarker.setZIndex(i);
+										markerGroup.addOverlay(pMarker);
+									};
+								};
+							};
+						});
+					});
+				});
+				gpsY = '416822';
+				gpsX = '344993';
+
+				oPoint = new nhn.api.map.TM128(gpsX, gpsY);
+				oMap.setCenterAndLevel(oPoint, 5);
+				oMap.addOverlay(markerGroup);
+				markerExists = true;
+
+			}
+
+			if (area.options[area.selectedIndex].value == '전남') {
+
+				var url = jeonnamPerformanceList_Url+"?format=xml&key="+jeonnamPerformanceList_Key+"&pageSize=999";
+				var yqlURL = ["http://query.yahooapis.com/v1/public/yql",
+						"?q="+ encodeURIComponent("select * from xml where url='"+ url + "'"), "&format=xml&callback=?" ].join("");
+
+				$.getJSON(yqlURL,function(data) {
+					xmlContent = $(data.results[0]);
+					perforList = $(xmlContent).find("Info");
+
+					$(perforList).each(function(i) {
+						var perform = perforList.eq(i);
+						var newAddr = perform.find("NEWADDR").text();
+
+						$.getJSON(
+								naverAddressToGPS_Url+"?key="+naverMap_Key+"&encoding=utf-8&coord=latlng&output=json&query="+newAddr+"&callback=?",
+										function(data) {
+											if (data.result.items[0].point.y&&data.result.items[0].point.x) {
+												gpsY = data.result.items[0].point.y;
+												gpsX = data.result.items[0].point.x;
+												var pMarker = new nhn.api.map.Marker(oIcon,{title : perform.find("NAME").text()});
+												var pPoint = new nhn.api.map.LatLng(gpsY,gpsX);
+												pMarker.setZIndex(i);
+												pMarker.setPoint(pPoint);
+												markerGroup.addOverlay(pMarker);
+											};
+										});
+									});
+								});
+
+				gpsY = '247502';
+				gpsX = '259596';
+				oPoint = new nhn.api.map.TM128(gpsX, gpsY);
+				oMap.setCenterAndLevel(oPoint, 4);
+				oMap.addOverlay(markerGroup);
+				markerExists = true;
+			};
+		}
+
+		oMap.attach('mouseenter', function(oCustomEvent) {
+			var oTarget = oCustomEvent.target;
+			// 마커위에 마우스 올라간거면
+			if (oTarget instanceof nhn.api.map.Marker) {
+				var oMarker = oTarget;
+				oLabel.setVisible(true, oMarker); // - 특정 마커를 지정하여 해당 마커의 title을 보여준다.
+			}
+		});
+
+		oMap.attach('mouseleave', function(oCustomEvent) {
+			var oTarget = oCustomEvent.target;
+			// 마커위에서 마우스 나간거면
+			if (oTarget instanceof nhn.api.map.Marker) {
+				oLabel.setVisible(false);
+			}
+		});
+
+		oMap
+				.attach(
+						'click',
+						function(oCustomEvent) {
+
+							var oPoint = oCustomEvent.point;
+							var oTarget = oCustomEvent.target;
+							mapInfoTestWindow.setVisible(false);
+							// 마커 클릭하면
+							if (oTarget instanceof nhn.api.map.Marker) {
+								// 겹침 마커 클릭한거면
+								if (oCustomEvent.clickCoveredMarker) {
+									return;
+								}
+								// - InfoWindow 에 들어갈 내용은 setContent 로 자유롭게 넣을 수 있습니다. 외부 css를 이용할 수 있으며, 
+								// - 외부 css에 선언된 class를 이용하면 해당 class의 스타일을 바로 적용할 수 있습니다.
+								// - 단, DIV 의 position style 은 absolute 가 되면 안되며, 
+								// - absolute 의 경우 autoPosition 이 동작하지 않습니다.
+								var perform;
+								var title;
+								var place;
+								var thumbnail;
+								var startDate;
+								var endDate;
+
+								if (area.options[area.selectedIndex].value == 'all'
+										|| !area.options[area.selectedIndex].value
+										|| area.options[area.selectedIndex].value == '서울') {
+
+									perform = perforList
+											.eq(oTarget.getZIndex());
+									title = perform.find("title").text();
+									place = perform.find("place").text();
+									thumbnail = perform.find("thumbnail")
+											.text();
+									startDate = perform.find("startDate")
+											.text();
+									endDate = perform.find("endDate").text();
+
+								}
+								if (area.options[area.selectedIndex].value == '인천') {
+
+									perform = perforList[oTarget.getZIndex()];
+									title = perform.title;
+									place = perform.place_sido + " "+ perform.place_gugun + " "+ perform.place;
+									thumbnail = perform.posterThumb;
+									startDate = perform.sdate;
+									endDate = perform.edate;
+								}
+								if (area.options[area.selectedIndex].value == '대전') {
+
+									perform = perforList.eq(oTarget.getZIndex());
+									title = perform.find('title').text();
+									place = perform.find('openPlace').text();
+									startDate = perform.find('opnStrtDt').text().replace(/-/gi,'');
+									endDate = perform.find('opnEndDt').text().replace(/-/gi,'');
+								}
+								
+								if (area.options[area.selectedIndex].value == '전남') {
+
+									perform = perforList.eq(oTarget.getZIndex());
+									title = perform.find("NAME").text();
+									place = perform.find("NEWADDR").text();
+									thumbnail = perform.find("MASTERIMG").text();
+									startDate = perform.find("startDate").text();
+									endDate = perform.find("endDate").text();
+
+								}
+
+								mapInfoTestWindow
+										.setContent('<DIV style="border-top:1px solid; border-bottom:2px groove black; border-left:1px solid; border-right:2px groove black;margin-bottom:1px;color:black;background-color:white; width:auto; height:auto;">'
+												+ '<span style="color: #000000 !important;display: inline-block;font-size: 12px !important;font-weight: bold !important;letter-spacing: -1px !important;white-space: nowrap !important; padding: 2px 2px 2px 2px !important">'
+												+ '타이틀 : '
+												+ title
+												+ '<br/> 장소 : '
+												+ place
+												+ '<br/>'
+												+ '시작일 : '
+												+ startDate.substring(0, 4)
+												+ '년 '
+												+ startDate.substring(4, 6)
+												+ '월 '
+												+ startDate.substring(6, 8)
+												+ '일<br/> 종료일 : '
+												+ endDate.substring(0, 4)
+												+ '년 '
+												+ endDate.substring(4, 6)
+												+ '월 '
+												+ endDate.substring(6, 8)
+												+ '일<br/><img src="'+thumbnail+'"width="240" height="300">'
+												+ '<span></div>');
+								mapInfoTestWindow.setPoint(oTarget.getPoint());
+								mapInfoTestWindow.setVisible(true);
+								mapInfoTestWindow.setPosition({
+									right : 15,
+									top : 30
+								});
+								mapInfoTestWindow.autoPosition();
+								return;
+							}
+
+						});
+
+		oMap.attach("click", setPoint); // - 이벤트 추가. 지도에서의 이벤트 추가는 attach를 통해 이루어진다.
+		oMap.attach("click", setMarkers);
+		
+		Date.prototype.yyyymmdd = function()
+		{
+		    var yyyy = this.getFullYear().toString();
+		    var mm = (this.getMonth() + 1).toString();
+		    var dd = this.getDate().toString();
+		    return yyyy + (mm[1] ? mm : '0'+mm[0]) + (dd[1] ? dd : '0'+dd[0]);
+		}
+		
+		
+		
+	</script>
+	<select id="area" onChange="areaChange()">
+		<option value="">지역선택</option>
+		<option value="서울">서울</option>
+		<option value="인천">인천</option>
+		<option value="대전">대전</option>
+		<option value="전남">전남</option>
+		<option value="all">전체</option>
+	</select>
+
+</body><!--]]>-->
+</html>
