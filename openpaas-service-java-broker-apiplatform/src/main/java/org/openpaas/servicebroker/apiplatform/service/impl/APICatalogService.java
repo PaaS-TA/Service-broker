@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
-@PropertySource("application-mvc.properties")
+@PropertySource("classpath:application-mvc.properties")
 public class APICatalogService implements CatalogService {
 
 	private static final Logger logger = LoggerFactory.getLogger(APICatalogService.class);

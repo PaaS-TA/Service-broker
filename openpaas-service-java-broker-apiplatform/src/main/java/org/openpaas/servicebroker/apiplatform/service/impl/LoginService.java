@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 
 @Service
-@PropertySource("application-mvc.properties")
+@PropertySource("classpath:application-mvc.properties")
 public class LoginService {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoginService.class);
