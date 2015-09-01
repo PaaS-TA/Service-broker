@@ -12,7 +12,7 @@
 
 	<script th:inline="javascript">
 	//컨트롤러로 부터 API url이나 서비스 key등의 vcap 정보를 받아온다. 
-		var naverMapUrl =/*[[${naverMapUrl}]]*/'';
+		var naverMapUrl =/*[[${naverMap_Url}]]*/'';
 		var naverMap_Key =/*[[${naverMap_Key}]]*/'';
 		var publicPerformance_Url =/*[[${publicPerformance_Url}]]*/'';
 		var publicPerformance_Key =/*[[${publicPerformance_Key}]]*/'';
@@ -27,7 +27,7 @@
 		var naverSearch_Url =/*[[${naverSearch_Url}]]*/'';
 		var naverSearch_Key =/*[[${naverSearch_Key}]]*/'';
 		
-	//XHTML 규약에 의해서 특수문자 사용이 제한되기 때문에 컨트롤러에서 값을 받아와 사용한다.
+	//Document 규약에 의해서 특수문자 사용이 제한되기 때문에 컨트롤러에서 값을 받아와 사용한다.
 		var mark ='"';
 		var script1 = /*[[${script1}]]*/'';
 		var script2 = /*[[${script2}]]*/'';
@@ -395,108 +395,82 @@
 			}
 		});
 
-		oMap
-				.attach(
-						'click',
-						function(oCustomEvent) {
+		oMap.attach('click',function(oCustomEvent) {
 
-							var oPoint = oCustomEvent.point;
-							var oTarget = oCustomEvent.target;
-							mapInfoTestWindow.setVisible(false);
-							// 마커 클릭하면
-							if (oTarget instanceof nhn.api.map.Marker) {
-								// 겹침 마커 클릭한거면
-								if (oCustomEvent.clickCoveredMarker) {
-									return;
-								}
-								// - InfoWindow 에 들어갈 내용은 setContent 로 자유롭게 넣을 수 있습니다. 외부 css를 이용할 수 있으며, 
-								// - 외부 css에 선언된 class를 이용하면 해당 class의 스타일을 바로 적용할 수 있습니다.
-								// - 단, DIV 의 position style 은 absolute 가 되면 안되며, 
-								// - absolute 의 경우 autoPosition 이 동작하지 않습니다.
-								var perform;
-								var title;
-								var place;
-								var thumbnail;
-								var startDate;
-								var endDate;
+				var oPoint = oCustomEvent.point;
+				var oTarget = oCustomEvent.target;
+				mapInfoTestWindow.setVisible(false);
+				// 마커 클릭하면
+				if (oTarget instanceof nhn.api.map.Marker) {
+					// 겹침 마커 클릭한거면
+					if (oCustomEvent.clickCoveredMarker) {
+						return;
+					}
+					// - InfoWindow 에 들어갈 내용은 setContent 로 자유롭게 넣을 수 있습니다. 외부 css를 이용할 수 있으며, 
+					// - 외부 css에 선언된 class를 이용하면 해당 class의 스타일을 바로 적용할 수 있습니다.
+					// - 단, DIV 의 position style 은 absolute 가 되면 안되며, 
+					// - absolute 의 경우 autoPosition 이 동작하지 않습니다.
+					var perform;
+					var title;
+					var place;
+					var thumbnail;
+					var startDate;
+					var endDate;
+					//지역에 따라 매핑되어야 하는 값이 다르기 때문에
+					if (area.options[area.selectedIndex].value == 'all'||!area.options[area.selectedIndex].value||area.options[area.selectedIndex].value == '서울') {
+						
+						perform = perforList.eq(oTarget.getZIndex());
+						title = perform.find("title").text();
+						place = perform.find("place").text();
+						thumbnail = perform.find("thumbnail").text();
+						startDate = perform.find("startDate").text();
+						endDate = perform.find("endDate").text();
+					}
+					if (area.options[area.selectedIndex].value == '인천') {
 
-								if (area.options[area.selectedIndex].value == 'all'
-										|| !area.options[area.selectedIndex].value
-										|| area.options[area.selectedIndex].value == '서울') {
+						perform = perforList[oTarget.getZIndex()];
+						title = perform.title;
+						place = perform.place_sido + " "+ perform.place_gugun + " "+ perform.place;
+						thumbnail = perform.posterThumb;
+						startDate = perform.sdate;
+						endDate = perform.edate;
+					}
+					if (area.options[area.selectedIndex].value == '대전') {
 
-									perform = perforList
-											.eq(oTarget.getZIndex());
-									title = perform.find("title").text();
-									place = perform.find("place").text();
-									thumbnail = perform.find("thumbnail")
-											.text();
-									startDate = perform.find("startDate")
-											.text();
-									endDate = perform.find("endDate").text();
+						perform = perforList.eq(oTarget.getZIndex());
+						title = perform.find('title').text();
+						place = perform.find('openPlace').text();
+						startDate = perform.find('opnStrtDt').text().replace(/-/gi,'');
+						endDate = perform.find('opnEndDt').text().replace(/-/gi,'');
+					}
+					
+					if (area.options[area.selectedIndex].value == '전남') {
 
-								}
-								if (area.options[area.selectedIndex].value == '인천') {
+						perform = perforList.eq(oTarget.getZIndex());
+						title = perform.find("NAME").text();
+						place = perform.find("NEWADDR").text();
+						thumbnail = perform.find("MASTERIMG").text();
+						startDate = perform.find("startDate").text();
+						endDate = perform.find("endDate").text();
 
-									perform = perforList[oTarget.getZIndex()];
-									title = perform.title;
-									place = perform.place_sido + " "+ perform.place_gugun + " "+ perform.place;
-									thumbnail = perform.posterThumb;
-									startDate = perform.sdate;
-									endDate = perform.edate;
-								}
-								if (area.options[area.selectedIndex].value == '대전') {
+					}
 
-									perform = perforList.eq(oTarget.getZIndex());
-									title = perform.find('title').text();
-									place = perform.find('openPlace').text();
-									startDate = perform.find('opnStrtDt').text().replace(/-/gi,'');
-									endDate = perform.find('opnEndDt').text().replace(/-/gi,'');
-								}
-								
-								if (area.options[area.selectedIndex].value == '전남') {
-
-									perform = perforList.eq(oTarget.getZIndex());
-									title = perform.find("NAME").text();
-									place = perform.find("NEWADDR").text();
-									thumbnail = perform.find("MASTERIMG").text();
-									startDate = perform.find("startDate").text();
-									endDate = perform.find("endDate").text();
-
-								}
-
-								mapInfoTestWindow
-										.setContent('<DIV style="border-top:1px solid; border-bottom:2px groove black; border-left:1px solid; border-right:2px groove black;margin-bottom:1px;color:black;background-color:white; width:auto; height:auto;">'
-												+ '<span style="color: #000000 !important;display: inline-block;font-size: 12px !important;font-weight: bold !important;letter-spacing: -1px !important;white-space: nowrap !important; padding: 2px 2px 2px 2px !important">'
-												+ '타이틀 : '
-												+ title
-												+ '<br/> 장소 : '
-												+ place
-												+ '<br/>'
-												+ '시작일 : '
-												+ startDate.substring(0, 4)
-												+ '년 '
-												+ startDate.substring(4, 6)
-												+ '월 '
-												+ startDate.substring(6, 8)
-												+ '일<br/> 종료일 : '
-												+ endDate.substring(0, 4)
-												+ '년 '
-												+ endDate.substring(4, 6)
-												+ '월 '
-												+ endDate.substring(6, 8)
-												+ '일<br/><img src="'+thumbnail+'"width="240" height="300">'
-												+ '<span></div>');
-								mapInfoTestWindow.setPoint(oTarget.getPoint());
-								mapInfoTestWindow.setVisible(true);
-								mapInfoTestWindow.setPosition({
-									right : 15,
-									top : 30
-								});
-								mapInfoTestWindow.autoPosition();
-								return;
-							}
-
-						});
+					mapInfoTestWindow.setContent('<DIV style="border-top:1px solid; border-bottom:2px groove black; border-left:1px solid; border-right:2px groove black;margin-bottom:1px;color:black;background-color:white; width:auto; height:auto;">'
+						+ '<span style="color: #000000 !important;display: inline-block;font-size: 12px !important;font-weight: bold !important;letter-spacing: -1px !important;white-space: nowrap !important; padding: 2px 2px 2px 2px !important">'
+						+ '타이틀 : '+ title+ '<br/> 장소 : '+ place+ '<br/>'
+						+ '시작일 : '+ startDate.substring(0, 4)+ '년 '+ startDate.substring(4, 6)+ '월 '+ startDate.substring(6, 8)+ '일<br/> 종료일 : '
+						+ endDate.substring(0, 4)+ '년 '+ endDate.substring(4, 6)+ '월 '+ endDate.substring(6, 8)\+ '일<br/><img src="'+thumbnail+'"width="240" height="300">'
+						+ '<span></div>');
+					mapInfoTestWindow.setPoint(oTarget.getPoint());
+					mapInfoTestWindow.setVisible(true);
+					mapInfoTestWindow.setPosition({
+						right : 15,
+						top : 30
+					});
+					mapInfoTestWindow.autoPosition();
+					return;
+				}
+			});
 
 		oMap.attach("click", setPoint); // - 이벤트 추가. 지도에서의 이벤트 추가는 attach를 통해 이루어진다.
 		oMap.attach("click", setMarkers);

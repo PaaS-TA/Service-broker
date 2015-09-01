@@ -71,7 +71,7 @@ public class PublicAPIServiceInstanceBindingService implements ServiceInstanceBi
 					throw new ServiceBrokerException("There is no plan information. Properties File: 'application-mvc-properties', Service: "+ serviceId.split(" ")[0]+" Plan: "+planId.split(" ")[2]);
 				}
 				else{
-					logger.error("Invalid ServiceID : ["+serviceId+"]");
+					logger.error("Invalid PlanID : ["+planId+"]");
 					throw new ServiceBrokerException("Invalid PlanID : ["+planId+"]");					
 				}
 			}
@@ -85,8 +85,8 @@ public class PublicAPIServiceInstanceBindingService implements ServiceInstanceBi
 		Map<String,Object> credentials = new LinkedHashMap<String, Object>();
 		credentials.put("url", env.getProperty("Service"+sNumber+".Endpoint"));
 		credentials.put("serviceKey", env.getProperty("Service"+sNumber+".ServiceKey"));
-		credentials.put("supportUrl", env.getProperty("Service"+sNumber+".SupportUrl"));
-		String syslogDrainUrl = env.getProperty("Service"+sNumber+".Provider");
+		credentials.put("documentUrl", env.getProperty("Service"+sNumber+".DocumentationUrl"));
+		String syslogDrainUrl = null;
 		
 		ServiceInstanceBinding binding = new ServiceInstanceBinding(bindingId, instanceId, credentials, syslogDrainUrl, appGuid);
 		logger.debug("End - PublicAPIServiceInstanceBindingService.createServiceInstanceBinding()");

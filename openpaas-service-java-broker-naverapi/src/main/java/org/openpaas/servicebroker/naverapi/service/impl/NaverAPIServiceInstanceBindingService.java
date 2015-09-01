@@ -84,7 +84,7 @@ public class NaverAPIServiceInstanceBindingService implements ServiceInstanceBin
 		Map<String,Object> credentials = new LinkedHashMap<String, Object>();
 		credentials.put("url", env.getProperty("Service"+sNumber+".Endpoint"));
 		credentials.put("serviceKey", env.getProperty("Service"+sNumber+".ServiceKey"));
-		credentials.put("supportUrl", env.getProperty("Service"+sNumber+".SupportUrl"));
+		credentials.put("documentUrl", env.getProperty("Service"+sNumber+".DocumentationUrl"));
 		String syslogDrainUrl = env.getProperty("Service"+sNumber+".Provider");
 		
 		ServiceInstanceBinding binding = new ServiceInstanceBinding(bindingId, instanceId, credentials, syslogDrainUrl, appGuid);

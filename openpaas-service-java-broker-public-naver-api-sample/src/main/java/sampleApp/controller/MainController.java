@@ -12,7 +12,7 @@ import sampleApp.common.CloudFoundryConnector;
 
 @Controller
 public class MainController {
- 
+	
 	@RequestMapping("/main")
     public String main(Model model) {
 		
@@ -44,7 +44,8 @@ public class MainController {
     			model.addAttribute("jeonnamPerformanceList_Key", service_info.get("serviceKey"));    			
     		}
     		if("naverMap".equals(item.get("name"))){
-    			naverMapUrl = service_info.get("url")+"?ver=2.0&key="+service_info.get("serviceKey");
+    			naverMapUrl = service_info.get("url")+
+    								"?ver=2.0&key="+service_info.get("serviceKey");
     			model.addAttribute("naverMap_Key", service_info.get("serviceKey"));
     			
     	    	String script1 ="<script type=";
@@ -57,7 +58,7 @@ public class MainController {
     	    	model.addAttribute("script3",script3);
     	    	model.addAttribute("script4",script4);
     	    	model.addAttribute("script5",script5);
-    			model.addAttribute("naverMapUrl",naverMapUrl);
+    			model.addAttribute("naverMap_Url",naverMapUrl);
     		}
     		if("naverAddressToGPS".equals(item.get("name"))){
     			model.addAttribute("naverAddressToGPS_Url", service_info.get("url"));
