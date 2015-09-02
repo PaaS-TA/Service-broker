@@ -1,6 +1,6 @@
 package org.openpaas.servicebroker.apiplatform.service.impl;
 
-import org.openpaas.servicebroker.apiplatform.exception.APICatalogException;
+import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
 import org.openpaas.servicebroker.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 
 @Service
-@PropertySource("application-mvc.properties")
+@PropertySource("classpath:application-mvc.properties")
 public class LoginService {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoginService.class);
@@ -29,11 +29,11 @@ public class LoginService {
 	@Autowired
 	private Environment env;
 	
-	public String getLogin(String username, String password) throws ServiceBrokerException{
+	public String getLogin(String userId, String userPassword) throws ServiceBrokerException{
 		
 		String cookie = "";
 		String loginUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.Login");
-		String loginParameters = "action=login&username="+username+"&password="+password;
+		String loginParameters = "action=login&username="+userId+"&password="+userPassword;
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -45,20 +45,17 @@ public class LoginService {
 		HttpEntity<String> httpEntity = new HttpEntity<String>(loginParameters, headers);
 		loginResponseHttp = HttpClientUtils.send(loginUri, httpEntity, HttpMethod.POST);
 		try {
-		//API 플랫폼의 응답을 확인하기 위해 Json으로 변환
+		//API 플랫폼의 응답을 확인하기 위해 Json으로 변환하고 응답받은 메시지를 확인한다.
 			JsonNode loginResponseJson = JsonUtils.convertToJson(loginResponseHttp);
-			
-			if (loginResponseJson.get("error").asText() == "true") { 
-				
-				throw new APICatalogException(" " + loginResponseJson.get("message").asText());
-			}
+			ApiPlatformUtils.apiPlatformErrorMessageCheck(loginResponseJson);
 		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage());		
+			throw new ServiceBrokerException(e.getMessage());
 		}
 		
 		cookie = loginResponseHttp.getHeaders().getFirst("Set-Cookie");
 		
-		logger.info(" Login 성공");
+		logger.info("Login Success");
+		logger.debug("Username : ["+userId+"], Password : ["+userPassword+"]");
 		return cookie;
 	}
 	
