@@ -26,13 +26,6 @@ ext {
 
 processResources {
 
-//	from('src/main/resources') {
-//		exclude 'application-mvc.properties'
-//		exclude 'datasource.properties'
-//		exclude 'logback.xml'
-//		
-//		filter(jarType, 'openpaas')
-//	}
 	
 	if (project.hasProperty('jarType')) {
 		if (project.jarType == 'openpaas_bosh') {
@@ -43,18 +36,6 @@ processResources {
 	}
 	
 }
-
-//task(openpaas_jar) {
-//
-//	dependsOn compileJava
-//	dependsOn classes
-//	
-//	copy {
-//		from 'src/main/resources'
-//		into 'build/resources/main'
-//		exclude 'application-mvc.properties'
-//	}
-//}
 
 repositories {
     mavenCentral()
