@@ -1,0 +1,6 @@
+---
+applications:
+- name: openpaas-mongo-broker
+  memory: 512M
+  instances: 1
+  path: build/libs/openpaas-service-java-broker-mongo.war

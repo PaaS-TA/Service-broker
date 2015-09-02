@@ -13,29 +13,25 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class CatalogConfig {
-	
+
 	@Bean
 	public Catalog catalog() {		
 		return new Catalog( Arrays.asList(
 				new ServiceDefinition(
-					"cubrid", 
-					"Cubrid DB", 
-					"A simple cubrid implementation", 
-					true, 
-					false,
-					Arrays.asList(
-							new Plan("cubrid-plan", 
-									"Default cubrid Plan", 
-									"This is a default cubrid plan.  All services are created equally.",
-									getPlanMetadata())),
-					Arrays.asList("cubrid", "document"),
-					getServiceDefinitionMetadata(),
-					null,
-					null)));
+						"cubrid", 
+						"CubridDB", 
+						"A simple cubrid implementation", 
+						true, 
+						false,
+						getPlans(),
+						Arrays.asList("cubrid", "document"),
+						getServiceDefinitionMetadata(),
+						null,
+						null)));
 	}
-	
-/* Used by Pivotal CF console */	
-	
+
+	/* Used by Pivotal CF console */	
+
 	private Map<String,Object> getServiceDefinitionMetadata() {
 		Map<String,Object> sdMetadata = new HashMap<String,Object>();
 		sdMetadata.put("displayName", "CubridDB");
@@ -46,30 +42,47 @@ public class CatalogConfig {
 		sdMetadata.put("supportUrl","http://www.openpaas.org");
 		return sdMetadata;
 	}
-	
-	private Map<String,Object> getPlanMetadata() {		
+
+	private Map<String,Object> getPlanMetadata(String vol, String charset) {		
 		Map<String,Object> planMetadata = new HashMap<String,Object>();
 		planMetadata.put("costs", getCosts());
-		planMetadata.put("bullets", getBullets());
+		planMetadata.put("bullets", getBullets(vol, charset));
 		return planMetadata;
 	}
-	
+
 	private List<Map<String,Object>> getCosts() {
 		Map<String,Object> costsMap = new HashMap<String,Object>();
-		
+
 		Map<String,Object> amount = new HashMap<String,Object>();
 		amount.put("usd", new Double(0.0));
-	
+
 		costsMap.put("amount", amount);
 		costsMap.put("unit", "MONTHLY");
-		
+
 		return Arrays.asList(costsMap);
 	}
-	
-	private List<String> getBullets() {
+
+	private List<String> getBullets(String vol, String charset) {
 		return Arrays.asList("Shared CubridDB server", 
-				"100 MB Storage (not enforced)", 
-				"40 concurrent connections (not enforced)");
+				vol+" Storage", 
+				charset+" Character Set");
 	}
-	
+
+	private List<Plan> getPlans() {
+		
+		List<Plan> plans = Arrays.asList(
+				new Plan("utf8", 
+						"utf8", 
+						"This is a Cubrid plan. 100 MB Database volume size and UTF-8 Charactor set.",
+						getPlanMetadata("100 MB", "UTF-8"),
+						true),
+				new Plan("euckr", 
+						"euckr", 
+						"This is a Cubrid plan. 100 MB Database volume size and EUC-KR Charactor set.",
+						getPlanMetadata("100 MB", "EUC-KR"),
+						true));
+		
+		return plans;
+	}
+
 }

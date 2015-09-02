@@ -19,22 +19,22 @@ public class CatalogConfig {
 		return new Catalog( Arrays.asList(
 				new ServiceDefinition(
 					"96b9e707-0e2b-47e3-a21a-fd01a8eb0452", 
-					"Mysql DB", 
+					"Mysql-DB", 
 					"A simple mysql implementation", 
 					true, 
-					false,
+					true,
 					Arrays.asList(
 							new Plan("411d0c3e-b086-4a24-b041-0aeef1a819d1", 
-									"Default Mysql Plan1", 
-									"This is a default mysql plan1.  All services are created equally.",
-									getPlanMetadata("A")),
+									"Mysql-Plan1-10con", 
+									"This is a mysql plan1.  10 user connections",
+									getPlanMetadata("A"),true),
 							new Plan("4a932d9d-9bc5-4a86-937f-e2c14bb9f497", 
-									"Default Mysql Plan2", 
-									"This is a default mysql plan2.  All services are created equally.",
-									getPlanMetadata("B"))),
+									"Mysql-Plan2-100con", 
+									"This is a mysql plan2.  100 user connections",
+									getPlanMetadata("B"),false)),
 					Arrays.asList("mysql", "document"),
 					getServiceDefinitionMetadata(),
-					null,
+					getRequires(),
 					null)));
 	}
 	
@@ -86,16 +86,19 @@ public class CatalogConfig {
 	private List<String> getBullets(String planType) {
 		if(planType.equals("A")){
 			return Arrays.asList("Shared MysqlDB server", 
-					"10 MB Storage (not enforced)", 
 					"10 concurrent connections (not enforced)");
 		}else if(planType.equals("B")){
 			return Arrays.asList("Shared MysqlDB server", 
-					"100 MB Storage (not enforced)", 
-					"20 concurrent connections (not enforced)");
+					"100 concurrent connections (not enforced)");
 		}
 		return Arrays.asList("Shared MysqlDB server", 
-				"10 MB Storage (not enforced)", 
 				"10 concurrent connections (not enforced)");
 	}
+	
+	private List<String> getRequires() {
+		
+		return Arrays.asList("syslog_drain");
+	}
+	
 	
 }
