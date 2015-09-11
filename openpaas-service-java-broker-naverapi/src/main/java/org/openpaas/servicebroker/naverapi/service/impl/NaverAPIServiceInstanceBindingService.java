@@ -31,7 +31,7 @@ public class NaverAPIServiceInstanceBindingService implements ServiceInstanceBin
 		String planId = request.getPlanId();
 		String bindingId = request.getBindingId();
 		String appGuid = request.getAppGuid();
-		
+		String serviceKey = (String) request.getParameters().get("serviceKey");
 		System.out.println(instanceId);
 		System.out.println(serviceId);
 
@@ -83,7 +83,7 @@ public class NaverAPIServiceInstanceBindingService implements ServiceInstanceBin
 		//credential 값을 넣는다.
 		Map<String,Object> credentials = new LinkedHashMap<String, Object>();
 		credentials.put("url", env.getProperty("Service"+sNumber+".Endpoint"));
-		credentials.put("serviceKey", env.getProperty("Service"+sNumber+".ServiceKey"));
+		credentials.put("serviceKey", serviceKey);
 		credentials.put("documentUrl", env.getProperty("Service"+sNumber+".DocumentationUrl"));
 		String syslogDrainUrl = env.getProperty("Service"+sNumber+".Provider");
 		
