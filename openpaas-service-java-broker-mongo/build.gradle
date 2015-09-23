@@ -9,24 +9,36 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'application'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
-apply plugin: 'war'
 
 ext {
-  springBootCfServiceBrokerVersion = "2.4.0"
+  springBootCfServiceBrokerVersion = "2.5.0"
   springBootVersion = '1.3.0.BUILD-SNAPSHOT'
-  baseName = 'openpaas-service-java-broker-mongo'
-  version =  '2.4'
+  baseName = 'openpaas-service-java-broker-mongodb'
+  version =  '2.5'
   
   hibernateValidatorVersion = '5.1.0.Final'
   jsonPathVersion = '0.9.1'
 }
 
-war {
-    baseName = baseName
-    version =  version
+jar {
+    archiveName = 'openpaas-cf-service-java-broker-mongodb.jar'
+    
+}
+
+processResources {
+
+	if (project.hasProperty('jarType')) {
+		if (project.jarType == 'openpaas_bosh') {
+			exclude 'application-mvc.properties'
+			exclude 'datasource.properties'
+			exclude 'logback.xml'
+		}
+	}
+	
 }
 
 repositories {
