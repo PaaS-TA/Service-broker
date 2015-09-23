@@ -18,19 +18,20 @@ public class CatalogConfig {
 	public Catalog catalog() {		
 		return new Catalog( Arrays.asList(
 				new ServiceDefinition(
-					"mongo", 
-					"Mongo DB", 
+					"Mongo-DB", 
+					"Mongo-DB", 
 					"A simple mongo implementation", 
 					true, 
 					false,
 					Arrays.asList(
-							new Plan("mongo-plan", 
-									"Default Mongo Plan", 
+							new Plan("default-plan", 
+									"default-plan", 
 									"This is a default mongo plan.  All services are created equally.",
-									getPlanMetadata())),
+									getPlanMetadata(),
+									true)),
 					Arrays.asList("mongodb", "document"),
 					getServiceDefinitionMetadata(),
-					null,
+					Arrays.asList("syslog_drain"),
 					null)));
 	}
 	
@@ -41,7 +42,7 @@ public class CatalogConfig {
 		sdMetadata.put("displayName", "MongoDB");
 		sdMetadata.put("imageUrl","http://info.mongodb.com/rs/mongodb/images/MongoDB_Logo_Full.png");
 		sdMetadata.put("longDescription","MongodDB Service");
-		sdMetadata.put("providerDisplayName","OpanPaas");
+		sdMetadata.put("providerDisplayName","OpanPaaS");
 		sdMetadata.put("documentationUrl","http://www.mongodb.org");
 		sdMetadata.put("supportUrl","http://www.mongodb.org");
 		return sdMetadata;
