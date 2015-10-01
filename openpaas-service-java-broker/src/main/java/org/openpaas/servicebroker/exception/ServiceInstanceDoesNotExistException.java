@@ -1,12 +1,13 @@
 package org.openpaas.servicebroker.exception;
 
 /**
- * id ¿¡ ÇØ´çÇÏ´Â ¼­ºñ½º ÀÎ½ºÅÏ½º°¡  Á¸ÀçÇÏ´Â ¾Ê´Â °æ¿ìExceptionÅ¬·¡½º . 
- * Exception Å¬·¡½º¸¦ »ó¼ÓÇÔ.
+ * id ì— í•´ë‹¹í•˜ëŠ” ì„œë¹„ìŠ¤ ì¸ìŠ¤í„´ìŠ¤ê°€  ì¡´ì¬í•˜ëŠ” ì•ŠëŠ” ê²½ìš°Exceptioní´ë˜ìŠ¤ . 
+ * Exception í´ë˜ìŠ¤ë¥¼ ìƒì†í•¨.
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 public class ServiceInstanceDoesNotExistException extends Exception {
 	
 	private static final long serialVersionUID = -1879753092397657116L;

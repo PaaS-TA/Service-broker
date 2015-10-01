@@ -30,11 +30,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * ¼­ºñ½º ÀÎ½ºÅÏ½º ¹ÙÀÎµå °ü·Ã Bind/Unbind API ¸¦ È£Ãâ ¹Ş´Â ÄÁÆ®·Ñ·¯ÀÌ´Ù.
+ * ì„œë¹„ìŠ¤ ì¸ìŠ¤í„´ìŠ¤ ë°”ì¸ë“œ ê´€ë ¨ Bind/Unbind API ë¥¼ í˜¸ì¶œ ë°›ëŠ” ì»¨íŠ¸ë¡¤ëŸ¬ì´ë‹¤.
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 @Controller
 public class ServiceInstanceBindingController extends BaseController {
 

@@ -1,17 +1,19 @@
 package org.openpaas.servicebroker.model;
 
 import org.hibernate.validator.constraints.NotEmpty;
-
+import java.util.Map;
+import org.apache.commons.beanutils.BeanUtils;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * ¼­ºñ½º ÀÎ½ºÅÏ½º¿¡ ¹ÙÀÎµå¸¦ »ı¼ºÇÒ ¶§ ÇÊ¿äÇÑ Request Á¤º¸¸¦ °¡Áö°í ÀÖ´Â µ¥ÀÌÅÍ ¸ğµ¨ bean Å¬·¡½º. 
- * Json ¾î³ëÅ×ÀÌ¼ÇÀ» »ç¿ëÇØ¼­ JSON ÇüÅÂ·Î Á¦°ø
+ * ì„œë¹„ìŠ¤ ì¸ìŠ¤í„´ìŠ¤ì— ë°”ì¸ë“œë¥¼ ìƒì„±í•  ë•Œ í•„ìš”í•œ Request ì •ë³´ë¥¼ ê°€ì§€ê³  ìˆëŠ” ë°ì´í„° ëª¨ë¸ bean í´ë˜ìŠ¤. 
+ * Json ì–´ë…¸í…Œì´ì…˜ì„ ì‚¬ìš©í•´ì„œ JSON í˜•íƒœë¡œ ì œê³µ
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CreateServiceInstanceBindingRequest {
 
@@ -30,6 +32,11 @@ public class CreateServiceInstanceBindingRequest {
 	@JsonProperty("app_guid")
 	private String appGuid;
 
+	
+	@JsonSerialize
+	@JsonProperty("parameters")
+	private Map<String, Object> parameters;
+	
 	@JsonIgnore
 	private String serviceInstanceId;
 
@@ -43,7 +50,13 @@ public class CreateServiceInstanceBindingRequest {
 		this.planId = planId;
 		this.appGuid = appGuid;
 	}
-
+	
+	
+	public CreateServiceInstanceBindingRequest(String serviceDefinitionId, String planId, String appGuid, Map<String, Object> parameters) {
+		this(serviceDefinitionId, planId, appGuid);
+		this.parameters = parameters;
+	}
+	
 	public String getServiceDefinitionId() {
 		return serviceDefinitionId;
 	}
@@ -71,6 +84,26 @@ public class CreateServiceInstanceBindingRequest {
 	public String getBindingId() { 
 		return bindingId;
 	}
+	
+	
+	public Map<String, Object> getParameters() {
+		return parameters;
+	}
+	public <T> T getParameters(Class<T> cls) {
+		try {
+			T bean = cls.newInstance();
+			BeanUtils.populate(bean, parameters);
+			return bean;
+			
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Error mapping parameters to class of type " + cls.getName());
+		}
+	}
+	public void setParameters(Map<String, Object> parameters) {
+		this.parameters = parameters;
+	}
+	
+	
 	
 	public String getServiceInstanceId() { 
 		return serviceInstanceId;

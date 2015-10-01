@@ -1,12 +1,13 @@
 package org.openpaas.servicebroker.exception;
 
 /**
- * ¼­ºñ½º ºê·ÎÄ¿ GeneralExceptionÅ¬·¡½º . Exception Å¬·¡½º¸¦ »ó¼ÓÇÔ.
+ * ì„œë¹„ìŠ¤ ë¸Œë¡œì»¤ GeneralExceptioní´ë˜ìŠ¤ . Exception í´ë˜ìŠ¤ë¥¼ ìƒì†í•¨.
  * 
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 public class ServiceBrokerException extends Exception {
 
 	private static final long serialVersionUID = -5544859893499349135L;

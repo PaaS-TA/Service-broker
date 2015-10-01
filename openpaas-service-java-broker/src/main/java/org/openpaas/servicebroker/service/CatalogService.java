@@ -4,13 +4,13 @@ import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.model.Catalog;
 import org.openpaas.servicebroker.model.ServiceDefinition;
 
-
 /**
- * Catalog ¼­ºñ½º°¡ Á¦°øÇØ¾ßÇÏ´Â ¸Ş¼Òµå¸¦ Á¤ÀÇÇÑ ÀÎÅÍÆäÀÌ½º Å¬·¡½º
+ * Catalog ì„œë¹„ìŠ¤ê°€ ì œê³µí•´ì•¼í•˜ëŠ” ë©”ì†Œë“œë¥¼ ì •ì˜í•œ ì¸í„°í˜ì´ìŠ¤ í´ë˜ìŠ¤
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 public interface CatalogService {
 
 	/**

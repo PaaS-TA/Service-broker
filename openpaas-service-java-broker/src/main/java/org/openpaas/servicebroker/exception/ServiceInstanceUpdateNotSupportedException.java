@@ -1,11 +1,12 @@
 package org.openpaas.servicebroker.exception;
 
 /**
- * ¼­ºñ½º ÀÎ½ºÅÏ½º Plan º¯°æ ±â´ÉÀÌ Á¦°øµÇÁö ¾ÊÀ» ¶§ÀÇ ExceptionÅ¬·¡½º . Exception Å¬·¡½º¸¦ »ó¼ÓÇÔ.
+ * ì„œë¹„ìŠ¤ ì¸ìŠ¤í„´ìŠ¤ Plan ë³€ê²½ ê¸°ëŠ¥ì´ ì œê³µë˜ì§€ ì•Šì„ ë•Œì˜ Exceptioní´ë˜ìŠ¤ . Exception í´ë˜ìŠ¤ë¥¼ ìƒì†í•¨.
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 public class ServiceInstanceUpdateNotSupportedException extends Exception {
 
 	private static final long serialVersionUID = 4719676639792071582L;

@@ -1,12 +1,13 @@
 package org.openpaas.servicebroker.model;
 
 /**
- * ¹ÙÀÎµåµÈ ¼­ºñ½º ÀÎ½ºÅÏ½º¸¦ ¹ÙÀÎµå »èÁ¦ ÇÒ ¶§ ÇÊ¿äÇÑ Request Á¤º¸¸¦ °¡Áö°í ÀÖ´Â µ¥ÀÌÅÍ ¸ğµ¨ bean Å¬·¡½º. 
- * Json ¾î³ëÅ×ÀÌ¼ÇÀ» »ç¿ëÇØ¼­ JSON ÇüÅÂ·Î Á¦°ø
+ * ë°”ì¸ë“œëœ ì„œë¹„ìŠ¤ ì¸ìŠ¤í„´ìŠ¤ë¥¼ ë°”ì¸ë“œ ì‚­ì œ í•  ë•Œ í•„ìš”í•œ Request ì •ë³´ë¥¼ ê°€ì§€ê³  ìˆëŠ” ë°ì´í„° ëª¨ë¸ bean í´ë˜ìŠ¤. 
+ * Json ì–´ë…¸í…Œì´ì…˜ì„ ì‚¬ìš©í•´ì„œ JSON í˜•íƒœë¡œ ì œê³µ
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 public class DeleteServiceInstanceBindingRequest {
 
 	private final String bindingId;

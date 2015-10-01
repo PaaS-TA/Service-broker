@@ -12,11 +12,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * Catalog API ¸¦ È£Ãâ ¹Ş´Â ÄÁÆ®·Ñ·¯ÀÌ´Ù.
+ * Catalog API ë¥¼ í˜¸ì¶œ ë°›ëŠ” ì»¨íŠ¸ë¡¤ëŸ¬ì´ë‹¤.
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 @Controller
 public class CatalogController extends BaseController {
 	

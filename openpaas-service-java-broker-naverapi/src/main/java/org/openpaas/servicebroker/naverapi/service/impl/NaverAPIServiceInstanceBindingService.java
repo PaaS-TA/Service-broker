@@ -32,9 +32,6 @@ public class NaverAPIServiceInstanceBindingService implements ServiceInstanceBin
 		String bindingId = request.getBindingId();
 		String appGuid = request.getAppGuid();
 		
-		System.out.println(instanceId);
-		System.out.println(serviceId);
-
 		//요청된 서비스ID와 플랜ID의 유효성 확인
 		String existServiceId;
 		int sNumber=0;
@@ -82,8 +79,22 @@ public class NaverAPIServiceInstanceBindingService implements ServiceInstanceBin
 
 		//credential 값을 넣는다.
 		Map<String,Object> credentials = new LinkedHashMap<String, Object>();
+		try{
+			String serviceKey = (String) request.getParameters().get("serviceKey");
+			if(serviceKey==null){
+				//파라미터는 입력되었으나 키 값이'serviceKey'로 입력되지 않은 경우
+				logger.error("Parameter 'serviceKey' not entered.'");
+				throw new ServiceBrokerException("Parameter 'serviceKey' not entered. ex) cf bind-service [appName] [serviceInstanceName] -c '{\"serviceKey\":\"[your ServiceKey]\"}'");
+			}else{				
+				credentials.put("serviceKey", serviceKey);
+			}
+		}catch(NullPointerException e){
+			//파라미터가 아무것도 입력되지 않았을 경우
+			logger.error("no serviceKey entered");
+			throw new ServiceBrokerException("Please enter your serviceKey. ex) cf bind-service [appName] [serviceInstanceName] -c '{\"serviceKey\":\"[your ServiceKey]\"}'");
+		}
+		
 		credentials.put("url", env.getProperty("Service"+sNumber+".Endpoint"));
-		credentials.put("serviceKey", env.getProperty("Service"+sNumber+".ServiceKey"));
 		credentials.put("documentUrl", env.getProperty("Service"+sNumber+".DocumentationUrl"));
 		String syslogDrainUrl = env.getProperty("Service"+sNumber+".Provider");
 		

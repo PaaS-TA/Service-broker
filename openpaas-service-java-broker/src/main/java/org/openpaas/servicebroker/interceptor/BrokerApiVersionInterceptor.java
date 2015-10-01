@@ -8,12 +8,13 @@ import org.openpaas.servicebroker.model.BrokerApiVersion;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
- * ¼­ºñ½º ºê·ÎÄ¿ ¹öÀü Ã¼Å© ÇÏ´Â interceptor Å¬·¡½º . 
- * spring ÀÇ HandlerInterceptorAdapter Å¬·¡½º¸¦ »ó¼ÓÇÔ.
+ * ì„œë¹„ìŠ¤ ë¸Œë¡œì»¤ ë²„ì „ ì²´í¬ í•˜ëŠ” interceptor í´ë˜ìŠ¤ . 
+ * spring ì˜ HandlerInterceptorAdapter í´ë˜ìŠ¤ë¥¼ ìƒì†í•¨.
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 public class BrokerApiVersionInterceptor extends HandlerInterceptorAdapter {
 
 	private final BrokerApiVersion version;

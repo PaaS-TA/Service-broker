@@ -8,12 +8,13 @@ import org.springframework.http.HttpStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * ¼­ºñ½º ÀÎ½ºÅÏ½º ¹ÙÀÎµåµÈ Á¤º¸¸¦ °¡Áö°í ÀÖ´Â µ¥ÀÌÅÍ ¸ğµ¨ bean Å¬·¡½º. 
- * Json ¾î³ëÅ×ÀÌ¼ÇÀ» »ç¿ëÇØ¼­ JSON ÇüÅÂ·Î Á¦°ø
+ * ì„œë¹„ìŠ¤ ì¸ìŠ¤í„´ìŠ¤ ë°”ì¸ë“œëœ ì •ë³´ë¥¼ ê°€ì§€ê³  ìˆëŠ” ë°ì´í„° ëª¨ë¸ bean í´ë˜ìŠ¤. 
+ * Json ì–´ë…¸í…Œì´ì…˜ì„ ì‚¬ìš©í•´ì„œ JSON í˜•íƒœë¡œ ì œê³µ
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 public class ServiceInstanceBinding {
 
 	private String id;

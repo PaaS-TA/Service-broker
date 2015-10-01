@@ -11,11 +11,12 @@ import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.UpdateServiceInstanceRequest;
 
 /**
- * ¼­ºñ½º ÀÎ½ºÅÏ½º ¼­ºñ½º°¡ Á¦°øÇØ¾ßÇÏ´Â ¸Ş¼Òµå¸¦ Á¤ÀÇÇÑ ÀÎÅÍÆäÀÌ½º Å¬·¡½º
+ * ì„œë¹„ìŠ¤ ì¸ìŠ¤í„´ìŠ¤ ì„œë¹„ìŠ¤ê°€ ì œê³µí•´ì•¼í•˜ëŠ” ë©”ì†Œë“œë¥¼ ì •ì˜í•œ ì¸í„°í˜ì´ìŠ¤ í´ë˜ìŠ¤
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 public interface ServiceInstanceService {
 
 	/**

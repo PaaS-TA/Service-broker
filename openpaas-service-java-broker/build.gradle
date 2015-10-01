@@ -60,6 +60,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
     compile("org.hibernate:hibernate-validator:${hibernateValidatorVersion}")
     compile("org.apache.httpcomponents:httpclient:4.4.1")
+	compile("commons-beanutils:commons-beanutils:1.9.2")
 	
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
     testCompile("com.jayway.jsonpath:json-path:${jsonPathVersion}")

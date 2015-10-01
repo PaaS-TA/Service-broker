@@ -9,11 +9,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 /**
- * ¼­ºñ½º ºê·ÎÄ¿ Auto Configuration À» ¼³Á¤ÇÏ´Â Å¬·¡½º (spring boot autoconfigure »ç¿ë)
+ * ì„œë¹„ìŠ¤ ë¸Œë¡œì»¤ Auto Configuration ì„ ì„¤ì •í•˜ëŠ” í´ë˜ìŠ¤ (spring boot autoconfigure ì‚¬ìš©)
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 @Configuration
 @ComponentScan(basePackages = {"org.openpaas.servicebroker"})
 @ConditionalOnWebApplication

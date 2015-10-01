@@ -2,15 +2,14 @@ package org.openpaas.servicebroker.exception;
 
 import org.openpaas.servicebroker.model.ServiceInstanceBinding;
 
-
-
 /**
- * Bindig id ¿¡ ÇØ´çÇÏ´Â ¼­ºñ½º ÀÎ½ºÅÏ½º°¡ Á¸ÀçÇÏ´Â °æ¿ìExceptionÅ¬·¡½º . 
- * Exception Å¬·¡½º¸¦ »ó¼ÓÇÔ.
+ * Bindig id ì— í•´ë‹¹í•˜ëŠ” ì„œë¹„ìŠ¤ ì¸ìŠ¤í„´ìŠ¤ê°€ ì¡´ì¬í•˜ëŠ” ê²½ìš°Exceptioní´ë˜ìŠ¤ . 
+ * Exception í´ë˜ìŠ¤ë¥¼ ìƒì†í•¨.
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 public class ServiceInstanceBindingExistsException extends Exception {
 
 	private static final long serialVersionUID = -914571358227517785L;

@@ -1,11 +1,12 @@
 package org.openpaas.servicebroker.model;
 
 /**
- * ºê·ÎÄ¿ API ¹öÀü Á¤º¸¸¦ °¡Áö°í ÀÖ´Â µ¥ÀÌÅÍ ¸ğµ¨ bean Å¬·¡½º
+ * ë¸Œë¡œì»¤ API ë²„ì „ ì •ë³´ë¥¼ ê°€ì§€ê³  ìˆëŠ” ë°ì´í„° ëª¨ë¸ bean í´ë˜ìŠ¤
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 public class BrokerApiVersion {
 
 	public final static String DEFAULT_API_VERSION_HEADER = "X-Broker-Api-Version";

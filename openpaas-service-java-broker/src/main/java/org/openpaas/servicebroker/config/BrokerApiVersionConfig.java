@@ -15,12 +15,13 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
 /**
- * Spring ÀÇ WebMvcConfigurerAdapter Å¬·¡½º¸¦ »ó¼ÓÇÑ Å¬·¡½º.
- * BrokerApiVersionInterceptor interceptor ¸¦ add ÇÑ´Ù. 
+ * Spring ì˜ WebMvcConfigurerAdapter í´ë˜ìŠ¤ë¥¼ ìƒì†í•œ í´ë˜ìŠ¤.
+ * BrokerApiVersionInterceptor interceptor ë¥¼ add í•œë‹¤. 
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 @Configuration
 @EnableWebMvc
 public class BrokerApiVersionConfig extends WebMvcConfigurerAdapter {

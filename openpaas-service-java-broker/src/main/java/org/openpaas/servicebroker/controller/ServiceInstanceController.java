@@ -24,11 +24,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * ¼­ºñ½º ÀÎ½ºÅÏ½º °ü·Ã Provision/Undate Instance/Unprovision API ¸¦ È£Ãâ ¹Ş´Â ÄÁÆ®·Ñ·¯ÀÌ´Ù.
+ * ì„œë¹„ìŠ¤ ì¸ìŠ¤í„´ìŠ¤ ê´€ë ¨ Provision/Undate Instance/Unprovision API ë¥¼ í˜¸ì¶œ ë°›ëŠ” ì»¨íŠ¸ë¡¤ëŸ¬ì´ë‹¤.
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 @Controller
 public class ServiceInstanceController extends BaseController {
 

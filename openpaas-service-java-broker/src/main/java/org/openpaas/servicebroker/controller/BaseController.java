@@ -16,11 +16,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * ExceptionHandler¸¦ Á¤ÀÇÇÑ ±âº» ÄÁÆ®·Ñ·¯ÀÌ°í Catalog, ServiceInstance, ServiceInstanceBinding ÄÁÆ®·Ñ·¯´Â ÀÌ Å¬·¡½º¸¦ »ó¼ÓÇÑ´Ù.
+ * ExceptionHandlerë¥¼ ì •ì˜í•œ ê¸°ë³¸ ì»¨íŠ¸ë¡¤ëŸ¬ì´ê³  Catalog, ServiceInstance, ServiceInstanceBinding ì»¨íŠ¸ë¡¤ëŸ¬ëŠ” ì´ í´ë˜ìŠ¤ë¥¼ ìƒì†í•œë‹¤.
  * 
- * @author ¼ÛÃ¢ÇĞ
+ * @author ì†¡ì°½í•™
  * @date 2015.0629
  */
+
 public class BaseController {
 
 	private static final Logger logger = LoggerFactory.getLogger(BaseController.class);
