@@ -2,36 +2,25 @@ package org.openpaas.servicebroker.apiplatform.test;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openpaas.servicebroker.common.JsonUtils;
-import org.openpaas.servicebroker.apiplatform.service.impl.APICatalogService;
-import org.openpaas.servicebroker.common.HttpClientUtils;
+import org.openpaas.servicebroker.apiplatform.common.HttpClientUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
-import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
-import org.openpaas.servicebroker.service.CatalogService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.util.StringUtils;
 
-import ch.qos.logback.core.net.server.Client;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 /**
  * 시작전에 Spring Boot로 Service Broker를 띄워 놓구 진행합니다.
@@ -65,10 +54,11 @@ public class CatalogRestTest {
 	}
 	
 	/**
-	 * 사용자 ID, 비밀번호가 없을 경우
+	 * C001 사용자 ID, 비밀번호가 없을 경우 
 	 */
+	
 	@Test	
-	public void getCatalogTest_noUser() {
+	public void C001_getCatalogTest_noUser() {
 		
 		System.out.println("Start - no user");
 		
@@ -77,31 +67,25 @@ public class CatalogRestTest {
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;
 
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		boolean bException = false;
-		
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.PUT);
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals("No user", sbe.getMessage(), "401 Unauthorized");
+		try{
+			response = HttpClientUtils.testSend(url, entity, HttpMethod.PUT);			
+		}
+		catch(Exception e){
+			assertTrue(e.getMessage().contains(":cannot retry due to server authentication"));
 			bException = true;
-			
 		}
 		
-		if (!bException) assertFalse("Error", true);
-		
+		assertTrue(bException);
 		System.out.println("End - no user");
 	}
 
 	/**
-	 * 사용자 ID, 비밀번호가 잘못 입력되었을 경우
+	 * C002 사용자 ID, 비밀번호가 잘못 입력되었을 경우
 	 */
 	@Test	
-	public void getCatalogTest_invalidUser() {
+	public void C002_getCatalogTest_invalidUser() {
 		
 		System.out.println("Start - invalid user");
 		
@@ -110,32 +94,31 @@ public class CatalogRestTest {
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id_fail") +":" + prop.getProperty("auth_password_fail")).getBytes())));
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;
+			
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+			
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.GET);
+			
+		System.out.println(response.getBody());
 
-		boolean bException = false;
-		
+		JsonNode json = null;
 		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
-			
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "401 Unauthorized");
-			bException = true;
-			
+			json=JsonUtils.convertToJson(response);
+		} catch (ServiceBrokerException e) {
+			assertTrue(false);
 		}
 		
-		if (!bException) assertFalse("Error", true);
-		
+		assertTrue(json.get("message").asText().equals("Bad credentials"));
+		assertEquals(response.getStatusCode(), HttpStatus.UNAUTHORIZED);
+
 		System.out.println("End - invalid user");
 	}
 
 	/**
-	 * 사용자 ID, 비밀번호가 정상적으로 입력되었을 경우
+	 * C003 사용자 ID, 비밀번호가 정상적으로 입력되었을 경우
 	 */
 	@Test	
-	public void getCatalogTest_correctUser() {
+	public void C003_getCatalogTest_correctUser() {
 		
 		System.out.println("Start - correct user");
 		
@@ -146,29 +129,27 @@ public class CatalogRestTest {
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;
 		
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.GET);
+		
+		System.out.println(response.getBody());
 
-		} catch (ServiceBrokerException sbe) {
-			
-			System.out.println(sbe.getMessage());
-			assertFalse(sbe.getMessage(), true);
+		JsonNode json = null;
+		try {
+			json=JsonUtils.convertToJson(response);
+		} catch (ServiceBrokerException e) {
+			assertTrue(false);
 		}
 		
-		assertTrue("Success", true);
+		assertEquals(response.getStatusCode(), HttpStatus.OK);
 		
 		System.out.println("End - correct user");
 	}
 	/**
-	 * 사용자 password가 유효하지 않은 경우
+	 * C004 사용자 password가 유효하지 않은 경우
 	 */
 	@Test	
-	public void getCatalogTest_invalidPassword() {
+	public void C004_getCatalogTest_invalidPassword() {
 		
 		System.out.println("Start - invalid Password");
 		
@@ -178,32 +159,32 @@ public class CatalogRestTest {
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;
 
-		boolean bException = false;
+			
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.GET);
+		
+		System.out.println(response.getBody());
+
+		JsonNode json = null;
 		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
-			
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "401 Unauthorized");
-			bException = true;
-			
+			json=JsonUtils.convertToJson(response);
+		} catch (ServiceBrokerException e) {
+			assertTrue(false);
 		}
 		
-		if (!bException) assertFalse("Error", true);
+		assertTrue(json.get("message").asText().equals("Bad credentials"));
+		assertEquals(response.getStatusCode(), HttpStatus.UNAUTHORIZED);
 		
 		System.out.println("End - invalid Password");
 	}
 
 
 	/**
-	 * Version이 잘못 입력되었을 경우
+	 * C005 Version이 잘못 입력되었을 경우
 	 */
 	@Test	
-	public void getCatalogTest_incorrectAPIVersion() {
+	public void C005_getCatalogTest_incorrectAPIVersion() {
 		
 		System.out.println("Start - incorrect API Version");
 		
@@ -214,31 +195,29 @@ public class CatalogRestTest {
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;
 
-		boolean bException = false;
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.GET);
+		
+		System.out.println(response.getBody());
+
+		JsonNode json = null;
 		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
-			
-		} catch (ServiceBrokerException sbe) {
-			System.out.println(sbe.getMessage());
-			assertEquals(sbe.getMessage(), "412 Precondition Failed");
-			bException = true;
+			json=JsonUtils.convertToJson(response);
+		} catch (ServiceBrokerException e) {
+			assertTrue(false);
 		}
 		
-		if (!bException) assertFalse("Error", true);
-		
-		System.out.println("End - incorrect API Version");
+		assertEquals(response.getStatusCode(), HttpStatus.PRECONDITION_FAILED);
+		assertTrue(json.get("description").asText().equals("The provided service broker API version is not supported: Expected Version = 2.4, Provided Version = "+prop.getProperty("api_version_fail")));
 	}
 
 	/**
-	 * Catalog 정보를 정상적으로 가져옴
+	 * C006 Catalog 정보를 정상적으로 가져옴
 	 * Mandatory 부분이 다 들어가 있는지 확인
 	 */
 	@Test	
-	public void getCatalogTest_validCatalog() {
+	public void C006_getCatalogTest_validCatalog() {
 		
 		System.out.println("Start - valid catalog");
 		
@@ -248,27 +227,23 @@ public class CatalogRestTest {
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
 		HttpEntity<String> entity = new HttpEntity<String>("", headers);
 		ResponseEntity<String> response = null;
+
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+		
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.GET);
+	
+		JsonNode json = null;
 		
 		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.GET);
-			
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-			
-			JsonNode json = JsonUtils.convertToJson(response);
-
+			json = JsonUtils.convertToJson(response);			
+	
 			if (!checkValidCatalogJson(json)) throw new ServiceBrokerException("validation check is fail.");
-			
-			
-		} catch (ServiceBrokerException sbe) {
-			
-			assertFalse(sbe.getMessage(), true);
-			
+		} catch (Exception e) {
+			System.out.println(e.getMessage());			
+			assertTrue(false);
 		}
-		
+
+		assertEquals(response.getStatusCode(), HttpStatus.OK);
 		assertTrue("Success", true);
 		
 		System.out.println("End - valid catalog");
@@ -330,10 +305,10 @@ public class CatalogRestTest {
 	
 	
 	/**
-	 * POST로 요청
+	 * C007 POST로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodPOST() {
+	public void C007_getCatalogTest_methodPOST() {
 		
 		System.out.println("Start - POST");
 		
@@ -346,33 +321,32 @@ public class CatalogRestTest {
 		
 		boolean bException = false;
 
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			System.out.println(sbe.getMessage());
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-		}
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		
-		if (!bException) assertFalse("Error", true);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.POST);
+		
+		System.out.println(response.getBody());
+
+		JsonNode json = null;
+		try {
+			json=JsonUtils.convertToJson(response);
+		} catch (ServiceBrokerException e) {
+			assertTrue(false);
+		}
+			
+		assertEquals(response.getStatusCode(), HttpStatus.METHOD_NOT_ALLOWED);
+		assertTrue(json.get("message").asText().equals("Request method 'POST' not supported"));
+
 		
 		System.out.println("End - POST");
 	}
 
 
 	/**
-	 * PUT으로 요청
+	 * C008 PUT으로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodPUT() {
+	public void C008_getCatalogTest_methodPUT() {
 		
 		System.out.println("Start - PUT");
 		
@@ -384,32 +358,30 @@ public class CatalogRestTest {
 		ResponseEntity<String> response = null;
 		
 		boolean bException = false;
-
-		try {
 			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.PUT);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			System.out.println(sbe.getMessage());
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-		}  
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		
-		if (!bException) assertFalse("Error", true);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.PUT);
+		System.out.println(response.getBody());
+
+		JsonNode json = null;
+		try {
+			json=JsonUtils.convertToJson(response);
+		} catch (ServiceBrokerException e) {
+			assertTrue(false);
+		}
+			
+		assertEquals(response.getStatusCode(), HttpStatus.METHOD_NOT_ALLOWED);
+		assertTrue(json.get("message").asText().equals("Request method 'PUT' not supported"));
 		
 		System.out.println("End - PUT");
 	}
 
 	/**
-	 * DELETE로 요청
+	 * C009 DELETE로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodDELETE() {
+	public void C009_getCatalogTest_methodDELETE() {
 		
 		System.out.println("Start - DELETE");
 		
@@ -422,31 +394,30 @@ public class CatalogRestTest {
 		
 		boolean bException = false;
 
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.DELETE);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
-			bException = true;
-			
-		}
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		
-		if (!bException) assertFalse("Error", true);
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.DELETE);
+		
+		System.out.println(response.getBody());
+
+		JsonNode json = null;
+		try {
+			json=JsonUtils.convertToJson(response);
+		} catch (ServiceBrokerException e) {
+			assertTrue(false);
+		}
+			
+		assertEquals(response.getStatusCode(), HttpStatus.METHOD_NOT_ALLOWED);
+		assertTrue(json.get("message").asText().equals("Request method 'DELETE' not supported"));
 		
 		System.out.println("End - DELETE");
 	}
 
 	/**
-	 * PATCH로 요청
+	 * C010 PATCH로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodPATCH() {
+	public void C010_getCatalogTest_methodPATCH() {
 		
 		System.out.println("Start - PATCH");
 		
@@ -454,40 +425,32 @@ public class CatalogRestTest {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		HttpEntity<String> entity = new HttpEntity<String>(" ", headers);
 		ResponseEntity<String> response = null;
 		
 		boolean bException = false;
 
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		try {
+			response = HttpClientUtils.testSend(url, entity, HttpMethod.PATCH);
 			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.PATCH);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("I/O error on PATCH request for"));
 
-		} catch (ServiceBrokerException sbe) {
-			System.out.println("ddddddddddddddddddddddddddddddddddddddd");
-			System.out.println(sbe.getMessage());
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
 			bException = true;
-			
-			sbe.printStackTrace();
-			
 		}
 		
-		if (!bException) assertFalse("Error", true);
-		
+		assertTrue(bException);
 		System.out.println("End - PATCH");
 	}
 	
 	
 	/**
-	 * OPTIONS로 요청
+	 * C011 OPTIONS로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodOPTIONS() {
+	public void C011_getCatalogTest_methodOPTIONS() {
 		
 		System.out.println("Start - OPTIONS");
 		
@@ -495,38 +458,28 @@ public class CatalogRestTest {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Broker-Api-Version", prop.getProperty("api_version"));
 		headers.set("Authorization", "Basic " + new String(Base64.encode((prop.getProperty("auth_id") +":" + prop.getProperty("auth_password")).getBytes())));
-		HttpEntity<String> entity = new HttpEntity<String>("", headers);
+		HttpEntity<String> entity = new HttpEntity<String>(" ", headers);
 		ResponseEntity<String> response = null;
-		
-		boolean bException = false;
 
-		try {
-			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
-			
-			response = HttpClientUtils.send(url, entity, HttpMethod.OPTIONS);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 
-		} catch (ServiceBrokerException sbe) {
-			
-			assertFalse(sbe.getMessage(), true);
-			bException = true;
-			
-			sbe.printStackTrace();
-			
-		}
+		response = HttpClientUtils.testSend(url, entity, HttpMethod.OPTIONS);
+		System.out.println(response.getHeaders());
+		System.out.println(response.getBody());
+		System.out.println(response.getStatusCode());
+
 		
-		if (!bException) assertTrue("Success", true);
+		assertTrue(response.getStatusCode().equals(HttpStatus.OK));
+		
 		
 		System.out.println("End - OPTIONS");
 	}
 
 	/**
-	 * HEAD로 요청
+	 * C012 HEAD로 요청
 	 */
 	@Test	
-	public void getCatalogTest_methodHEAD() {
+	public void C012_getCatalogTest_methodHEAD() {
 		
 		System.out.println("Start - HEAD");
 		
@@ -539,24 +492,18 @@ public class CatalogRestTest {
 		
 		boolean bException = false;
 
+		String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
 		try {
+			response = HttpClientUtils.testSend(url, entity, HttpMethod.HEAD);
 			
-			String url = prop.getProperty("test_base_protocol") + prop.getProperty("test_base_url") + prop.getProperty("catalog_path");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			assertTrue(e.getMessage().contains("I/O error on HEAD request for"));
 			
-			response = HttpClientUtils.send(url, entity, HttpMethod.HEAD);
-			
-			if (response.getStatusCode() != HttpStatus.OK) throw new ServiceBrokerException("Response code is " + response.getStatusCode());
-
-		} catch (ServiceBrokerException sbe) {
-			
-			assertEquals(sbe.getMessage(), "405 Method Not Allowed");
 			bException = true;
-			
-			sbe.printStackTrace();
-			
 		}
 		
-		if (!bException) assertFalse("Error", true);
+		assertTrue(bException);
 		
 		System.out.println("End - HEAD");
 	}

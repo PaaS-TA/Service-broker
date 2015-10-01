@@ -3,15 +3,16 @@ package org.openpaas.servicebroker.apiplatform.dao;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.openpaas.servicebroker.apiplatform.model.APIServiceInstance;
 import org.openpaas.servicebroker.apiplatform.model.APIUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
 
 @Repository
 public class APIServiceInstanceDAO {
@@ -29,10 +30,10 @@ public class APIServiceInstanceDAO {
 	@Autowired
 	private Environment env;
 	
-	public APIUser getAPIUserByOrgID(String oranization_guid){
+	public APIUser getAPIUserByOrgID(String organizationGuid){
 		logger.info("getAPIUserByOrgID() start");
-		logger.debug("oranization_guid : "+oranization_guid);
-		String sql = "SELECT * FROM apiplatform_users WHERE organization_guid='"+oranization_guid+"'";
+		logger.debug("oranization_guid : "+organizationGuid);
+		String sql = "SELECT * FROM apiplatform_users WHERE organization_guid='"+organizationGuid+"'";
 		
 		APIUser apiUser = new APIUser();
 		
@@ -43,133 +44,121 @@ public class APIServiceInstanceDAO {
 				apiUser.setUser_id(rs.getString("user_id"));
 				apiUser.setUser_password(rs.getString("user_password"));
 				
-				System.out.println(rs.getString("organization_guid"));
-				
 				return apiUser;
 				}
 			};
 
-		try {
-			apiUser = (APIUser)jdbcTemplate.queryForObject(sql, mapper);
-			
-		} catch (EmptyResultDataAccessException e) {
-			
-			logger.info("Could not found User at APIPlatform Database");
-		}
-		
+		apiUser = (APIUser)jdbcTemplate.queryForObject(sql, mapper);
+
 		logger.info("getAPIUserByOrgID() finished");
+		
 	return apiUser;
 	}
 	
-	public boolean serviceInstanceDuplicationCheck(String organizationGuid,String serviceInstanceId, String service_id,String plan_id){
-		logger.info("serviceInstanceDuplicationCheck() start");
+	public APIServiceInstance getAPIServiceByInstance(String serviceInstanceId){
+		logger.info("getServiceByInstanceID() start");
+		logger.debug("instance_id : "+serviceInstanceId);
+		String sql = "SELECT * FROM apiplatform_services WHERE instance_id='"+serviceInstanceId+"'";
 		
-		boolean duplication =false;
+		APIServiceInstance apiServiceInstance = new APIServiceInstance();
 		
-		String sql = "SELECT COUNT(*) FROM apiplatform_services "
-				+ "WHERE organization_guid='"+organizationGuid+"' AND instance_id='"+serviceInstanceId+"' AND service_id='"+service_id+"' AND plan_id='"+plan_id+"'";
-		int count=0;
+		RowMapper mapper = new RowMapper(){
+			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+				APIServiceInstance apiService = new APIServiceInstance();
+				apiService.setInstance_id(rs.getString("instance_id"));
+				apiService.setOrganization_id(rs.getString("organization_guid"));
+				apiService.setSpace_guid(rs.getString("space_guid"));
+				apiService.setService_id(rs.getString("service_id"));
+				apiService.setPlan_id(rs.getString("plan_id"));
+				apiService.setDelyn(rs.getString("delyn"));
+				return apiService;
+				}
+			};
+
+			apiServiceInstance = (APIServiceInstance)jdbcTemplate.queryForObject(sql, mapper);
+
+		logger.info("getAPIServiceByInstanceID() finished");
 		
-		try {
-			count = jdbcTemplate.queryForInt(sql);
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Database Error :"+e.getMessage());
-		}
-		
-		if(count!=0){
-			duplication=true;
-		}
-		logger.info("serviceInstanceDuplicationCheck() finished");
-		return duplication;
+	return apiServiceInstance;
 	}
 	
-	public boolean serviceInstanceIdDuplicationCheck(String serviceInstanceId){
-		logger.info("serviceInstanceIdDuplicationCheck() start");
+	public APIServiceInstance getAPIInfoByInstanceID(String serviceInstanceId){
+		logger.info("getServiceByInstanceID() start");
+		logger.debug("instance_id : "+serviceInstanceId);
+		String sql = 
+				"SELECT s.organization_guid,s.instance_id,s.space_guid,s.service_id,s.plan_id,u.user_id,u.user_password,s.delyn FROM apiplatform_services s "
+				+ "INNER JOIN apiplatform_users u ON u.organization_guid = s.organization_guid WHERE instance_id= '"+serviceInstanceId+"'";
 		
-		boolean duplication = false;
+		APIServiceInstance apiService = new APIServiceInstance();
 		
-		String sql = "SELECT COUNT(*) FROM apiplatform_services "
-				+ "WHERE instance_id='"+serviceInstanceId+"'";
-		int count=0;
+		RowMapper mapper = new RowMapper(){
+			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+				APIServiceInstance apiService = new APIServiceInstance();
+				apiService.setInstance_id(rs.getString("instance_id"));
+				apiService.setOrganization_id(rs.getString("organization_guid"));
+				apiService.setSpace_guid(rs.getString("space_guid"));
+				apiService.setService_id(rs.getString("service_id"));
+				apiService.setPlan_id(rs.getString("plan_id"));
+				apiService.setUser_id(rs.getString("user_id"));
+				apiService.setUser_password(rs.getString("user_password"));
+				apiService.setDelyn(rs.getString("delyn"));
+				return apiService;
+				}
+			};
+
+			apiService = (APIServiceInstance)jdbcTemplate.queryForObject(sql, mapper);
+
+		logger.info("getAPIServiceByInstanceID() finished");
 		
-		try {
-			count = jdbcTemplate.queryForInt(sql);
-		} catch (Exception e) {
-			e.printStackTrace();
-			
-			logger.error("Database Error :"+e.getMessage());
-		}
-		System.out.println(count);
-		if(count!=0){
-			duplication=true;
-		}
-		System.out.println(duplication);
-		logger.info("serviceInstanceIdDuplicationCheck() finished");
-		return duplication;
+	return apiService;
 	}
-	
-	public boolean insertAPIUser(String oranization_guid, String user_id, String user_password){
+
+	public void insertAPIUser(String oranizationGuid, String userId, String userPassword){
 		
-		boolean insertAPIUserResult;
 		logger.info("insertAPIUser() start");
 		String sql ="INSERT INTO apiplatform_users (organization_guid,user_id,user_password, createtimestamp) VALUES "
-				+ "('"+oranization_guid+"','"+user_id+"','"+user_password+"',utc_timestamp())";
+				+ "('"+oranizationGuid+"','"+userId+"','"+userPassword+"',utc_timestamp())";
 		
-		try {
-			jdbcTemplate.execute(sql);
-		} catch (Exception e) {
-			e.printStackTrace();
-			insertAPIUserResult=false;
-			return insertAPIUserResult;
-		}
-		insertAPIUserResult=true;
+		jdbcTemplate.execute(sql);
+
 		logger.info("insertAPIUser() finished");
-		return insertAPIUserResult;
 	}
 	
-	public boolean insertAPIServiceInstance(String oranization_guid, String serviceInstanceId,String space_guid,String service_id,String plan_id){
+	public void insertAPIServiceInstance(String oranizationGuid, String serviceInstanceId,String spaceGuid,String serviceId,String planId){
 		
-		boolean insertAPIServiceInstanceResult;
-		
-		logger.info("insertAPIUser() start");
+		logger.info("insertAPIServiceInstance() start");
 		String sql ="INSERT INTO apiplatform_services (organization_guid,instance_id,space_guid,service_id,plan_id,delyn,createtimestamp) VALUES "
-				+ "('"+oranization_guid+"','"+serviceInstanceId+"','"+space_guid+"','"+service_id+"','"+plan_id+"','N',utc_timestamp())";
+				+ "('"+oranizationGuid+"','"+serviceInstanceId+"','"+spaceGuid+"','"+serviceId+"','"+planId+"','N',utc_timestamp())";
+	
+		jdbcTemplate.execute(sql);
 		
-		try {
-			jdbcTemplate.execute(sql);
-		} catch (Exception e) {
-			e.printStackTrace();
-			insertAPIServiceInstanceResult=false;
-			return insertAPIServiceInstanceResult;
-		}
-		
-		insertAPIServiceInstanceResult=true;
-		logger.info("insertAPIUser() finished");
-		return insertAPIServiceInstanceResult;
+		logger.info("insertAPIServiceInstance() finished");
 	}
 	
-//	public boolean serviceInstanceSubscriptionDBCheck(String serviceInstanceId,String service_id,String plan_id){
-//		boolean subscriptionDBExists = true;
-//		
-//		String sql = "SELECT COUNT(*) FROM apiplatform_services "
-//				+ "WHERE instance_id='"+serviceInstanceId+"' AND service_id='"+service_id+"' AND plan_id='"+plan_id+"'";
-//		int count=0;
-//		
-//		try {
-//			count = jdbcTemplate.queryForInt(sql);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			logger.error("Database Error :"+e.getMessage());
-//		}
-//		
-//		if(count!=0){
-//			subscriptionDBExists=false;
-//		}
-//		logger.info("serviceInstanceDuplicationDBCheck() finished");
-//		
-//		return subscriptionDBExists;
-//	}
+	public void updateAPIServiceInstance(String serviceInstanceId, String planId){
+		
+		logger.info("updateAPIServiceInstance() start");
+		String sql ="UPDATE apiplatform_services SET plan_id = '"+planId+"' WHERE instance_id = '"+serviceInstanceId+"'";
+
+		jdbcTemplate.update(sql);
+		
+		logger.info("updateAPIServiceInstance() finished");
+	}
 	
+	public void deleteAPIServiceInstance(String oranizationGuid,String serviceInstanceId, String serviceId,String planId ){
+		
+		logger.info("deleteAPIServiceInstance() start");
+		String sql ="UPDATE apiplatform_services SET delyn = 'Y', deletetimestamp = utc_timestamp() WHERE instance_id = '"+serviceInstanceId+"' AND "
+				+ "organization_guid = '"+oranizationGuid+"' AND service_id = '"+serviceId+"' AND plan_id = '"+planId+"'";
+		
+		jdbcTemplate.update(sql);
+		
+		logger.info("deleteAPIServiceInstance() finished");
+	}
 	
+	public void test_beforeBindingTest(String serviceInstanceId){
+		
+		String sql ="UPDATE apiplatform_services SET delyn = 'N' WHERE instance_id = '"+serviceInstanceId+"'";
+		jdbcTemplate.update(sql);
+	}
 }

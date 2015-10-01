@@ -26,7 +26,7 @@ public class CatalogConfig {
 						getPlans(),
 						Arrays.asList("cubrid", "document"),
 						getServiceDefinitionMetadata(),
-						null,
+						Arrays.asList("syslog_drain"),
 						null)));
 	}
 
@@ -37,7 +37,7 @@ public class CatalogConfig {
 		sdMetadata.put("displayName", "CubridDB");
 		sdMetadata.put("imageUrl","http://www.openpaas.org/rs/cubrid/images/CubridDB_Logo_Full.png");
 		sdMetadata.put("longDescription","CubridDB Service");
-		sdMetadata.put("providerDisplayName","OpenPaas");
+		sdMetadata.put("providerDisplayName","OpenPaaS");
 		sdMetadata.put("documentationUrl","http://www.openpaas.org");
 		sdMetadata.put("supportUrl","http://www.openpaas.org");
 		return sdMetadata;

@@ -1,0 +1,50 @@
+buildscript {
+    repositories {
+        maven { url "http://repo.spring.io/libs-snapshot" }
+        mavenLocal()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.3.0.BUILD-SNAPSHOT")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+apply plugin: 'war'
+
+ext {
+  springBootVersion = '1.3.0.BUILD-SNAPSHOT'
+  baseName = 'openpaas-service-java-broker-public-naver-api-sample'
+  
+  jsonPathVersion = '0.9.1'
+}
+
+war {
+    baseName = baseName
+    version =  version
+}
+
+repositories {
+    mavenCentral()
+    maven { url "http://repo.spring.io/libs-snapshot" }
+}
+
+configurations {
+    providedRuntime
+}
+
+dependencies {
+    
+    compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-thymeleaf:${springBootVersion}")
+	compile 'org.springframework.cloud:spring-cloud-core:1.0.0.RELEASE'
+	compile("org.apache.httpcomponents:httpclient:4.4.1")
+    testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testCompile("com.jayway.jsonpath:json-path:${jsonPathVersion}")       
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
