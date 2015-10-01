@@ -13,7 +13,6 @@
 	<script th:inline="javascript">
 	//컨트롤러로 부터 API url이나 서비스 key등의 vcap 정보를 받아온다. 
 		var naverMapUrl =/*[[${naverMap_Url}]]*/'';
-		var naverMap_Key =/*[[${naverMap_Key}]]*/'';
 		var publicPerformance_Url =/*[[${publicPerformance_Url}]]*/'';
 		var publicPerformance_Key =/*[[${publicPerformance_Key}]]*/'';
 		var incheonCulture_Url =/*[[${incheonCulture_Url}]]*/'';
@@ -354,7 +353,7 @@
 						var newAddr = perform.find("NEWADDR").text();
 
 						$.getJSON(
-								naverAddressToGPS_Url+"?key="+naverMap_Key+"&encoding=utf-8&coord=latlng&output=json&query="+newAddr+"&callback=?",
+								naverAddressToGPS_Url+"?key="+naverAddressToGPS_Key+"&encoding=utf-8&coord=latlng&output=json&query="+newAddr+"&callback=?",
 										function(data) {
 											if (data.result.items[0].point.y&&data.result.items[0].point.x) {
 												gpsY = data.result.items[0].point.y;
