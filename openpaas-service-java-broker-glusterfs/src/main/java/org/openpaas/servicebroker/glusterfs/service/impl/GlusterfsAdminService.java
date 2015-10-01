@@ -39,14 +39,13 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Utility class for manipulating a Glusterfs database.
+ * Glusterfs대용량저장소를 조작하기위한 유틸리티 클래스.
  * 
- * @author 
+ * @author 김한종
  *
  */
 @PropertySource("classpath:glusterfs.properties")
 @Service
-//@PropertySource("/WEB-INF/classes/application-mvc.properties")
 public class GlusterfsAdminService {
 
 	public static final String SERVICE_INSTANCES_FILDS = "instance_id, service_id, plan_id, organization_guid, space_guid, tenant_name, tenant_id";
@@ -95,43 +94,12 @@ public class GlusterfsAdminService {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 	
-	/*@Autowired
-	public GlusterfsAdminService(JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
-	}*/
-		
 	private final RowMapper<ServiceInstance> mapper = new ServiceInstanceRowMapper();
 	
 	private final RowMapper<GlusterfsServiceInstance> mapper3 = new GlusterfsServiceInstanceRowMapper();
 	
 	private final RowMapper<ServiceInstanceBinding> mapper2 = new ServiceInstanceBindingRowMapper();
 	
-	/**
-	 * ServiceInstance의 유무를 확인합니다
-	 * @param instance
-	 * @return
-	 */
-	/*public boolean isExistsService(ServiceInstance instance){
-		System.out.println("GlusterfsAdminService.isExistsService");
-		//List<String> databases = jdbcTemplate.queryForList("SHOW DATABASES LIKE '"+getDatabase(instance.getServiceInstanceId())+"'",String.class);
-		List<String> databases = null;
-		return databases.size() > 0;
-	}*/
-	
-	/**
-	 * 사용자 유무를 확인합니다.
-	 * @param userId
-	 * @return
-	 */
-	/*public boolean isExistsUser(String userId){
-		System.out.println("GlusterfsAdminService.isExistsUser");
-		try {
-			jdbcTemplate.execute("SHOW GRANTS FOR '"+userId+"'");
-		} catch (Exception e) {
-			return false;
-		}
-		return true;
-	}*/
 	
 	/**
 	 * ServiceInstanceId로 ServiceInstance정보를 조회합니다.
@@ -139,7 +107,7 @@ public class GlusterfsAdminService {
 	 * @return
 	 */
 	public ServiceInstance findById(String id){
-		System.out.println("GlusterfsAdminService.findById");
+		logger.debug("GlusterfsAdminService.findById");
 		ServiceInstance serviceInstance = null;;
 		try {
 			serviceInstance = jdbcTemplate.queryForObject(SERVICE_INSTANCES_FIND_BY_INSTANCE_ID, mapper, id);
@@ -156,7 +124,7 @@ public class GlusterfsAdminService {
 	 * @return
 	 */
 	public GlusterfsServiceInstance tenantInfofindById(String id){
-		System.out.println("GlusterfsAdminService.tenantInfofindById");
+		logger.debug("GlusterfsAdminService.tenantInfofindById");
 		GlusterfsServiceInstance serviceInstance = null;;
 		try {
 			serviceInstance = jdbcTemplate.queryForObject(SERVICE_GLUSTERFS_INSTANCES_FIND_BY_INSTANCE_ID, mapper3, id);
@@ -171,7 +139,7 @@ public class GlusterfsAdminService {
 	 * @return
 	 */
 	public ServiceInstance createServiceInstanceByRequest(CreateServiceInstanceRequest request){
-		System.out.println("GlusterfsAdminService.createServiceInstanceByRequest");
+		logger.debug("GlusterfsAdminService.createServiceInstanceByRequest");
 		return new ServiceInstance(request).withDashboardUrl(getDashboardUrl(request.getServiceInstanceId()));
 	}
 	
@@ -181,7 +149,7 @@ public class GlusterfsAdminService {
 	 * @return
 	 */
 	public ServiceInstanceBinding findBindById(String id){
-		System.out.println("GlusterfsAdminService.findBindById");
+		logger.debug("GlusterfsAdminService.findBindById");
 		ServiceInstanceBinding serviceInstanceBinding = null;;
 		try {
 			serviceInstanceBinding = jdbcTemplate.queryForObject(SERVICE_BINDING_FIND_BY_BINDING_ID, mapper2, id);
@@ -197,7 +165,7 @@ public class GlusterfsAdminService {
 	 * @return
 	 */
 	public List<Map<String,Object>> findBindByInstanceId(String id){
-		System.out.println("GlusterfsAdminService.findBindByInstanceId");
+		logger.debug("GlusterfsAdminService.findBindByInstanceId");
 		
 		List<Map<String,Object>> list = new ArrayList<Map<String,Object>>();
 		try {
@@ -213,7 +181,7 @@ public class GlusterfsAdminService {
 	 * @return
 	 */
 	public ServiceInstanceBinding createServiceInstanceBindingByRequest(CreateServiceInstanceBindingRequest request){
-		System.out.println("GlusterfsAdminService.createServiceInstanceBindingByRequest");
+		logger.debug("GlusterfsAdminService.createServiceInstanceBindingByRequest");
 		
 		return new ServiceInstanceBinding(request.getBindingId(), 
 				request.getServiceInstanceId(), 
@@ -229,7 +197,7 @@ public class GlusterfsAdminService {
 	 */
 	public void save(ServiceInstance serviceInstance, GlusterfsServiceInstance gf) throws GlusterfsServiceException{
 		try{
-			System.out.println("GlusterfsAdminService.save");
+			logger.debug("GlusterfsAdminService.save");
 			jdbcTemplate.update(SERVICE_INSTANCES_ADD, 
 					serviceInstance.getServiceInstanceId(),
 					serviceInstance.getServiceDefinitionId(),
@@ -257,7 +225,7 @@ public class GlusterfsAdminService {
 	 */
 	public void delete(String id) throws GlusterfsServiceException{
 		try{
-			System.out.println("GlusterfsAdminService.delete");
+			logger.debug("GlusterfsAdminService.delete");
 			
 			jdbcTemplate.update(SERVICE_INSTANCES_DELETE_BY_INSTANCE_ID, id);
 		} catch (Exception e) {
@@ -278,7 +246,7 @@ public class GlusterfsAdminService {
 		if(null == gfInstance) throw new ServiceBrokerException("");
 		
 		try{
-			System.out.println("GlusterfsAdminService.deleteDatabase");
+			logger.debug("GlusterfsAdminService.deleteDatabase");
 			
 			HttpHeaders headers = new HttpHeaders();	
 			headers.set("X-Auth-Token", ConstantsAuthToken.AUTH_TOKEN);
@@ -311,24 +279,12 @@ public class GlusterfsAdminService {
 	}
 	
 	/**
-	 * 해당하는 Database를 생성합니다.
-	 * @param serviceInstance
+	 * Glusterfs 관리자 AuthToken 획득
 	 * @throws GlusterfsServiceException
 	 */
-	/*public void createDatabase(ServiceInstance serviceInstance) throws GlusterfsServiceException{
-		
-		try{
-			
-			System.out.println("GlusterfsAdminService.createDatabase");
-			//jdbcTemplate.execute("CREATE DATABASE " + getDatabase(serviceInstance.getServiceInstanceId()));
-		} catch (Exception e) {
-			throw handleException(e);
-		}
-	}*/
-	
 	public void setGlusterfsAuthToken() throws GlusterfsServiceException{
 		
-		System.out.println("GlusterfsAdminService.getGlusterfsAuthToken");
+		logger.debug("GlusterfsAdminService.getGlusterfsAuthToken");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -365,20 +321,30 @@ public class GlusterfsAdminService {
 		}
 	}
 
+	/**
+	 * Glusterfs 관리자 AuthToken 설정
+	 * @param json
+	 */
 	private void setAuthToken(JsonNode json) {
-		System.out.println("json : " + json.toString());
+		logger.debug("json : " + json.toString());
 		
 		String authToken = json.get("access").get("token").get("id").asText();
 		
-		System.out.println("authToken : " + authToken);
+		logger.debug("authToken : " + authToken);
 		
 		ConstantsAuthToken.AUTH_TOKEN = authToken;
 		
 	}
 	
+	/**
+	 * Glusterfs Quota 설정
+	 * @param planId
+	 * @param tenantId
+	 * @throws ServiceBrokerException
+	 */
 	public void setGlusterfsQuota(String planId, String tenantId) throws ServiceBrokerException{
 		
-		System.out.println("GlusterfsAdminService.getGlusterfsAuthToken");
+		logger.debug("GlusterfsAdminService.getGlusterfsAuthToken");
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 		headers.set("X-Auth-Token", ConstantsAuthToken.AUTH_TOKEN);
@@ -392,11 +358,11 @@ public class GlusterfsAdminService {
 		
 		HttpEntity<String> entity = new HttpEntity<String>(body, headers);
 		ResponseEntity<String> response = null;
-		System.out.println("body : " + body);
+		logger.debug("body : " + body);
 		try{
 				
 			String url = env.getRequiredProperty("glusterfs.swiftproxy") + env.getRequiredProperty("glusterfs.uri.account");
-			System.out.println("url : " + url);
+			logger.debug("url : " + url);
 			url = url.replace("#TENANT_ID", tenantId);
 			
 			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
@@ -414,16 +380,22 @@ public class GlusterfsAdminService {
 		}
 	}
 
+	/**
+	 * 사용자 명으로 아이디 검색
+	 * @param username
+	 * @return
+	 * @throws GlusterfsServiceException
+	 */
 	public String getGlusterfsUserIdByUserName(String username) throws GlusterfsServiceException{
 		
-		System.out.println("GlusterfsAdminService.getGlusterfsAuthToken");
+		logger.debug("GlusterfsAdminService.getGlusterfsAuthToken");
 		HttpHeaders headers = new HttpHeaders();	
 		headers.set("X-Auth-Token", ConstantsAuthToken.AUTH_TOKEN);
 		String body = 	"";
 		String userId = "";
 		HttpEntity<String> entity = new HttpEntity<String>(body, headers);
 		ResponseEntity<String> response = null;
-		System.out.println("body : " + body);
+		logger.debug("body : " + body);
 		
 		try{
 				
@@ -441,7 +413,7 @@ public class GlusterfsAdminService {
 			
 		} catch (Exception e) {
 			if (e.getMessage().equals("401 Unauthorized")) {
-				System.out.println("setGlusterfsAuthTokenaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+				logger.debug("setGlusterfsAuthToken");
 				setGlusterfsAuthToken();
 				userId = getGlusterfsUserIdByUserName(username);
 			}else { 
@@ -451,8 +423,13 @@ public class GlusterfsAdminService {
 		return userId;
 	}
 
+	/**
+	 * 사용자 아이디 추출
+	 * @param json
+	 * @return
+	 */
 	private String getUserId(JsonNode json) {
-		System.out.println("json : " + json.toString());
+		logger.debug("json : " + json.toString());
 		
 		String userId = json.get("user").get("id").asText();
 		
@@ -460,9 +437,16 @@ public class GlusterfsAdminService {
 		
 	}
 	
+	/**
+	 * Glusterfs Tenant 생성
+	 * @param serviceInstance
+	 * @return
+	 * @throws ServiceInstanceExistsException
+	 * @throws ServiceBrokerException
+	 */
 	public GlusterfsServiceInstance createTenant(ServiceInstance serviceInstance) throws ServiceInstanceExistsException, ServiceBrokerException{
 		
-		System.out.println("GlusterfsAdminService.createTenant");
+		logger.debug("GlusterfsAdminService.createTenant");
 		
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -477,13 +461,13 @@ public class GlusterfsAdminService {
 			"}";
 		HttpEntity<String> entity = new HttpEntity<String>(body, headers);
 		ResponseEntity<String> response = null;
-		System.out.println("body : " + body);
+		logger.debug("body : " + body);
 		GlusterfsServiceInstance glusterfsServiceInstance = null;
 		
 		try{
 				
 			String url = env.getRequiredProperty("glusterfs.endpoint") + env.getRequiredProperty("glusterfs.uri.createtenant");
-			System.out.println("url : " + url);
+			logger.debug("url : " + url);
 			
 			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
 			
@@ -516,7 +500,7 @@ public class GlusterfsAdminService {
 	}
 	
 	private void setTenantInfo(JsonNode json, GlusterfsServiceInstance glusterfsServiceInstance) {
-		System.out.println("json : " + json.toString());
+		logger.debug("json : " + json.toString());
 		
 		glusterfsServiceInstance.setTenantId(json.get("tenant").get("id").asText());
 		glusterfsServiceInstance.setTenantName(json.get("tenant").get("name").asText());
@@ -531,7 +515,7 @@ public class GlusterfsAdminService {
 	 */
 	public void updatePlan(ServiceInstance instance, ServiceInstance request) throws GlusterfsServiceException{
 		try{
-			System.out.println("GlusterfsAdminService.updatePlan");
+			logger.debug("GlusterfsAdminService.updatePlan");
 			jdbcTemplate.update(SERVICE_INSTANCES_UPDATE_FILDS,
 					instance.getServiceDefinitionId(),
 					request.getPlanId(),
@@ -544,30 +528,13 @@ public class GlusterfsAdminService {
 	}
 	
 	/**
-	 * 사용자별 MAX_USER_CONNECTIONS정보를 수정합니다.
-	 * @param database
-	 * @param userId
-	 * @param connections
-	 * @return
-	 */
-	/*public boolean updateUserConnections(String database, String userId, String connections){
-		System.out.println("GlusterfsAdminService.updateUserConnections");
-		try {
-			jdbcTemplate.execute("GRANT USAGE ON " + database + ".* TO '" + userId + "'@'%' WITH MAX_USER_CONNECTIONS " + connections);
-		} catch (Exception e) {
-			return false;
-		}
-		return true;
-	}*/
-	
-	/**
 	 * ServiceInstanceBinding 정보를 저장합니다.
 	 * @param serviceInstanceBinding
 	 * @throws GlusterfsServiceException
 	 */
 	public void saveBind(ServiceInstanceBinding serviceInstanceBinding) throws GlusterfsServiceException{
 		try{
-			System.out.println("GlusterfsAdminService.saveBind");
+			logger.debug("GlusterfsAdminService.saveBind");
 			jdbcTemplate.update(SERVICE_BINDING_ADD, 
 					serviceInstanceBinding.getId(),
 					serviceInstanceBinding.getServiceInstanceId(),
@@ -590,7 +557,7 @@ public class GlusterfsAdminService {
 	 */
 	public void deleteBind(String id) throws GlusterfsServiceException{
 		try{
-			System.out.println("GlusterfsAdminService.deleteBind");
+			logger.debug("GlusterfsAdminService.deleteBind");
 			jdbcTemplate.update(SERVICE_BINDING_DELETE_BY_BINDING_ID, id);
 		} catch (Exception e) {
 			throw handleException(e);
@@ -605,7 +572,7 @@ public class GlusterfsAdminService {
 	 * @throws GlusterfsServiceException
 	 */
 	public void createUser(String tenantId, String userId, String password) throws GlusterfsServiceException{
-		System.out.println("GlusterfsAdminService.createTenant");
+		logger.debug("GlusterfsAdminService.createUser");
 		HttpHeaders headers = new HttpHeaders();	
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.set("X-Auth-Token", ConstantsAuthToken.AUTH_TOKEN);
@@ -620,12 +587,12 @@ public class GlusterfsAdminService {
 						"}";
 		HttpEntity<String> entity = new HttpEntity<String>(body, headers);
 		ResponseEntity<String> response = null;
-		System.out.println("body : " + body);
+		logger.debug("body : " + body);
 		
 		try{
 				
 			String url = env.getRequiredProperty("glusterfs.endpoint") + env.getRequiredProperty("glusterfs.uri.createusers");
-			System.out.println("url : " + url);
+			logger.debug("url : " + url);
 			
 			response = HttpClientUtils.send(url, entity, HttpMethod.POST);
 			
@@ -656,7 +623,7 @@ public class GlusterfsAdminService {
 	 * @throws GlusterfsServiceException
 	 */
 	public void deleteUser(String instanceId, String bindingId) throws GlusterfsServiceException{
-		System.out.println("GlusterfsAdminService.createTenant");
+		logger.debug("GlusterfsAdminService.createTenant");
 		
 		String userId = getGlusterfsUserIdByUserName(getUsername(bindingId));
 		
@@ -666,13 +633,13 @@ public class GlusterfsAdminService {
 		String body = 	"";
 		HttpEntity<String> entity = new HttpEntity<String>(body, headers);
 		ResponseEntity<String> response = null;
-		System.out.println("body : " + body);
+		logger.debug("body : " + body);
 		
 		try{
 				
 			String url = env.getRequiredProperty("glusterfs.endpoint") + env.getRequiredProperty("glusterfs.uri.deleteusers");
-			System.out.println("url : " + url);
-			System.out.println("userId : " + userId);
+			logger.debug("url : " + url);
+			logger.debug("userId : " + userId);
 			url = url.replace("#USER_ID", userId);
 			response = HttpClientUtils.send(url, entity, HttpMethod.DELETE);
 			
@@ -693,47 +660,6 @@ public class GlusterfsAdminService {
 		} 
 	}
 	
-	/**
-	 * 해당하는 User를 삭제합니다.
-	 * @param database
-	 * @param bindingId
-	 * @throws GlusterfsServiceException
-	 */
-	/*public void deleteUser(String userId) throws GlusterfsServiceException{
-		try{
-			System.out.println("GlusterfsAdminService.deleteUser");
-			jdbcTemplate.execute("DROP USER '"+userId+"'@'%'");
-		} catch (Exception e) {
-			throw handleException(e);
-		}
-	}*/
-	
-	/*public String getConnectionString(String database, String username, String password) {
-		//glusterfs://b5d435f40dd2b2:ebfc00ac@us-cdbr-east-03.cleardb.com:3306/ad_c6f4446532610ab
-		StringBuilder builder = new StringBuilder();
-		return builder.toString();
-	}*/
-	
-	/**
-	 * Database 접속정보를 생성합니다.
-	 * @param database
-	 * @param username
-	 * @param password
-	 * @param hostName
-	 * @return
-	 */
-	/*public String getConnectionString(String database, String username, String password, String hostName) {
-		//glusterfs://ns4VKg4Xtoy5mNCo:KyNRTVYPJyoqG1xo@10.30.40.163:3306/cf_dd2e0ffe_2bab_4308_b191_7d8814b16933
-		StringBuilder builder = new StringBuilder();
-		builder.append("glusterfs://"+username+":"+password+"@"+hostName+":3306/"+database);
-		return builder.toString();
-	}*/
-	
-	/*public String getServerAddresses() {
-		StringBuilder builder = new StringBuilder();
-		return builder.toString();
-	}*/
-	
 	private GlusterfsServiceException handleException(Exception e) {
 		logger.warn(e.getLocalizedMessage(), e);
 		return new GlusterfsServiceException(e.getLocalizedMessage());
@@ -745,7 +671,7 @@ public class GlusterfsAdminService {
 		return "http://www.sample.com/"+instanceId;
 	}
 	
-	// Tenant
+	// Tenant명 생성
 	public String getTenantName(String id){
 		
 		String database;
@@ -768,68 +694,6 @@ public class GlusterfsAdminService {
 		return username;
 						
 	}
-	
-	// User MAX_USER_CONNECTIONS 설정 조정
-	/*public void setUserConnections(String planId, String id) throws ServiceBrokerException{
-		
-		 Plan 정보 설정 
-		int totalConnections = 0;
-		int totalUsers;
-		int userPerConnections;
-		int mod;
-		
-		//if(planA.equals(planId)) totalConnections = planAconnections;
-		//if(planB.equals(planId)) totalConnections = planBconnections;
-		if(!planA.equals(planId) && !planB.equals(planId)) throw new ServiceBrokerException("");
-		
-		// ServiceInstanceBinding 정보를 조회한다.
-		List<Map<String,Object>> list = findBindByInstanceId(id);
-		// ServiceInstance의 총 Binding 건수 확인
-		totalUsers = list.size();
-		if(totalUsers <= 0) return;
-		if(totalConnections<totalUsers) throw new ServiceBrokerException("It may not exceed the specified plan.(Not assign Max User Connection)");
-
-		// User당 connection 수 = Plan의 connection / 총 Binding 건수
-		userPerConnections = totalConnections / totalUsers;
-		// 미할당 connection = Plan의 connection % 총 Binding 건수
-		mod = totalConnections % totalUsers;
-
-		for(int i=0;i < list.size();i++){
-			Map<String,Object> tmp = list.get(i);
-			
-			// 첫번째 사용자에게 User당 connection 수 + 미할당 connection 할당
-			if(i==0){
-				//updateUserConnections(getDatabase((String)tmp.get("instance_id")), getUsername((String)tmp.get("binding_id")), (userPerConnections+mod)+"");
-				//System.out.println(tmp.get("instance_id")+"/"+tmp.get("binding_id")+"/"+userPerConnections);
-			}
-			//  User당 connection 수  할당
-			else{
-				//updateUserConnections(getDatabase((String)tmp.get("instance_id")), getUsername((String)tmp.get("binding_id")), userPerConnections+"");
-				//System.out.println(tmp.get("instance_id")+"/"+tmp.get("binding_id")+"/"+userPerConnections);
-			}
-		}
-	}*/
-	
-	// User MAX_USER_CONNECTIONS 설정 조정
-	/*public boolean checkUserConnections(String planId, String id) throws ServiceBrokerException{
-			
-		 Plan 정보 설정 
-		int totalConnections = 0;
-		int totalUsers;
-		
-		//if(planA.equals(planId)) totalConnections = planAconnections;
-		//if(planB.equals(planId)) totalConnections = planBconnections;
-		if(!planA.equals(planId) && !planB.equals(planId)) throw new ServiceBrokerException("");
-		
-		// ServiceInstanceBinding 정보를 조회한다.
-		List<Map<String,Object>> list = findBindByInstanceId(id);
-		// ServiceInstance의 총 Binding 건수 확인
-		totalUsers = list.size();
-		
-		if(totalConnections <= totalUsers) return true;
-		
-		return false;
-	}*/
 	
 	private static final class ServiceInstanceRowMapper implements RowMapper<ServiceInstance> {
         @Override
