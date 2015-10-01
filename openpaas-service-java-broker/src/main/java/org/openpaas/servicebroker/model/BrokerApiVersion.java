@@ -7,15 +7,15 @@ public class BrokerApiVersion {
 	public final static String API_VERSION_ANY = "*";
 
 	private String brokerApiVersionHeader;
-	private String apiVersion;
+	private String apiVersions;
 
-	public BrokerApiVersion(String brokerApiVersionHeader, String apiVersion) {
+	public BrokerApiVersion(String brokerApiVersionHeader, String apiVersions) {
 		this.brokerApiVersionHeader = brokerApiVersionHeader;
-		this.apiVersion = apiVersion;
+		this.apiVersions = apiVersions;
 	}
 
-	public BrokerApiVersion(String apiVersion) {
-		this(DEFAULT_API_VERSION_HEADER, apiVersion);
+	public BrokerApiVersion(String apiVersions) {
+		this(DEFAULT_API_VERSION_HEADER, apiVersions);
 	}
 
 	public BrokerApiVersion() {
@@ -26,8 +26,8 @@ public class BrokerApiVersion {
 		return brokerApiVersionHeader;
 	}
 
-	public String getApiVersion() {
-		return apiVersion;
+	public String getApiVersions() {
+		return apiVersions;
 	}
 
 }

@@ -45,12 +45,12 @@ public class BrokerApiVersionInterceptorTest {
 		String header = "header";
 		String version = BrokerApiVersion.API_VERSION_ANY;
 		when(brokerApiVersion.getBrokerApiVersionHeader()).thenReturn(header);
-		when(brokerApiVersion.getApiVersion()).thenReturn(version);
+		when(brokerApiVersion.getApiVersions()).thenReturn(version);
 		when(request.getHeader(header)).thenReturn("version");
 		
 		BrokerApiVersionInterceptor interceptor = new BrokerApiVersionInterceptor(brokerApiVersion);
 		assertTrue(interceptor.preHandle(request, response, null));
-		verify(brokerApiVersion, atLeastOnce()).getApiVersion();
+		verify(brokerApiVersion, atLeastOnce()).getApiVersions();
 	}
 
 	@Test
@@ -58,12 +58,12 @@ public class BrokerApiVersionInterceptorTest {
 		String header = "header";
 		String version = "version";
 		when(brokerApiVersion.getBrokerApiVersionHeader()).thenReturn(header);
-		when(brokerApiVersion.getApiVersion()).thenReturn(version);
+		when(brokerApiVersion.getApiVersions()).thenReturn(version);
 		when(request.getHeader(header)).thenReturn(version);
 
 		BrokerApiVersionInterceptor interceptor = new BrokerApiVersionInterceptor(brokerApiVersion);
 		assertTrue(interceptor.preHandle(request, response, null));
-		verify(brokerApiVersion, atLeastOnce()).getApiVersion();
+		verify(brokerApiVersion, atLeastOnce()).getApiVersions();
 	}
 
 	@Test(expected = ServiceBrokerApiVersionException.class)
@@ -72,13 +72,13 @@ public class BrokerApiVersionInterceptorTest {
 		String version = "version";
 		String notVersion = "not_version";
 		when(brokerApiVersion.getBrokerApiVersionHeader()).thenReturn(header);
-		when(brokerApiVersion.getApiVersion()).thenReturn(version);
+		when(brokerApiVersion.getApiVersions()).thenReturn(version);
 		when(request.getHeader(header)).thenReturn(notVersion);
 		
 		BrokerApiVersionInterceptor interceptor = new BrokerApiVersionInterceptor(brokerApiVersion);
 		interceptor.preHandle(request, response, null);
 		verify(brokerApiVersion).getBrokerApiVersionHeader();
-		verify(brokerApiVersion).getApiVersion();
+		verify(brokerApiVersion).getApiVersions();
 	}
 	
 }
