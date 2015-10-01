@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.openpaas.servicebroker.exception.ServiceBrokerApiVersionException;
 
 @Ignore
 public class StringTest {
@@ -50,6 +51,21 @@ public class StringTest {
 	public void testReplace() {
 		System.out.println("b22sdasd098098".matches("^[a-zA-Z][a-zA-Z0-9]+"));
 		System.out.println("00b--2a6363c74c1ee1286097d8ebb0b65e0".replaceAll("/[^a-zA-Z]+/", ""));
+		
+	}
+	
+	@Test
+	public void testContains() {
+		String apiVersion = "2.7";
+		boolean contains = false;
+		for (String brokerApiVersion : "2.5, 2.6, 2.7".split(", ")) {
+			if (brokerApiVersion.equals(apiVersion)) {
+				contains = true;
+				break;
+			} 
+		}
+		if (!contains) System.out.println("false");
+		else System.out.println("true");
 		
 	}
 	

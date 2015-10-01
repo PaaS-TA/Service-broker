@@ -31,9 +31,12 @@ public class CubridAdminService {
 
 	private Logger logger = LoggerFactory.getLogger(CubridAdminService.class);
 
+	
+	/* ssh 접속을 위한 객체 */
 	@Autowired
 	private JSchUtil jsch;
 
+	/* cubrid database 사용을 위한 객체*/
 	@Autowired 
 	private JdbcTemplate jdbcTemplate;
 
@@ -60,6 +63,15 @@ public class CubridAdminService {
 
 	}
 
+	/**
+	 * 같은 이름의 database가 존제하는지 여부를 반환한다.
+	 * 있으면 true
+	 * 없으면 false
+	 * 
+	 * @param instance
+	 * @return boolean
+	 * @throws CubridServiceException
+	 */
 	public boolean isExistsService(CubridServiceInstance instance) throws CubridServiceException {
 		try {
 			List<Map<String,Object>> databases = jdbcTemplate.queryForList("SELECT * FROM service_instances WHERE db_name = '"+instance.getDatabaseName()+"'");
@@ -73,6 +85,16 @@ public class CubridAdminService {
 		}
 	}
 
+	/**
+	 * 같은 이름의 user 가 존제하는지 여부를 반환한다.
+	 * 있으면 true
+	 * 없으면 false
+	 * 
+	 * @param databaseName
+	 * @param username
+	 * @return
+	 * @throws CubridServiceException
+	 */
 	public boolean isExistsUser(String databaseName, String username) throws CubridServiceException {
 		try {
 			List<Map<String,Object>> users = jdbcTemplate.queryForList("SELECT * "
@@ -88,6 +110,13 @@ public class CubridAdminService {
 		}
 	}
 
+	/**
+	 * 같은 guid의 ServiceInstance가 존재하는지 여부를 반환한다. 
+	 * 
+	 * @param id
+	 * @return
+	 * @throws CubridServiceException
+	 */
 	public CubridServiceInstance findById(String id) throws CubridServiceException {
 		try {
 			CubridServiceInstance serviceInstance = null;

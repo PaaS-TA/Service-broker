@@ -11,6 +11,15 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+/**
+ * 
+ * Cubrid Datasource 정의 및 Subrid server에 ssh 접속정의
+ * 
+ * 
+ * @author Cho Mingu
+ *
+ */
+
 @Configuration
 @PropertySource("classpath:datasource.properties")
 public class CubridConfig {

@@ -6,14 +6,11 @@ import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.UpdateServiceInstanceRequest;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 
 /**
  * An instance of a ServiceDefinition.
  * 
- * @author 
+ * @author Cho Mingu
  *
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -42,7 +39,7 @@ public class CubridServiceInstance extends ServiceInstance{
 	}
 	
 	/**
-	 * Create a service instance from a delete request. If fields 
+	 * Create a service instance from a update request. If fields 
 	 * are not present in the request they will remain null in the 
 	 * ServiceInstance.
 	 * @param request containing details of ServiceInstance

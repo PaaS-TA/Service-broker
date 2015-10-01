@@ -11,6 +11,14 @@ import org.openpaas.servicebroker.model.ServiceDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Cubrid Broker의 상세정보를 정의함.
+ * 
+ * 
+ * 
+ * */
+
+
 @Configuration
 public class CatalogConfig {
 
@@ -30,7 +38,7 @@ public class CatalogConfig {
 						null)));
 	}
 
-	/* Used by Pivotal CF console */	
+	/* Used by OpenPaaS console */	
 
 	private Map<String,Object> getServiceDefinitionMetadata() {
 		Map<String,Object> sdMetadata = new HashMap<String,Object>();
