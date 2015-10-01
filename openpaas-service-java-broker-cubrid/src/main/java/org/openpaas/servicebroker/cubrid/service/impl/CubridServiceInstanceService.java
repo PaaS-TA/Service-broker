@@ -23,8 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ *  서비스 인스턴스 서비스가 제공해야하는 메소드를 정의한 인터페이스 클래스인 ServiceInstance를 상속하여
+ *  CubridDB 서비스 인스턴스 서비스 관련 메소드를 구현한 클래스. 서비스 인스턴스 생성/삭제/수정/조회 를 구현한다.
  *  
- * @author
+ * @author Cho Mingu
  *
  */
 @Service
@@ -40,6 +42,11 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		this.cubridAdminService = cubridAdminService;
 	}
 
+	/**
+	 * create-service
+	 * ServiceInstance를 생성한다.
+	 * 
+	 */
 	@Override
 	public ServiceInstance createServiceInstance(CreateServiceInstanceRequest request) 
 			throws ServiceInstanceExistsException, ServiceBrokerException {
@@ -84,7 +91,9 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		return instance;
 	}
 
-
+	/**
+	 * ServiceInstance를 이용하여 ServiceInstance 정보를 조회한다.
+	 */
 	@Override
 	public ServiceInstance getServiceInstance(String id) {
 		ServiceInstance instance = null;
@@ -96,6 +105,11 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		return instance;
 	}
 
+	/**
+	 * delete-service
+	 * ServiceInstance를 삭제한다.
+	 * 
+	 */
 	@Override
 	public ServiceInstance deleteServiceInstance(DeleteServiceInstanceRequest request) throws CubridServiceException {
 		logger.info("=====> CubridServiceInstanceService CLASS deleteServiceInstance");
@@ -112,6 +126,11 @@ public class CubridServiceInstanceService implements ServiceInstanceService {
 		return instance;		
 	}
 
+	/**
+	 * update-service
+	 * ServiceInstance의 plan을 변경한다.
+	 * 
+	 */
 	@Override
 	public ServiceInstance updateServiceInstance(UpdateServiceInstanceRequest request)
 			throws ServiceInstanceUpdateNotSupportedException, ServiceBrokerException, ServiceInstanceDoesNotExistException {

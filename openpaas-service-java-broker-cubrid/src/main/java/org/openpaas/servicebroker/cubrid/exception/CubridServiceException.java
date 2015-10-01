@@ -5,7 +5,7 @@ import org.openpaas.servicebroker.exception.ServiceBrokerException;
 
 /**
  * 
- * CubridDB ¼­ºñ½º °ü·Ã ¿¡·¯ ExceptionÅ¬·¡½º . ServiceBrokerException Å¬·¡½º¸¦ »ó¼ÓÇÔ.
+ * CubridDB ì„œë¹„ìŠ¤ ê´€ë ¨ ì—ëŸ¬ Exceptioní´ë˜ìŠ¤ . ServiceBrokerException í´ë˜ìŠ¤ë¥¼ ìƒì†í•¨.
  * 
  * @author Cho mingu
  *

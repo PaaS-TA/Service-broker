@@ -13,7 +13,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * 
- * Cubrid Datasource Á¤ÀÇ ¹× Subrid server¿¡ ssh Á¢¼ÓÁ¤ÀÇ
+ * Cubrid Datasourceë¥¼ ì •ì˜ Cubrid serverì— sshì ‘ì†ì •ì˜.
  * 
  * 
  * @author Cho Mingu

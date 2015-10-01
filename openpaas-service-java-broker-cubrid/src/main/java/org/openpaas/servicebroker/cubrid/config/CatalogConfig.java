@@ -12,9 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Cubrid BrokerÀÇ »ó¼¼Á¤º¸¸¦ Á¤ÀÇÇÔ.
- * 
- * 
+ * Cubrid Brokerì˜ ìƒì„¸ì •ë³´ë¥¼ ì •ì˜
  * 
  * */
 

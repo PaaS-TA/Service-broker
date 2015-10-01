@@ -22,9 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * 
+ * 서비스 인스턴스 바인딩 관련 서비스가 제공해야하는 메소드를 정의한 인터페이스 클래스인 ServiceInstanceBindingService를 상속하여
+ * CubridDB 서비스 인스턴스 바인딩  관련 메소드를 구현한 클래스. 서비스 인스턴스 바인드 생성/삭제/조회 를 구현한다.
  *  
- * @author 
+ * @author Cho Mingu
  *
  */
 @Service
@@ -40,6 +41,11 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 		this.cubridAdminService = cubridAdminService;
 	}
 	
+	/**
+	 * bind-service-broker
+	 * ServiceInstanceBinding 생성
+	 * 
+	 */
 	@Override
 	public ServiceInstanceBinding createServiceInstanceBinding(
 			CreateServiceInstanceBindingRequest request)
@@ -94,10 +100,22 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 		return binding;
 	}
 
+	/**
+	 * ServiceInstanceBinding의 교유식별자를 이용하여 CubridServiceInstanceBinding정보를 조회.
+	 * 
+	 * @param id
+	 * @return CubridServiceInstanceBinding
+	 * @throws ServiceBrokerException
+	 */
 	protected CubridServiceInstanceBinding getServiceInstanceBinding(String id) throws ServiceBrokerException {
 		return cubridAdminService.findBindById(id);
 	}
  
+	/**
+	 * unbind-serivce-broker
+	 * ServiceInstanceBinding을 삭제
+	 * 
+	 */
 	@Override
 	public ServiceInstanceBinding deleteServiceInstanceBinding(DeleteServiceInstanceBindingRequest request)
 			throws ServiceBrokerException {

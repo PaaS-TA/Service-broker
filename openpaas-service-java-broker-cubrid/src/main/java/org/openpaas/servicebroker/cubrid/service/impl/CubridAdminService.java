@@ -20,7 +20,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Service;
 
 /**
- * Utility class for manipulating a Cubrid database.
+ * Cubrid Database의 Util 클래스이다.
  * 
  * @author 
  *
@@ -32,11 +32,11 @@ public class CubridAdminService {
 	private Logger logger = LoggerFactory.getLogger(CubridAdminService.class);
 
 	
-	/* ssh ������ ���� ��ü */
+	/* ssh접속을 위한 객체 */
 	@Autowired
 	private JSchUtil jsch;
 
-	/* cubrid database ����� ���� ��ü*/
+	/* cubrid database 접속을 위한 객체*/
 	@Autowired 
 	private JdbcTemplate jdbcTemplate;
 
@@ -64,9 +64,9 @@ public class CubridAdminService {
 	}
 
 	/**
-	 * ���� �̸��� database�� �����ϴ��� ���θ� ��ȯ�Ѵ�.
-	 * ������ true
-	 * ������ false
+	 * 같은이름의 Database가 존재하는지 여부를 반환.
+	 * 존재하면 true
+	 * 존재하지않으면 false
 	 * 
 	 * @param instance
 	 * @return boolean
@@ -86,9 +86,9 @@ public class CubridAdminService {
 	}
 
 	/**
-	 * ���� �̸��� user �� �����ϴ��� ���θ� ��ȯ�Ѵ�.
-	 * ������ true
-	 * ������ false
+	 * 같은이름의 user가 존재하는지 여부를 반환.
+	 * 존재하면 true
+	 * 존재하지않으면 false
 	 * 
 	 * @param databaseName
 	 * @param username
@@ -111,10 +111,11 @@ public class CubridAdminService {
 	}
 
 	/**
-	 * ���� guid�� ServiceInstance�� �����ϴ��� ���θ� ��ȯ�Ѵ�. 
+	 *  ServiceInstance의 고유식별자를 이용하여  ServiceInstance의 정보를 조회하여 반환.
+	 * 존재하지않을경우 null반환
 	 * 
 	 * @param id
-	 * @return
+	 * @return CubridServiceInstance
 	 * @throws CubridServiceException
 	 */
 	public CubridServiceInstance findById(String id) throws CubridServiceException {
@@ -146,6 +147,14 @@ public class CubridAdminService {
 		}
 	}
 
+	/**
+	 * ServiceInstanceBinding의 고유식별자를 이용하여 ServiceInstanceBinding 정보를 조회
+	 * 존재하지않을경우 null 반환
+	 * 
+	 * @param id
+	 * @return CubridServiceInstanceBinding
+	 * @throws CubridServiceException
+	 */
 	public CubridServiceInstanceBinding findBindById(String id) throws CubridServiceException {
 		try {
 			CubridServiceInstanceBinding serviceInstanceBinding = null;
@@ -175,6 +184,13 @@ public class CubridAdminService {
 		}
 	}
 
+	/**
+	 * ServiceInstance의 고유식별자를 이용하여 ServcieInstance 정보 및 ServiceInstanceBinding 정보를 삭제
+	 * 
+	 * @param id
+	 * @throws CubridServiceException
+	 */
+	
 	public void delete(String id) throws CubridServiceException{
 		try {
 			
@@ -188,6 +204,12 @@ public class CubridAdminService {
 		}
 	}
 
+	/**
+	 * ServcieInstanceBinding의 고유식별자를 이용하여 ServiceInstanceBinding 정보를 삭제
+	 * 
+	 * @param id
+	 * @throws CubridServiceException
+	 */
 	public void deleteBind(String id) throws CubridServiceException{
 		try {
 			
@@ -200,6 +222,12 @@ public class CubridAdminService {
 		}
 	}
 
+	/**
+	 * ServiceInstance 정보를 저장.
+	 * 
+	 * @param serviceInstance
+	 * @throws CubridServiceException
+	 */
 	public void save(CubridServiceInstance serviceInstance) throws CubridServiceException {
 		try {
 			
@@ -213,6 +241,12 @@ public class CubridAdminService {
 		}
 	}
 
+	/**
+	 * ServiceInstanceBinding 정보를 저장.
+	 * 
+	 * @param serviceInstanceBinding
+	 * @throws CubridServiceException
+	 */
 	public void saveBind(CubridServiceInstanceBinding serviceInstanceBinding) throws CubridServiceException{
 		try {		
 			
@@ -226,6 +260,12 @@ public class CubridAdminService {
 		}
 	}
 
+	/**
+	 * ServiceInstance 정보를 변경.
+	 * 
+	 * @param instance
+	 * @throws CubridServiceException
+	 */
 	public void update(ServiceInstance instance) throws CubridServiceException{
 		try {
 			
@@ -239,6 +279,14 @@ public class CubridAdminService {
 		}
 	}
 
+	/**
+	 * ServiceInstance에 볼륨을 추가 
+	 * 
+	 * !사용되지않음!
+	 * 
+	 * @param databaseName
+	 * @throws CubridServiceException
+	 */
 	public void addVolume(String databaseName) throws CubridServiceException{
 		
 		String command = "cubrid addvoldb -p data --db-volume-size=100MB " + databaseName;
@@ -246,6 +294,13 @@ public class CubridAdminService {
 
 	}
 
+	/**
+	 * ServiceInstance 정보를 이용하여 database 정지 및 삭제.
+	 * ssh 이용
+	 * 
+	 * @param serviceInstance
+	 * @throws CubridServiceException
+	 */
 	public void deleteDatabase(CubridServiceInstance serviceInstance) throws CubridServiceException{
 		// database name
 		String databaseName = serviceInstance.getDatabaseName();
@@ -264,6 +319,14 @@ public class CubridAdminService {
 		jsch.shell(commands);
 	}
 
+	/**
+	 * ServiceInstance 정보를 이용하여 database 생성 및 구동.
+	 * ssh 이용
+	 * 
+	 * @param serviceInstance
+	 * @return
+	 * @throws CubridServiceException
+	 */
 	public boolean createDatabase(CubridServiceInstance serviceInstance) throws CubridServiceException{
 		// database name
 		String databaseName = serviceInstance.getDatabaseName();
@@ -297,6 +360,16 @@ public class CubridAdminService {
 		return "0".equals(rs.get("exitStatus").get(0)) ? true : false;
 	}
 
+	
+	/**
+	 * 특정 database에 사용자를 추가.
+	 * ssh 이용.
+	 * 
+	 * @param database
+	 * @param userId
+	 * @param password
+	 * @throws CubridServiceException
+	 */
 	public void createUser(String database, String userId, String password) throws CubridServiceException{
 		//1. create query 'create user ... '
 		String q = "CREATE USER " + userId + " PASSWORD '" + password + "'" + "GROUPS DBA";
@@ -307,6 +380,14 @@ public class CubridAdminService {
 		jsch.shell(command);
 	}
 
+	/**
+	 * 특정 database에서 사용자를 삭제
+	 * 
+	 * 
+	 * @param database
+	 * @param username
+	 * @throws CubridServiceException
+	 */
 	public void deleteUser(String database, String username) throws CubridServiceException{
 		//1. create query 'drop user .... '
 		String q = "DROP USER " + username;
@@ -318,6 +399,15 @@ public class CubridAdminService {
 
 	}
 
+	
+	/**
+	 * connection uri 생성
+	 * 
+	 * @param database
+	 * @param username
+	 * @param password
+	 * @return
+	 */
 	public String getConnectionString(String database, String username, String password) {
 		StringBuilder builder = new StringBuilder();
 
@@ -351,6 +441,7 @@ public class CubridAdminService {
 		return new CubridServiceException(e.getLocalizedMessage());
 	}
 	
+	/*
 	public List<String> getDBList() {
 		String command = "cm_admin listdb";
 		Map<String, List<String>> resultMap = jsch.shell(command);
@@ -366,6 +457,6 @@ public class CubridAdminService {
 		}
 
 		return listDBName;
-	}
+	}*/
 
 }

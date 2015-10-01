@@ -1,6 +1,5 @@
 package org.openpaas.servicebroker.util;
 
-
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -15,6 +14,12 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
+/**
+ * ssh접속을 위한 Util 클래스.
+ * 
+ * @author Cho Mingu
+ *
+ */
 public class JSchUtil {
 	private String hostname;
 	private String username;
