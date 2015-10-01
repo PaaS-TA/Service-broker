@@ -20,11 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Mysql impl to manage service instances.  Creating a service does the following:
- * creates a new database,
- * saves the ServiceInstance info to the Mysql repository.
+ * 서비스 인스턴스 서비스가 제공해야하는 메소드를 정의한 인터페이스 클래스인 ServiceInstance를 상속하여
+ *  Mysql 서비스 인스턴스 서비스 관련 메소드를 구현한 클래스. 
+ *  서비스 인스턴스 생성/삭제/수정/조회 를 구현한다.
  *  
- * @author kkanzo@bluedigm.com
+ * @author 김한종
  *
  */
 @Service

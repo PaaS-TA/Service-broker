@@ -13,10 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * An implementation of the CatalogService that gets the catalog injected (ie configure 
- * in spring config)
+ * Catalog 서비스가 제공해야하는 메소드를 정의한 클래스
  * 
- * @author sgreenberg@gopivotal.com
+ * @author 김한종
  *
  */
 @Service

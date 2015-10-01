@@ -4,11 +4,9 @@ import org.openpaas.servicebroker.exception.ServiceBrokerException;
 
 
 /**
- * Exception thrown when issues with the underlying mongo service occur.
- * NOTE: com.mongodb.MongoException is a runtime exception and therefore we 
- * want to have to handle the issue.
+ * Mysql 서비스 관련 에러 Exception클래스 
  * 
- * @author sgreenberg@gopivotal.com
+ * @author 김한종
  *
  */
 public class MysqlServiceException extends ServiceBrokerException {

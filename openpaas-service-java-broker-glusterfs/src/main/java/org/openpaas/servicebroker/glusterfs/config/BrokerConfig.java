@@ -9,9 +9,9 @@ import org.springframework.core.io.Resource;
 
 
 /** 
- * Force the base spring boot packages to be searched for dependencies.
+ * 기본 Spring boot packages의 component 검색한다.
  * 
- * @author sgreenberg
+ * @author 김한종
  *
  */
 

@@ -11,6 +11,12 @@ import org.openpaas.servicebroker.model.ServiceDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Spring boot 구동시 Catalog API 에서 사용하는 Catalog Bean 를 생성하는 클래스.
+ * 
+ * @author 김한종
+ *
+ */
 @Configuration
 public class CatalogConfig {
 	

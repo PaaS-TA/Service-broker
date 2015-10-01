@@ -23,9 +23,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 /**
- * Utility class for manipulating a Mysql database.
+ * Mysql 데이터베이스를 조작하기위한 유틸리티 클래스.
  * 
- * @author 
+ * @author 김한종
  *
  */
 @Service

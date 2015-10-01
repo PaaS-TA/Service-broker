@@ -19,11 +19,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 /**
- * Glusterfs impl to bind services.  Binding a service does the following:
- * creates a new user in the database (password is Ramdom String value),
- * saves the ServiceInstanceBinding info to the Glusterfs repository.
+ * 서비스 인스턴스 바인딩 관련 서비스가 제공해야하는 메소드를 정의한 인터페이스 클래스인 ServiceInstanceBindingService를 상속하여 
+ * Glusterfs 서비스 인스턴스 바인딩  관련 메소드를 구현한 클래스. 
+ * 서비스 인스턴스 바인드 생성/삭제/조회 를 구현한다.
  *  
- * @author kkanzo@bluedigm.com
+ * @author 김한종
  *
  */
 @PropertySource("classpath:glusterfs.properties")
