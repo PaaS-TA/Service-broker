@@ -24,9 +24,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * See: http://docs.cloudfoundry.com/docs/running/architecture/services/writing-service.html
+ * 서비스 인스턴스 관련 Provision/Undate Instance/Unprovision API 를 호출 받는 컨트롤러이다.
  * 
- * @author sgreenberg@gopivotal.com
+ * @author 송창학
+ * @date 2015.0629
  */
 @Controller
 public class ServiceInstanceController extends BaseController {

@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * Base controller.
+ * ExceptionHandler를 정의한 기본 컨트롤러이고 Catalog, ServiceInstance, ServiceInstanceBinding 컨트롤러는 이 클래스를 상속한다.
  * 
- * @author sgreenberg@gopivotal.com
- *
+ * @author 송창학
+ * @date 2015.0629
  */
 public class BaseController {
 

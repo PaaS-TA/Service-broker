@@ -1,11 +1,11 @@
 package org.openpaas.servicebroker.exception;
 
 /**
- * General exception for underlying broker errors (like connectivity to the service
- * being brokered).
+ * 서비스 브로커 GeneralException클래스 . Exception 클래스를 상속함.
  * 
- * @author sgreenberg@gopivotal.com
- *
+ * 
+ * @author 송창학
+ * @date 2015.0629
  */
 public class ServiceBrokerException extends Exception {
 

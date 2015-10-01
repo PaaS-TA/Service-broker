@@ -9,10 +9,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 
 /**
- * An instance of a ServiceDefinition.
+ * 서비스 인스턴스 정보를 가지고 있는 데이터 모델 bean 클래스. 
+ * Json 어노테이션을 사용해서 JSON 형태로 제공
  * 
- * @author sgreenberg@gopivotal.com
- *
+ * @author 송창학
+ * @date 2015.0629
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ServiceInstance {

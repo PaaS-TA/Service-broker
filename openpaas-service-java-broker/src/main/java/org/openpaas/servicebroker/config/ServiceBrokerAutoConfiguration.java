@@ -8,7 +8,12 @@ import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-
+/**
+ * 서비스 브로커 Auto Configuration 을 설정하는 클래스 (spring boot autoconfigure 사용)
+ * 
+ * @author 송창학
+ * @date 2015.0629
+ */
 @Configuration
 @ComponentScan(basePackages = {"org.openpaas.servicebroker"})
 @ConditionalOnWebApplication

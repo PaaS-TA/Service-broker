@@ -14,6 +14,13 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.JstlView;
 
+/**
+ * Spring 의 WebMvcConfigurerAdapter 클래스를 상속한 클래스.
+ * BrokerApiVersionInterceptor interceptor 를 add 한다. 
+ * 
+ * @author 송창학
+ * @date 2015.0629
+ */
 @Configuration
 @EnableWebMvc
 public class BrokerApiVersionConfig extends WebMvcConfigurerAdapter {

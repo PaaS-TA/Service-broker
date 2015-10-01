@@ -1,8 +1,10 @@
 package org.openpaas.servicebroker.exception;
 
 /**
- * May be thrown if the particular plan change requested is not supported or if the request 
- * can not currently be fulfilled due to the state of the instance
+ * 서비스 인스턴스 Plan 변경 기능이 제공되지 않을 때의 Exception클래스 . Exception 클래스를 상속함.
+ * 
+ * @author 송창학
+ * @date 2015.0629
  */
 public class ServiceInstanceUpdateNotSupportedException extends Exception {
 

@@ -7,9 +7,10 @@ import org.openpaas.servicebroker.model.DeleteServiceInstanceBindingRequest;
 import org.openpaas.servicebroker.model.ServiceInstanceBinding;
 
 /**
- * Handles bindings to service instances.
+ * 서비스 인스턴스 바인딩 관련 서비스가 제공해야하는 메소드를 정의한 인터페이스 클래스
  * 
- * @author sgreenberg@gopivotal.com
+ * @author 송창학
+ * @date 2015.0629
  */
 public interface ServiceInstanceBindingService {
 

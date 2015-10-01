@@ -12,9 +12,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * See: Source: http://docs.cloudfoundry.com/docs/running/architecture/services/writing-service.html
+ * Catalog API 를 호출 받는 컨트롤러이다.
  * 
- * @author sgreenberg@gopivotal.com
+ * @author 송창학
+ * @date 2015.0629
  */
 @Controller
 public class CatalogController extends BaseController {

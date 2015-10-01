@@ -1,10 +1,11 @@
 package org.openpaas.servicebroker.exception;
 
 /**
- * Exception denoting an unknown ServiceDefintion
+ * ServiceDefinition 정보가 존재하지 않을 경우Exception클래스 . 
+ * Exception 클래스를 상속함.
  * 
- * @author sgreenberg@gopivotal.com
- *
+ * @author 송창학
+ * @date 2015.0629
  */
 public class ServiceDefinitionDoesNotExistException extends Exception {
 	

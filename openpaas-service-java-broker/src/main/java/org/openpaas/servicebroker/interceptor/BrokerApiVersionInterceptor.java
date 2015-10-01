@@ -7,6 +7,13 @@ import org.openpaas.servicebroker.exception.ServiceBrokerApiVersionException;
 import org.openpaas.servicebroker.model.BrokerApiVersion;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+/**
+ * 서비스 브로커 버전 체크 하는 interceptor 클래스 . 
+ * spring 의 HandlerInterceptorAdapter 클래스를 상속함.
+ * 
+ * @author 송창학
+ * @date 2015.0629
+ */
 public class BrokerApiVersionInterceptor extends HandlerInterceptorAdapter {
 
 	private final BrokerApiVersion version;

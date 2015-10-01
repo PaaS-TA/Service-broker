@@ -1,9 +1,11 @@
 package org.openpaas.servicebroker.model;
 
 /**
- * A request sent by the cloud controller to remove a service.
- * @author krujos
- *
+ * 서비스 인스턴스를 삭제 할 때 필요한 Request 정보를 가지고 있는 데이터 모델 bean 클래스. 
+ * Json 어노테이션을 사용해서 JSON 형태로 제공
+ * 
+ * @author 송창학
+ * @date 2015.0629
  */
 public class DeleteServiceInstanceRequest {
 

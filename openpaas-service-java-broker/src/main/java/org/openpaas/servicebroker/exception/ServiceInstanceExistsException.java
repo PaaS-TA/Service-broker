@@ -4,10 +4,11 @@ import org.openpaas.servicebroker.model.ServiceInstance;
 
 
 /**
- * Thrown when a duplicate service instance creation request is
- * received.
+ * id 에 해당하는 서비스 인스턴스가  존재하는 경우Exception클래스 . Exception 클래스를 상속함.
  * 
- * @author sgreenberg@gopivotal.com
+ * 
+ * @author 송창학
+ * @date 2015.0629
  */
 public class ServiceInstanceExistsException extends Exception {
 
