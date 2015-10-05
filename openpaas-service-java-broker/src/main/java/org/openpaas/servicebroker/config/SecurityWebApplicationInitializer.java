@@ -7,7 +7,8 @@ import org.springframework.security.web.context.*;
 
 /**
  * 
- * @author Johannes Hiemer.
+ * @author 송창학
+ * @date 2015.06.29
  *
  */
 public class SecurityWebApplicationInitializer
