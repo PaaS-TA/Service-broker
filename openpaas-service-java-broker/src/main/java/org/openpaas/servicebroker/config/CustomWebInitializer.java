@@ -13,7 +13,8 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
 
 /**
  * 
- * @author Johannes Hiemer.
+ * @author 송창학
+ * @date 2015.06.29
  * 
  */
 public class CustomWebInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
