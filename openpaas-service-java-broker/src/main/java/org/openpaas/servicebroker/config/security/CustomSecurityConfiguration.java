@@ -11,7 +11,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
- * @author Johannes Hiemer, cloudscale.
+ * @author 송창학
+ * @date 2015.06.29
  * 
  */
 @Configuration
