@@ -74,8 +74,14 @@ public class MongoServiceInstanceBindingService implements ServiceInstanceBindin
 		mongo.createUser(database, username, password);
 		
 		Map<String,Object> credentials = new HashMap<String,Object>();
-		credentials.put("uri", mongo.getConnectionString(database, username, password));
+		MongoClientURI uri = new MongoClientURI(mongo.getConnectionString(database, username, password));
 		
+		credentials.put("uri", uri.getURI());
+		credentials.put("name", uri.getDatabase());
+		credentials.put("hosts", uri.getHosts());
+		credentials.put("username", uri.getUsername());
+		credentials.put("password", new String(uri.getPassword()));
+	
 		binding = new ServiceInstanceBinding(request.getBindingId(), request.getServiceInstanceId(), credentials, null, request.getAppGuid());
 		repository.save(binding);
 		
