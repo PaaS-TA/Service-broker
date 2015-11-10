@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.mongodb.MongoClientURI;
+
 /**
  * Mongo impl to bind services.  Binding a service does the following:
  * creates a new user in the database (currently uses a default pwd of "password"),
