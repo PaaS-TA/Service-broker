@@ -92,6 +92,7 @@ public class GlusterfsServiceInstanceBindingService implements ServiceInstanceBi
 		// 반환될 credentials 정보를 생성합니다.
 		Map<String,Object> credentials = new HashMap<String,Object>();
 		credentials.put("tenantname", gf.getTenantName());
+		//credentials.put("provider", "openstack-swift");
 		credentials.put("provider", "swift-keystone");
 		credentials.put("username", username);
 		credentials.put("password", password);
