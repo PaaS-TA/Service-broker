@@ -87,15 +87,19 @@ public class CubridServiceInstanceBindingService implements ServiceInstanceBindi
 		} while(cubridAdminService.isExistsUser(database, username));
 		
 		cubridAdminService.createUser(database, username, password);
+
+		String[] host = cubridAdminService.getServerAddresses().split(":");
 		
 		Map<String,Object> credentials = new HashMap<String,Object>();
 		credentials.put("uri", cubridAdminService.getConnectionString(database, username, password));
+		credentials.put("jdbcurl", "jdbc:" + cubridAdminService.getConnectionString(database, username, password));
 		credentials.put("username", username);
 		credentials.put("password", password);
 		credentials.put("name", database);
 		credentials.put("host", cubridAdminService.getServerAddresses());
-		credentials.put("hostname", cubridAdminService.getServerAddresses().split(":")[0]);
-		credentials.put("port", cubridAdminService.getServerAddresses().split(":")[1]);
+		credentials.put("hostname", host[0]);
+		if ( host.length == 1) credentials.put("port", "");
+		else credentials.put("port", host[1]);
 	
 		binding = new CubridServiceInstanceBinding(request.getBindingId(), instance.getServiceInstanceId(), credentials, null, request.getAppGuid());
 		binding.setDatabaseUserName(username);

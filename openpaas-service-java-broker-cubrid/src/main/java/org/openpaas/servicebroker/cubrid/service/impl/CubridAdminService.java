@@ -411,7 +411,7 @@ public class CubridAdminService {
 	public String getConnectionString(String database, String username, String password) {
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("jdbc:cubrid:");
+		builder.append("cubrid:");
 		builder.append(getServerAddresses());
 		builder.append(database);
 		builder.append(":");
