@@ -1,7 +1,7 @@
 package org.openpaas.servicebroker.apiplatform.service.impl;
 
 import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
-import org.openpaas.servicebroker.common.HttpClientUtils;
+import org.openpaas.servicebroker.apiplatform.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.slf4j.Logger;

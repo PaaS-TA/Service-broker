@@ -7,7 +7,7 @@ import org.openpaas.servicebroker.apiplatform.dao.APIServiceInstanceDAO;
 import org.openpaas.servicebroker.apiplatform.exception.APIServiceInstanceException;
 import org.openpaas.servicebroker.apiplatform.model.APIServiceInstance;
 import org.openpaas.servicebroker.apiplatform.model.APIUser;
-import org.openpaas.servicebroker.common.HttpClientUtils;
+import org.openpaas.servicebroker.apiplatform.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.exception.ServiceInstanceDoesNotExistException;

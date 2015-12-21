@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.openpaas.servicebroker.apiplatform.common.ApiPlatformUtils;
 import org.openpaas.servicebroker.apiplatform.common.StringUtils;
-import org.openpaas.servicebroker.common.HttpClientUtils;
+import org.openpaas.servicebroker.apiplatform.common.HttpClientUtils;
 import org.openpaas.servicebroker.common.JsonUtils;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.exception.ServiceDefinitionDoesNotExistException;
@@ -28,11 +28,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-
-
-
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
