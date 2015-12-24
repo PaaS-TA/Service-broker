@@ -332,12 +332,14 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 				
 				
 				JsonNode operations = api.get("operations");
+				String path = api.get("path").asText();
 				for(JsonNode method : operations)
 				{	
 					JsonNode parameters = method.get("parameters");
 					List<JsonNode> parameterList = new ArrayList<JsonNode>();
 					Map<String, Object> methodMap = new LinkedHashMap<String, Object>();
 					methodMap.put("method", method.get("method").asText());
+					methodMap.put("path",path);
 //					Map<String, JsonNode> parameterMap = new LinkedHashMap<String, JsonNode>();
 					
 					for(JsonNode parameter : parameters)
