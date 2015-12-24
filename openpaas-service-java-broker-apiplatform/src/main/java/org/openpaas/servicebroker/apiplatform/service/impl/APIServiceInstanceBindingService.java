@@ -165,7 +165,7 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 				
 				prodConsumerKey = application.get("prodConsumerKey").asText();
 				prodConsumerSecret = application.get("prodConsumerSecret").asText();
-				pordKey = application.get("prodKey").asText();
+				prodKey = application.get("prodKey").asText();
 				
 				sandConsumerKey = application.get("sandboxConsumerKey").asText();
 				sandConsumerSecret = application.get("sandboxConsumerSecret").asText();
