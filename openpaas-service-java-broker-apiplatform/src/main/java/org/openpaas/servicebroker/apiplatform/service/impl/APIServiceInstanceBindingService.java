@@ -132,7 +132,7 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		
 		String prodConsumerKey = null;
 		String prodConsumerSecret = null;
-		String porKey = null;
+		String prodKey = null;
 		
 		String sandConsumerKey = null;
 		String sandConsumerSecret = null;
