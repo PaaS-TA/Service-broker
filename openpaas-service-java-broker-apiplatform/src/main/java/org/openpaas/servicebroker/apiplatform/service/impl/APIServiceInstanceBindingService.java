@@ -132,8 +132,11 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		
 		String prodConsumerKey = null;
 		String prodConsumerSecret = null;
+		String porKey = null;
+		
 		String sandConsumerKey = null;
 		String sandConsumerSecret = null;
+		String sandKey = null;
 		
 		String listApplicationsUri = env.getProperty("APIPlatformServer")+":"+env.getProperty("APIPlatformPort")+env.getProperty("URI.ListSubscriptions");
 		String listApplicationsParameters = "action=getAllSubscriptions";		
@@ -159,10 +162,14 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 				applicationExists = true;
 				//어플리케이션의 키값들을 변수에 담는다.
 				logger.debug("Application Exists. Application Name : "+serviceInstanceId);
+				
 				prodConsumerKey = application.get("prodConsumerKey").asText();
 				prodConsumerSecret = application.get("prodConsumerSecret").asText();
+				pordKey = application.get("prodKey").asText();
+				
 				sandConsumerKey = application.get("sandboxConsumerKey").asText();
 				sandConsumerSecret = application.get("sandboxConsumerSecret").asText();
+				sandKey = application.get("sandboxKey").asText();
 				break;
 			}
 		}
@@ -365,8 +372,10 @@ public class APIServiceInstanceBindingService implements ServiceInstanceBindingS
 		credentials.put("database","");
 		credentials.put("prodConsumerKey", prodConsumerKey);
 		credentials.put("prodConsumerSecret", prodConsumerSecret);
+		credentials.put("prodAccessToken", prodKey);
 		credentials.put("sandConsumerKey", sandConsumerKey);
 		credentials.put("sandConsumerSecret", sandConsumerSecret);
+		credentials.put("sandAccessToken", sandKey);
 		credentials.put("resources", resourceMapList);
 
 		
