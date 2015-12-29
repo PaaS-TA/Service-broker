@@ -44,8 +44,7 @@ public class CubridConfig {
 		
 		JSchUtil jsch = new JSchUtil(serverUser, serverHost, serverPort);
 		
-		if( !"".equals(serverSudoPassword) && serverSudoPassword != null) jsch.setHostname(serverSudoPassword);
-		
+		if( !"".equals(serverSudoPassword) && serverSudoPassword != null) jsch.setSudoPassword(serverSudoPassword);
 		if( !"".equals(serverIdentity) && serverIdentity != null) jsch.setIdentity(serverIdentity);
 		else jsch.setPassword(serverPassword);
 		

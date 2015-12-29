@@ -1,6 +1,9 @@
 package org.openpaas.servicebroker.util;
 
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
@@ -77,7 +81,7 @@ public class JSchUtil {
 	public void setSudoPassword(String sudoPassword) {
 		this.sudoPassword = sudoPassword;
 	}
-	
+
 	public int getPort() {
 		return port;
 	}
@@ -100,7 +104,7 @@ public class JSchUtil {
 			jsch.addIdentity(identity);
 			//jsch.setKnownHosts(new ByteArrayInputStream(hostname.getBytes()));
 		}
-		
+
 		Session session=jsch.getSession(username, hostname, port);
 		session.setConfig("StrictHostKeyChecking", "no");
 		if (password!=null)	session.setPassword(password);
@@ -110,7 +114,7 @@ public class JSchUtil {
 	public Map<String, List<String>> shell(String command){
 		List<String> commands = new ArrayList<String>();
 		commands.add(command);
-		
+
 		return shell(commands);
 	}/*
 	public void exec(List<String> commands){
@@ -120,72 +124,129 @@ public class JSchUtil {
 
 
 	public Map<String, List<String>> shell(List<String> commands) {
-		
+
 		int exitStatus = 1;
-		
+
 		commands.add("exit");
 		
 		StringBuilder sb = new StringBuilder();
-		
+
 		try{
 			Session session = getSession();
 			session.connect();
-			ChannelShell channel = (ChannelShell)session.openChannel("shell");//only shell
-			channel.setPtyType("vt102");
-	        //channel.setOutputStream(System.out); 
-	        PrintStream shellStream = new PrintStream(channel.getOutputStream());  // printStream for convenience 
-	        channel.connect(); 
-	        
-	        for(String command: commands) {
-	        	
-	            shellStream.print(command+"\n"); 
-	            shellStream.flush();
-	        }
-	        
-	        InputStream in = null;
-            in = channel.getInputStream();
-            channel.connect();
- 
-            byte[] tmp = new byte[1024];
-            while (true) {
-            	
-                while (in.available() > 0) {
-                    int i = in.read(tmp);
-                    if (i < 0)
-                        break;
-                    sb.append(new String(tmp, 0, i));
-                    if (isDebugMode) System.out.print(new String(tmp, 0, i));
-                }
+			Channel channel = session.openChannel("shell");//only shell
+			//channel.setPtyType("vt102");
 
-                if (channel.isClosed()) {
-                    if (in.available() > 0)
-                        continue;
-                    if (isDebugMode) System.out.println("exit-status: " + channel.getExitStatus());
-                    
-                    exitStatus = channel.getExitStatus();
-                    break;
-                }
-                 
-                try {Thread.sleep(1000);}
-                catch (Exception ee) { }
-            }
-            in.close();
-	        
+
+
+			// create the IO streams to send input to remote session.
+			PipedOutputStream commandIO = new PipedOutputStream();
+			InputStream sessionInput = new PipedInputStream(commandIO);
+			// this set's the InputStream the remote server will read from.
+			channel.setInputStream(sessionInput);
+
+			//PrintStream shellStream = new PrintStream(channel.getOutputStream());  // printStream for convenience 
+			// this will have the STDOUT from server.
+			InputStream sessionOutput = channel.getInputStream();
+
+			// this will have the STDERR from server
+			InputStream sessionError = channel.getExtInputStream();
+
+			channel.connect();
+
+			byte[] tmp = new byte[1024];
+			String stdOut = "";
+			String stdErr = "";
+
+			int i;
+
+			if (this.sudoPassword != null) {
+				commands.add("exit");
+				
+				commandIO.write(("su -\n").getBytes());
+				commandIO.flush();
+	
+	
+				while (true) {
+					if (sessionError.available() > 0) {
+						i = sessionError.read(tmp, 0, tmp.length);
+						if (i < 0) {
+							System.err.println("input stream closed earlier than expected");
+							System.exit(1);
+						}
+						stdErr += new String(tmp, 0, i);
+						if (isDebugMode) System.out.print(stdErr);
+					}
+	
+					if (sessionOutput.available() > 0) {
+						i = sessionOutput.read(tmp, 0, tmp.length);
+						if (i < 0) {
+							System.err.println("input stream closed earlier than expected");
+							System.exit(1);
+						}
+						stdOut += new String(tmp, 0, i);
+						if (isDebugMode) System.out.print(stdOut);
+					}
+	
+					if (stdOut.contains("assword")) {
+						break;
+					}
+	
+					Thread.sleep(1000);
+				}
+	
+				commandIO.write((this.sudoPassword+"\n").getBytes());
+				commandIO.flush();
+
+			}
+			
+			for(String command: commands) {
+
+				commandIO.write((command+"\n").getBytes()); 
+				commandIO.flush();
+			}
+
+
+			while (true) {
+
+				while (sessionOutput.available() > 0) {
+					i = sessionOutput.read(tmp);
+					if (i < 0)
+						break;
+					sb.append(new String(tmp, 0, i));
+					stdOut = new String(tmp, 0, i);
+					if (isDebugMode) System.out.print(stdOut);
+				}
+
+				if (channel.isClosed()) {
+					if (sessionOutput.available() > 0)
+						continue;
+					if (isDebugMode) System.out.println("exit-status: " + channel.getExitStatus());
+
+					exitStatus = channel.getExitStatus();
+					break;
+				}
+
+				try {Thread.sleep(1000);}
+				catch (Exception ee) { }
+			}
+			sessionOutput.close();
+
 			channel.disconnect();
 			session.disconnect();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
+
 		return getResults(commands, sb.toString().split("\n"), exitStatus);
 	}
-	
+
 	public List<String> exec(String command) {
 		List<String> ret = new ArrayList<String>();
 		try{
 			Session session = getSession();
 			session.connect();
-			
+
 			ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
 			channelExec.setPty(true);
 			if (isDebugMode) System.out.println("command : "+command);
@@ -206,20 +267,20 @@ public class JSchUtil {
 			if (isDebugMode) System.out.println("\nerr : "+err.toString());
 			ret.add(output);
 			channelExec.disconnect();
-		
+
 			session.disconnect();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
+
 		return ret;
-		
+
 	}
-	
+
 	public Map<String, List<String>> getResults(List<String> commands, String[] results, int exitStatus) {
 		Map<String, List<String>> rsMap = new HashMap<String, List<String>>();
 		List<String> rsList = null;
-		
+
 		int i = 0;
 		int j = 0;
 		boolean commandStart = false;
@@ -233,21 +294,21 @@ public class JSchUtil {
 					if (j != 0) {
 						rsMap.put(commands.get(j-1), rsList);
 					}
-					
+
 					if (j >= commands.size()-1) break;
-					
+
 					j++;
 					rsList = new ArrayList<String>();					
 				} else if ( rsList != null) {
 					rsList.add(results[i]);
 				}
 			}
-			
+
 			i++;
 		}
-		
+
 		rsMap.put("exitStatus", Arrays.asList(""+exitStatus));
-		
+
 		return rsMap;
 	}
 
