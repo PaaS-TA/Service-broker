@@ -36,12 +36,18 @@ public class CubridConfig {
 		
 		// serverPassword, serverIdentity. Only one of the two
 		String serverPassword = env.getRequiredProperty("cubrid.server.password");
-		//String serverIdentity = env.getRequiredProperty("cubrid.server.identity");
+		String serverIdentity = env.getRequiredProperty("cubrid.server.identity");
+		String serverSudoPassword = env.getRequiredProperty("cubrid.server.sudo.password");
+		
+		System.out.println(">> ENV: ");
+		System.out.println(env);
 		
 		JSchUtil jsch = new JSchUtil(serverUser, serverHost, serverPort);
 		
-		if( !"".equals(serverPassword) && serverPassword != null) jsch.setPassword(serverPassword);
-		//if( !"".equals(serverIdentity) && serverIdentity != null) jsch.setIdentity(serverIdentity);
+		if( !"".equals(serverSudoPassword) && serverSudoPassword != null) jsch.setHostname(serverSudoPassword);
+		
+		if( !"".equals(serverIdentity) && serverIdentity != null) jsch.setIdentity(serverIdentity);
+		else jsch.setPassword(serverPassword);
 		
 		return jsch;
 	}

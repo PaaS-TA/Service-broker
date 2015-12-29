@@ -25,6 +25,7 @@ public class JSchUtil {
 	private String username;
 	private String identity=null;
 	private String password=null;
+	private String sudoPassword=null;
 	private boolean isDebugMode=false;
 	private int port;
 
@@ -69,6 +70,14 @@ public class JSchUtil {
 		this.identity=null;
 	}
 
+	public String getSudoPassword() {
+		return sudoPassword;
+	}
+
+	public void setSudoPassword(String sudoPassword) {
+		this.sudoPassword = sudoPassword;
+	}
+	
 	public int getPort() {
 		return port;
 	}
@@ -241,5 +250,6 @@ public class JSchUtil {
 		
 		return rsMap;
 	}
+
 
 }

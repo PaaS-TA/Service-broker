@@ -41,12 +41,16 @@ public class CubridAdminService {
 	private JdbcTemplate jdbcTemplate;
 
 	private Map<String, Object> plans = null;
+	
+	private String sudoCommand = "";
 
 	@Autowired
 	public CubridAdminService(JSchUtil jsch, JdbcTemplate jdbcTemplate) {
 		this.jsch = jsch;
 		this.jdbcTemplate = jdbcTemplate;
-
+		
+		this.sudoCommand = "echo '" + jsch.getSudoPassword() + "' | sudo -S -p '' ";
+		
 		this.plans = new HashMap<String, Object>();
 		Map<String, String> plan = new HashMap<String, String>();
 
@@ -289,7 +293,7 @@ public class CubridAdminService {
 	 */
 	public void addVolume(String databaseName) throws CubridServiceException{
 		
-		String command = "cubrid addvoldb -p data --db-volume-size=100MB " + databaseName;
+		String command = sudoCommand + "cubrid addvoldb -p data --db-volume-size=100MB " + databaseName;
 		jsch.shell(command);
 
 	}
@@ -309,11 +313,11 @@ public class CubridAdminService {
 
 		//1. create shell command(s)
 		//1-1. stop database server
-		commands.add("cubrid server stop " + databaseName);
+		commands.add(sudoCommand + "cubrid server stop " + databaseName);
 		//1-2. delete database
-		commands.add("cubrid deletedb " + databaseName);
+		commands.add(sudoCommand + "cubrid deletedb " + databaseName);
 		//1-3. remove database directory
-		commands.add("rm -rf " + filePath);
+		commands.add(sudoCommand + "rm -rf " + filePath);
 
 		//1. execute command(s)
 		jsch.shell(commands);
@@ -343,15 +347,15 @@ public class CubridAdminService {
 
 		//1. create shell command(s)
 		//1-1. create directory for database
-		commands.add("mkdir -p " + filePath);
+		commands.add(sudoCommand + "mkdir -p " + filePath);
 		//1-2. create database
-		commands.add("cubrid createdb "
+		commands.add(sudoCommand + "cubrid createdb "
 				+ "--db-volume-size="+plan.get("vol")+" "
 				+ "--log-volume-size=100M "
 				+ "--file-path="+filePath+" "
 				+ databaseName+" "+plan.get("charset"));
 		//1-3. start database server
-		commands.add("cubrid server start " + databaseName);
+		commands.add(sudoCommand + "cubrid server start " + databaseName);
 
 		//2. execute command(s)
 		//return ==> map key: command, val: result
@@ -374,7 +378,7 @@ public class CubridAdminService {
 		//1. create query 'create user ... '
 		String q = "CREATE USER " + userId + " PASSWORD '" + password + "'" + "GROUPS DBA";
 		//2. create shell command
-		String command = "csql -c \""+q+"\" " + database + " -u dba";
+		String command = sudoCommand + "csql -c \""+q+"\" " + database + " -u dba";
 
 		//3. execute command(s)
 		jsch.shell(command);
@@ -392,7 +396,7 @@ public class CubridAdminService {
 		//1. create query 'drop user .... '
 		String q = "DROP USER " + username;
 		//2. create shell command
-		String command = "csql -c \""+q+"\" " + database + " -u dba";
+		String command = sudoCommand + "csql -c \""+q+"\" " + database + " -u dba";
 
 		//3. execute command(s)
 		jsch.shell(command);
