@@ -27,6 +27,6 @@ public class ServiceBrokerAutoConfiguration {
 		//example
 		//"2.5"
 		//"2.5, 2.6, 2.7"
-		return new BrokerApiVersion("2.5, 2.6, 2.8");
+		return new BrokerApiVersion("2.5, 2.7, 2.6, 2.8");
 	}
 }
