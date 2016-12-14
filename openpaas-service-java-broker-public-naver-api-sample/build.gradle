@@ -14,6 +14,9 @@ apply plugin: 'idea'
 apply plugin: 'spring-boot'
 apply plugin: 'war'
 
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
 ext {
   springBootVersion = '1.3.0.BUILD-SNAPSHOT'
   baseName = 'openpaas-service-java-broker-public-naver-api-sample'
