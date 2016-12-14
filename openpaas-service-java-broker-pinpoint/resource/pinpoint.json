@@ -1,0 +1,17 @@
+{
+  "instance_id":["pinpopintinstance_id","pinpopintinstance_id2"],
+  "binding_id": [
+   [{"instance_id": "pinpopintinstance_id"},
+    {"binding_id": "binding_id1"},
+    {"instance_url": "http://115.68.46.185:8080/#/main"},
+    {"agent_id": ""},
+    {"application_name": ""}]
+  ,
+  [ {"instance_id": "pinpopintinstance_id2"},
+    {"binding_id": "binding_id2"},
+    {"instance_url": "http://115.68.46.185:8080/#/main"},
+    {"agent_id": ""},
+    {"application_name": ""}
+  ]]
+}
+

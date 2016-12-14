@@ -1,0 +1,9 @@
+[
+  {
+    "dashboard_url": "http://127.0.0.1:8080/#/main",
+    "collector_ips": ["192.0.0.1","192.0.0.2"],
+    "collector_span_port": "29996",
+    "collector_stat_port": "29995",
+    "collector_tcp_port": "29994"
+  }
+]

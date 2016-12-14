@@ -1,0 +1,34 @@
+
+ curl http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id -d '
+ {
+  "plan_id":      "plan-guid-here",
+  "service_id":   "service-guid-here",
+  "bind_resource":     {
+    "route": "route-url-here"
+  },
+  "parameters":        {
+    "parameter1-name-here": 1,
+    "parameter2-name-here": "parameter2-value-here"
+  }
+}
+' -X PUT
+
+
+{
+  "service_id":        "801bd048-c570-4629-8539-301e68fe0611",
+  "plan_id":           "pinpoint_plan",
+  "organization_guid": "org-guid-here",
+  "space_guid":        "space-guid-here"
+}
+$ curl http://username:password@broker-url/v2/service_instances/:instance_id/service_bindings/:binding_id -d '{
+  "plan_id":      "plan-guid-here",
+  "service_id":   "service-guid-here",
+  "app_guid":     "app-guid-here",
+  "bind_resource":     {
+    "app_guid": "app-guid-here"
+  },
+  "parameters":        {
+    "parameter1-name-here": 1,
+    "parameter2-name-here": "parameter2-value-here"
+  }
+}' -X PUT

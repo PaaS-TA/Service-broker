@@ -1,0 +1,6 @@
+---
+applications:
+- name: pinpoint-broker-test1
+  memory: 512M
+  instances: 1
+  path: build/libs/openpaas-service-java-broker-pinpoint.jar
