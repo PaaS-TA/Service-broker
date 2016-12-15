@@ -66,6 +66,22 @@ public class BrokerApiVersionInterceptorTest {
 		verify(brokerApiVersion, atLeastOnce()).getApiVersions();
 	}
 
+	@Test
+	public void versionsMatch_version_x() throws IOException, ServletException, ServiceBrokerApiVersionException {
+		String header = "header";
+		String expectedVersion = "2.x";
+		String apiVersion = "2.111";
+		when(brokerApiVersion.getBrokerApiVersionHeader()).thenReturn(header);
+		when(brokerApiVersion.getApiVersions()).thenReturn(expectedVersion);
+		when(request.getHeader(header)).thenReturn(apiVersion);
+
+		BrokerApiVersionInterceptor interceptor = new BrokerApiVersionInterceptor(brokerApiVersion);
+		assertTrue(interceptor.preHandle(request, response, null));
+		verify(brokerApiVersion, atLeastOnce()).getApiVersions();
+	}
+
+
+
 	@Test(expected = ServiceBrokerApiVersionException.class)
 	public void versionMismatch() throws IOException, ServletException, ServiceBrokerApiVersionException {
 		String header = "header";
@@ -75,6 +91,21 @@ public class BrokerApiVersionInterceptorTest {
 		when(brokerApiVersion.getApiVersions()).thenReturn(version);
 		when(request.getHeader(header)).thenReturn(notVersion);
 		
+		BrokerApiVersionInterceptor interceptor = new BrokerApiVersionInterceptor(brokerApiVersion);
+		interceptor.preHandle(request, response, null);
+		verify(brokerApiVersion).getBrokerApiVersionHeader();
+		verify(brokerApiVersion).getApiVersions();
+	}
+
+	@Test(expected = ServiceBrokerApiVersionException.class)
+	public void versionMismatch_version_x() throws IOException, ServletException, ServiceBrokerApiVersionException {
+		String header = "header";
+		String version = "2.x, 3.x";
+		String notVersion = "4.5";
+		when(brokerApiVersion.getBrokerApiVersionHeader()).thenReturn(header);
+		when(brokerApiVersion.getApiVersions()).thenReturn(version);
+		when(request.getHeader(header)).thenReturn(notVersion);
+
 		BrokerApiVersionInterceptor interceptor = new BrokerApiVersionInterceptor(brokerApiVersion);
 		interceptor.preHandle(request, response, null);
 		verify(brokerApiVersion).getBrokerApiVersionHeader();

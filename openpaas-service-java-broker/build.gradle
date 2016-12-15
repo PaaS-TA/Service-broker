@@ -17,6 +17,9 @@ apply plugin: 'spring-boot'
 apply plugin: 'maven-publish'
 apply plugin: 'maven'
 
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
 //version = "2.4.1"
 //group = "org.cloudfoundry"
 //description = "Spring Boot project for creating Cloud Foundry service brokers"
