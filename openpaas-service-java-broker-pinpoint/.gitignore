@@ -1,3 +1,5 @@
+settings.gradle
+manifest.yml
 .gradle
 .idea
 build
