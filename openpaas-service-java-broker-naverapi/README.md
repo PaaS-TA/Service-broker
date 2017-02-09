@@ -4,7 +4,7 @@ Naver 개발자 센터에서 제공하는 OpenAPI를 OpenPaaS의 서비스로 �
 이 브로커는 클라우드 컨트롤러와 서비스 브로커 간의 v2 서비스 API를 보여줍니다.<br> 
 이 API는 클라우드 컨트롤러 API와 혼동되어서는 안됩니다.<br>
 
-사용자는 Naver 개발자 센터를 통해 API 사용 신청을 하고 인증키를 발급받습니다. 서비스 브로커 소스의 프로퍼티 파일('src/main/resources/application-mvc.properties')에 발급받은 인증키와 엔드포인트 등 API 정보를 입력하고 빌드합니다. 이를 OpenPaaS에 등록하면 Naver OpenAPI를 OpenPaaS의 다른 서비스와 동일한 형태로 사용이 가능합니다.<br>
+사용자는 Naver 개발자 센터를 통해 API 사용 신청을 하고 인증키를 발급받습니다. 서비스 브로커 소스의 프로퍼티 파일('src/main/resources/application-mvc.properties')에 발급받은 인증키와 엔드포인트 등 API 정보를 입력하고 빌드합니다. 빌드된 서비스 브로커 war파일을 구동하고 이 서비스 브로커를  OpenPaaS에 등록하면 Naver OpenAPI를 OpenPaaS의 다른 서비스와 동일한 형태로 사용이 가능합니다.<br>
 
 API 서비스 등록에 대한 상세한 설명은 [PublicAPI 개발 가이드](https://github.com/OpenPaaSRnD/Documents-PaaSTA-1.0/blob/master/Development-Guide/PublicAPI_devlope_guide.md) 문서의 [4.1 API 서비스 브로커 설정 파일](https://github.com/OpenPaaSRnD/Documents-PaaSTA-1.0/blob/master/Development-Guide/PublicAPI_devlope_guide.md#13)을 참고합니다.
 
