@@ -1,6 +1,6 @@
 # Open PaaS Service broker 
 
- Open Paas Service broker는 외부서비스를 CloudFoundry 서비스로 제공합니다.<br>
+ Open Paas Service broker는 외부서비스를 OpenPaas(CloudFoundry) 서비스로 제공합니다.<br>
  서비스 브로커는 클라우드 컨트롤러와 서비스 브로커간의 v2 서비스 API를 제공합니다.<br>
  서비스 브로커 API는 클라우드 컨트롤러 API와 혼동되어서는 안됩니다.<br>
  
