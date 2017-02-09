@@ -20,5 +20,5 @@ Open PaaS 서비스 자바 브로커 API는 OpenPaaS 마켓플레이스(독립�
 OpenPaaS플랫폼에서 OpenPaaS서비스 브로커 API를 통한 구현으로 마켓플레이스 플랫폼에대한 관리 규약을 통제할 수 있다.
 
 서비스브로커 아키텍쳐에 관련된 사항은 
-[서비스팩 개발 가이드](./Development-Guide/ServicePack_develope_guide.md)의 API 개발 가이드를 참고하시면 아키텍쳐와 기술, 구현과 개발에 대해 자세히 알 수 있습니다.
+[서비스팩 개발 가이드](https://github.com/OpenPaaSRnD/Documents-PaaSTA-1.0/blob/master/Development-Guide/ServicePack_develope_guide.md)의 API 개발 가이드를 참고하시면 아키텍쳐와 기술, 구현과 개발에 대해 자세히 알 수 있습니다.
  
