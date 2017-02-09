@@ -15,7 +15,7 @@
  - 자격 증명 제거 (바인딩 해제)
  - glusterfs 인스턴스 프로비저닝 해제 (삭제)
 
-[서비스팩 개발 가이드](./Development-Guide/ServicePack_develope_guide.md)의 API 개발 가이드를 참고하시면 아키텍쳐와 기술, 구현과 개발에 대해 자세히 알 수 있습니다.
+[서비스팩 개발 가이드](https://github.com/OpenPaaSRnD/Documents-PaaSTA-1.0/blob/master/Development-Guide/ServicePack_develope_guide.md)의 API 개발 가이드를 참고하시면 아키텍쳐와 기술, 구현과 개발에 대해 자세히 알 수 있습니다.
 #DB Schema
     CREATE DATABASE IF NOT EXISTS gfbroker;
     USE gfbroker;
