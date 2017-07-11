@@ -51,26 +51,42 @@ public class CatalogConfig {
 
 	private Map<String,Object> getPlanMetadata(String planType) {		
 		Map<String,Object> planMetadata = new HashMap<String,Object>();
-		planMetadata.put("costs", getCosts());
+		planMetadata.put("costs", getCosts(planType));
 		planMetadata.put("bullets", getBullets(planType));
 		return planMetadata;
 	}
 
-	private List<Map<String,Object>> getCosts() {
+	private List<Map<String,Object>> getCosts(String planType) {
 		Map<String,Object> costsMap = new HashMap<String,Object>();
-
 		Map<String,Object> amount = new HashMap<String,Object>();
-		amount.put("usd", new Double(500.0));
-
-		costsMap.put("amount", amount);
-		costsMap.put("unit", "YEARLY");
-
+				
+		if(planType.equals("A")) { // not used yet
+			amount.put("usd", new Double(0.0));
+			costsMap.put("amount", amount);
+			costsMap.put("unit", "MONTHLY");
+			
+		} else if(planType.equals("B")) {
+			amount.put("usd", new Double(500.0));
+			costsMap.put("amount", amount);
+			costsMap.put("unit", "YEARLY");
+			
+		} else {
+			amount.put("usd", new Double(500.0));
+			costsMap.put("amount", amount);
+			costsMap.put("unit", "YEARLY");
+		}	
+		
 		return Arrays.asList(costsMap);
 	}
 
 	private List<String> getBullets(String planType) {
-		return Arrays.asList("Shared AltibaseDB server", 
-				planType);
+		if(planType.equals("A")) { // not used yet
+			return Arrays.asList("Shared AltibaseDB server", "???");
+		} else if(planType.equals("B")) {
+			return Arrays.asList("Dedicated Altibase server", "64GB Memory");
+		} else {
+			return Arrays.asList("Dedicated Altibase server", "64GB Memory");
+		}
 	}
 
 	private List<Plan> getPlans() {
@@ -79,12 +95,12 @@ public class CatalogConfig {
 				new Plan("7e361c93-70ed-4eaa-8ab5-b1b53fe8a8f4",
 						"Altibase-Plan1-Shared-vm", 
 						"This is a Altibase plan. Shared-vm.",
-						getPlanMetadata("shared-vm"),
+						getPlanMetadata("A"),
 						true),*/
 				new Plan("5d8f7c3d-ce3d-4487-adbe-63aeab39cb5b",
 						"Altibase-Plan-Dedicated-vm", 
 						"This is an Altibase plan. Dedicated-vm.",
-						getPlanMetadata("dedicated-vm"),
+						getPlanMetadata("B"),
 						true));
 		
 		return plans;
