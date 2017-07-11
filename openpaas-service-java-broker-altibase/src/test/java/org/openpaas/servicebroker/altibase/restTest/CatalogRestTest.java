@@ -235,6 +235,9 @@ public class CatalogRestTest {
 		
 		assertTrue("Success", true);
 		
+		System.out.println("RESPONSE =====>");
+		System.out.println(response.toString());
+		
 		System.out.println("End - valid catalog");
 	}
 

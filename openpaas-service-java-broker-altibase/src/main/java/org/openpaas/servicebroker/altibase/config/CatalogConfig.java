@@ -101,7 +101,7 @@ public class CatalogConfig {
 						"Altibase-Plan-Dedicated-vm", 
 						"This is an Altibase plan. Dedicated-vm.",
 						getPlanMetadata("B"),
-						true));
+						false));
 		
 		return plans;
 	}
