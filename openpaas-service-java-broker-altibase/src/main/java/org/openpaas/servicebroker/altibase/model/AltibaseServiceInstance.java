@@ -10,13 +10,15 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 /**
  * An instance of a ServiceDefinition.
  * 
- * @author Cho Mingu
+ * @author Bethy
  *
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class AltibaseServiceInstance extends ServiceInstance{
 
-	private String databaseName;
+	private String mHost;
+	private String mPort;
+	private int mNodeId;
 	
 	/**
 	 * Create a ServiceInstance from a create request. If fields 
@@ -52,12 +54,27 @@ public class AltibaseServiceInstance extends ServiceInstance{
 		super(new CreateServiceInstanceRequest());
 	}
 
-	public String getDatabaseName() {
-		return databaseName;
+	public String getHost() {
+		return mHost;
 	}
 
-	public void setDatabaseName(String databaseName) {
-		this.databaseName = databaseName;
+	public void setHost(String aHost) {
+		this.mHost = aHost;
 	}
 	
+	public String getPort() {
+		return mPort;
+	}
+
+	public void setPort(String aPort) {
+		this.mPort = aPort;
+	}
+
+	public int getNodeId() {
+		return mNodeId;
+	}
+	
+	public void setNodeId(int aNodeId) {
+		mNodeId = aNodeId;
+	}
 }

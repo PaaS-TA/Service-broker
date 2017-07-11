@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
  * 서비스 인스턴스 바인딩 관련 서비스가 제공해야하는 메소드를 정의한 인터페이스 클래스인 ServiceInstanceBindingService를 상속하여
  * AltibaseDB 서비스 인스턴스 바인딩  관련 메소드를 구현한 클래스. 서비스 인스턴스 바인드 생성/삭제/조회 를 구현한다.
  *  
- * @author Cho Mingu
+ * @author Bethy
  *
  */
 @Service
@@ -77,7 +77,7 @@ public class AltibaseServiceInstanceBindingService implements ServiceInstanceBin
 		}
 		
 		AltibaseServiceInstance instance = altibaseAdminService.findById(request.getServiceInstanceId());
-		String database = instance.getDatabaseName();
+		String port = instance.getPort();
 		
 		// TODO Password Generator
 		String password = getPassword();
@@ -86,21 +86,29 @@ public class AltibaseServiceInstanceBindingService implements ServiceInstanceBin
 		// Username Generator (Unique)
 		do {
 			username = getUsername();
-		} while(altibaseAdminService.isExistsUser(database, username));
+		} while(altibaseAdminService.isExistsUser(username));
 		
-		altibaseAdminService.createUser(username, password);
-
 		String host = env.getRequiredProperty("jdbc.host");
-		String port = env.getRequiredProperty("jdbc.port");
+		String user = env.getRequiredProperty("jdbc.username");
+		String pwd = env.getRequiredProperty("jdbc.password");
+		String url = altibaseAdminService.getConnectionString(user, pwd, host, port);
 		
+		/* 새로운 사용자명이 존재하는지 검증합니다.*/
+		if (altibaseAdminService.isExistsUser(url, username)) {			
+			// 사용자 삭제시 특정 Databas의 사용자를 삭제하지 않아 아래와 같이 사용자 명으로 삭제 처리합니다.
+			altibaseAdminService.deleteUser(url, username);
+		}
+		
+		altibaseAdminService.createUser(url, username, password);
+		String bindUrl = altibaseAdminService.getConnectionString(username, password, host, port);
 		Map<String,Object> credentials = new HashMap<String,Object>();
-		credentials.put("uri", altibaseAdminService.getConnectionString(username, password, host, port));
-		credentials.put("jdbcurl", "jdbc:" + altibaseAdminService.getConnectionString(username, password, host, port));
+		credentials.put("uri", bindUrl);
+		credentials.put("jdbcurl", bindUrl);
 		credentials.put("hostname", host);
 		credentials.put("port", port);
 		credentials.put("username", username);
 		credentials.put("password", password);
-		credentials.put("name", database);
+		credentials.put("name", "mydb");
 	
 		binding = new ServiceInstanceBinding(request.getBindingId(),
 				instance.getServiceInstanceId(),
@@ -141,7 +149,13 @@ public class AltibaseServiceInstanceBindingService implements ServiceInstanceBin
 		
 		if (binding != null) {
 			AltibaseServiceInstance instance = altibaseAdminService.findById(binding.getServiceInstanceId());
-			altibaseAdminService.deleteUser(binding.getCredentials().get("username").toString());
+			
+			String host = env.getRequiredProperty("jdbc.host");
+			String username = env.getRequiredProperty("jdbc.username");
+			String password = env.getRequiredProperty("jdbc.password");	
+			String url = altibaseAdminService.getConnectionString(username, password, host, instance.getPort());
+			
+			altibaseAdminService.deleteUser(url, binding.getCredentials().get("username").toString());
 			altibaseAdminService.deleteBind(bindingId);
 		}
 		

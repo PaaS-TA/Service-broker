@@ -60,10 +60,10 @@ public class CatalogConfig {
 		Map<String,Object> costsMap = new HashMap<String,Object>();
 
 		Map<String,Object> amount = new HashMap<String,Object>();
-		amount.put("usd", new Double(0.0));
+		amount.put("usd", new Double(500.0));
 
 		costsMap.put("amount", amount);
-		costsMap.put("unit", "MONTHLY");
+		costsMap.put("unit", "YEARLY");
 
 		return Arrays.asList(costsMap);
 	}
@@ -75,17 +75,17 @@ public class CatalogConfig {
 
 	private List<Plan> getPlans() {
 		
-		List<Plan> plans = Arrays.asList(
-				new Plan("5d8f7c3d-ce3d-4487-adbe-63aeab39cb5b", 
+		List<Plan> plans = Arrays.asList(/*
+				new Plan("7e361c93-70ed-4eaa-8ab5-b1b53fe8a8f4",
 						"Altibase-Plan1-Shared-vm", 
 						"This is a Altibase plan. Shared-vm.",
 						getPlanMetadata("shared-vm"),
-						true)/*,
-				new Plan("7e361c93-70ed-4eaa-8ab5-b1b53fe8a8f4", 
-						"Altibase-Plan2-Dedicated-vm", 
-						"This is a Altibase plan. Dedicated-vm.",
+						true),*/
+				new Plan("5d8f7c3d-ce3d-4487-adbe-63aeab39cb5b",
+						"Altibase-Plan-Dedicated-vm", 
+						"This is an Altibase plan. Dedicated-vm.",
 						getPlanMetadata("dedicated-vm"),
-						true)*/);
+						true));
 		
 		return plans;
 	}

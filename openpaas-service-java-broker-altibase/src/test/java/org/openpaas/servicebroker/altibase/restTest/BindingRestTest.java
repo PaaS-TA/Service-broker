@@ -196,6 +196,9 @@ public class BindingRestTest {
 		}
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
+		
+//		System.out.println("=====> RESPONSE");
+//		System.out.println(response.toString());
 
 		System.out.println("End - binding");
 		

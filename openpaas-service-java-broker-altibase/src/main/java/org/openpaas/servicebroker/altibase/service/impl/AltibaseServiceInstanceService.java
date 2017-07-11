@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
  *  서비스 인스턴스 서비스가 제공해야하는 메소드를 정의한 인터페이스 클래스인 ServiceInstance를 상속하여
  *  AltibaseDB 서비스 인스턴스 서비스 관련 메소드를 구현한 클래스. 서비스 인스턴스 생성/삭제/수정/조회 를 구현한다.
  *  
- * @author Cho Mingu
+ * @author Bethy
  *
  */
 @Service
@@ -77,16 +77,10 @@ public class AltibaseServiceInstanceService implements ServiceInstanceService {
 		instance = new AltibaseServiceInstance();
 		instance.setServiceInstanceId(request.getServiceInstanceId());
 		instance.setPlanId(request.getPlanId());
-
-		//TODO
-		/*
-		do {
-			instance.setDatabaseName(getDatabaseName());
-		} while(altibaseAdminService.isExistsService(instance));
-
-		if (!altibaseAdminService.createDatabase(instance)) {
-			throw new ServiceBrokerException("Failed to create new DB instance.");
-		}*/
+		
+		if (altibaseAdminService.getNode(instance) == 0) {
+			throw new ServiceBrokerException("Failed to get a dedicated server.");
+		}
 
 		altibaseAdminService.save(instance);
 
@@ -121,7 +115,7 @@ public class AltibaseServiceInstanceService implements ServiceInstanceService {
 		logger.debug("instance : {}", (instance == null ? "Not exist": "Exist") );
 
 		if (instance != null) {
-			altibaseAdminService.deleteDatabase(instance);
+			altibaseAdminService.freeNode(instance);
 			altibaseAdminService.delete(instance.getServiceInstanceId());
 		}
 
@@ -147,19 +141,6 @@ public class AltibaseServiceInstanceService implements ServiceInstanceService {
 		} else {
 			throw new ServiceInstanceUpdateNotSupportedException("Not Supported.");
 		}
-	}
-
-	private String getDatabaseName() {
-		MessageDigest digest = null;
-		try {
-			digest = MessageDigest.getInstance("MD5");
-			digest.update(UUID.randomUUID().toString().getBytes());
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		//[^a-zA-Z0-9]
-		return new BigInteger(1, digest.digest()).toString(16).replaceAll("/[^a-zA-Z0-9]+/", "").substring(0, 16);
-
 	}
 
 }

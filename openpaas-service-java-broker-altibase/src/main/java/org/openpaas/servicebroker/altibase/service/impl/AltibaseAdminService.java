@@ -1,7 +1,10 @@
 package org.openpaas.servicebroker.altibase.service.impl;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +27,7 @@ import org.springframework.stereotype.Service;
 /**
  * Altibase Database의 Util 클래스이다.
  * 
- * @author 
+ * @author Bethy
  *
  */
 @Service
@@ -48,8 +51,12 @@ public class AltibaseAdminService {
 	
 	private final RowMapper<ServiceInstanceBinding> mapper2 = new ServiceInstanceBindingRowMapper();
 	
-	public static final String SERVICE_INSTANCES_FILDS = "instance_id, service_id, plan_id, organization_guid, space_guid";
-	public static final String SERVICE_INSTANCES_FIND_BY_INSTANCE_ID = "select " + SERVICE_INSTANCES_FILDS + " from broker.service_instances where instance_id = ?";
+	public static final String SERVICE_INSTANCES_SELECT_FILDS = "instance_id, plan_id, organization_guid, space_guid, a.node_id, host, port";
+	public static final String SERVICE_INSTANCES_FIND_BY_INSTANCE_ID = 
+			"select " + SERVICE_INSTANCES_SELECT_FILDS + 
+			" from broker.service_instances a, broker.dedicated_nodes b" +
+			" where instance_id = ? and a.node_id = b.node_id";	
+	public static final String SERVICE_INSTANCES_FILDS = "instance_id, plan_id, organization_guid, space_guid, node_id";
 	public static final String SERVICE_INSTANCES_ADD = "INSERT INTO broker.service_instances (" + SERVICE_INSTANCES_FILDS + ") values (?, ?, ?, ?, ?)";
 	public static final String SERVICE_INSTANCES_UPDATE_FILDS = "UPDATE broker.service_instances SET plan_id = ? WHERE instance_id = ?";
 	public static final String SERVICE_INSTANCES_DELETE_BY_INSTANCE_ID = "delete from broker.service_instances where instance_id = ?";
@@ -59,27 +66,16 @@ public class AltibaseAdminService {
 	public static final String SERVICE_BINDING_FIND_BY_BINDING_ID = "select " + SERVICE_BINDING_FILDS + " from broker.service_binding where binding_id = ?";
 	public static final String SERVICE_BINDING_FIND_USERNAME_BY_BINDING_ID = "select username from broker.service_binding where binding_id = ?";
 	public static final String SERVICE_BINDING_DELETE_BY_BINDING_ID = "delete from broker.service_binding where binding_id = ?";
+	public static final String SERVICE_BINDING_DELETE_BY_INSTANCE_ID = "DELETE FROM broker.service_binding WHERE instance_id = ?";
 	public static final String SERVICE_BINDING_FIND_USERNAME_BY_INSTANCE_ID = "select username from broker.service_binding where instance_id = '%s'";
+	
+	public static final String DEDICATED_NODES_FIND_FREE_NODE = "SELECT node_id FROM broker.dedicated_nodes WHERE inuse='0' LIMIT 1";
+	public static final String DEDICATED_NODES_UPDATE_FIELD = "UPDATE broker.dedicated_nodes SET inuse=? WHERE node_id=?";
 	
 	@Autowired
 	public AltibaseAdminService(JSchUtil jsch, JdbcTemplate jdbcTemplate) {
 		this.jsch = jsch;
 		this.jdbcTemplate = jdbcTemplate;
-		/*		
-		this.plans = new HashMap<String, Object>();
-		Map<String, String> plan = new HashMap<String, String>();
-
-		//Plan A
-		plan.put("vol", "100M");
-		plan.put("charset", "ko_KR.utf8");
-		this.plans.put("utf8", plan);
-
-		plan = new HashMap<String, String>();
-		//Plan C
-		plan.put("vol", "100M");
-		plan.put("charset", "ko_KR.euckr");
-		this.plans.put("euckr", plan);
-*/
 	}
 
 	/**
@@ -92,8 +88,17 @@ public class AltibaseAdminService {
 	 * @throws AltibaseServiceException
 	 */
 	public boolean isExistsService(AltibaseServiceInstance instance) throws AltibaseServiceException {
-		return true;
-		//TODO
+		try {
+			List<Map<String,Object>> databases = jdbcTemplate.queryForList(
+					"SELECT service_id FROM broker.service_instances WHERE instance_id = '"+instance.getServiceInstanceId()+"'");
+			
+			return databases.size() > 0 ? true : false;
+			
+		} catch (InvalidResultSetAccessException e) {
+			throw handleException(e);
+		} catch (DataAccessException e) {
+			throw handleException(e);
+		}
 		/*
 		try {
 			List<Map<String,Object>> databases = jdbcTemplate.queryForList("SELECT * FROM service_instances WHERE db_name = '"+instance.getDatabaseName()+"'");
@@ -112,16 +117,16 @@ public class AltibaseAdminService {
 	 * 존재하면 true
 	 * 존재하지않으면 false
 	 * 
-	 * @param databaseName
 	 * @param username
 	 * @return
 	 * @throws AltibaseServiceException
 	 */
-	public boolean isExistsUser(String databaseName, String username) throws AltibaseServiceException {
+	public boolean isExistsUser(String username) throws AltibaseServiceException {
 		try {
-			List<Map<String,Object>> users = jdbcTemplate.queryForList("SELECT user_id "
-					+ "FROM system_.sys_users_ "
-					+ "WHERE user_name = '" + username + "'");
+
+			List<Map<String,Object>> users = jdbcTemplate.queryForList("SELECT binding_id "
+					+ "FROM broker.service_binding "
+					+ "WHERE username = '" + username + "'");
 
 			return users.size() > 0 ? true : false;
 			
@@ -129,6 +134,32 @@ public class AltibaseAdminService {
 			throw handleException(e);
 		} catch (DataAccessException e) {
 			throw handleException(e);
+		}
+	}
+	
+	public boolean isExistsUser(String url, String username) throws AltibaseServiceException {
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet res = null;
+		try {
+			Class.forName("Altibase.jdbc.driver.AltibaseDriver");
+			con = DriverManager.getConnection( url );
+			stmt = con.createStatement();
+			res = stmt.executeQuery("SELECT user_id "
+					+ "FROM system_.sys_users_ "
+					+ "WHERE user_name = '" + username + "'");
+			
+			if (res.next()) return true;
+			else return false;
+			
+		} catch (Exception e) {
+			throw handleException(e);
+		} finally {
+			try {
+				if (res != null) res.close();
+				if (stmt != null) stmt.close();
+				if (con != null) con.close();
+			} catch (SQLException e) { }
 		}
 	}
 
@@ -142,25 +173,7 @@ public class AltibaseAdminService {
 	 */
 	public AltibaseServiceInstance findById(String id) throws AltibaseServiceException {
 		AltibaseServiceInstance serviceInstance = null;
-		try {			
-/*
-			List<Map<String,Object>> findByIdList = jdbcTemplate.queryForList("SELECT * FROM service_instances WHERE guid = '"+id+"'");
-
-			if ( findByIdList.size() > 0) {
-
-				serviceInstance = new AltibaseServiceInstance();
-				Map<String,Object> findById = findByIdList.get(0); 
-
-				String serviceInstanceId = (String)findById.get("guid");
-				String planId = (String)findById.get("plan_id");
-				String databaseName = (String)findById.get("db_name");
-
-				if ( !"".equals(serviceInstanceId) && serviceInstanceId !=null) serviceInstance.setServiceInstanceId(serviceInstanceId);
-				if ( !"".equals(planId) && planId !=null) serviceInstance.setPlanId(planId);
-				if ( !"".equals(databaseName) && databaseName !=null) serviceInstance.setDatabaseName(databaseName);
-			}
-
-			return serviceInstance;*/
+		try {
 			serviceInstance = jdbcTemplate.queryForObject(SERVICE_INSTANCES_FIND_BY_INSTANCE_ID, mapper, id);
 			
 		} catch (Exception e) {
@@ -195,18 +208,8 @@ public class AltibaseAdminService {
 	public void delete(String id) throws AltibaseServiceException{
 		try {
 			
-			jdbcTemplate.update(SERVICE_INSTANCES_DELETE_BY_INSTANCE_ID, id);
-			
-			String sql = String.format(SERVICE_BINDING_FIND_USERNAME_BY_INSTANCE_ID, id);
-
-			//List<User> = jdbcTemplate.query(SERVICE_BINDING_FIND_USERNAME_BY_INSTANCE_ID, mapper2, id);
-			
-			List<Map<String,Object>> rows = jdbcTemplate.queryForList(sql);
-			for (Map<String,Object> row : rows) {
-				deleteUser(row.get("USERNAME").toString());
-			}			
-			
-			jdbcTemplate.update("DELETE FROM broker.service_binding WHERE instance_id = ?", id);
+			jdbcTemplate.update(SERVICE_INSTANCES_DELETE_BY_INSTANCE_ID, id);			
+			jdbcTemplate.update(SERVICE_BINDING_DELETE_BY_INSTANCE_ID, id);
 			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
@@ -244,10 +247,10 @@ public class AltibaseAdminService {
 			
 			jdbcTemplate.update(SERVICE_INSTANCES_ADD, 
 					serviceInstance.getServiceInstanceId(),
-					serviceInstance.getServiceDefinitionId(),
 					serviceInstance.getPlanId(),
 					serviceInstance.getOrganizationGuid(),
-					serviceInstance.getSpaceGuid());
+					serviceInstance.getSpaceGuid(),
+					serviceInstance.getNodeId());
 			
 		} catch (InvalidResultSetAccessException e) {
 			throw handleException(e);
@@ -305,25 +308,14 @@ public class AltibaseAdminService {
 	 * @param serviceInstance
 	 * @throws AltibaseServiceException
 	 */
-	public void deleteDatabase(AltibaseServiceInstance serviceInstance) throws AltibaseServiceException {
-		//TODO
-		/*
-		// database name
-		String databaseName = serviceInstance.getDatabaseName();
-		String filePath = "$CUBRID_DATABASES/" + databaseName;
-		List<String> commands = new ArrayList<>();
-
-		//1. create shell command(s)
-		//1-1. stop database server
-		commands.add("cubrid server stop " + databaseName);
-		//1-2. delete database
-		commands.add("cubrid deletedb " + databaseName);
-		//1-3. remove database directory
-		commands.add("rm -rf " + filePath);
-
-		//1. execute command(s)
-		jsch.shell(commands);
-		*/
+	public void freeNode(AltibaseServiceInstance serviceInstance) throws AltibaseServiceException {
+		try {
+			jdbcTemplate.update(DEDICATED_NODES_UPDATE_FIELD, "0", serviceInstance.getNodeId());
+		} catch (InvalidResultSetAccessException e) {
+			throw handleException(e);
+		} catch (DataAccessException e) {
+			throw handleException(e);
+		}
 	}
 
 	/**
@@ -334,40 +326,25 @@ public class AltibaseAdminService {
 	 * @return
 	 * @throws AltibaseServiceException
 	 */
-	public boolean createDatabase(AltibaseServiceInstance serviceInstance) throws AltibaseServiceException {
-		return true;
-		//TODO
-		/*
-		// database name
-		String databaseName = serviceInstance.getDatabaseName();
-		String filePath = "$CUBRID_DATABASES/" + databaseName;
-		List<String> commands = new ArrayList<>();
-		String planId = serviceInstance.getPlanId();
+	public int getNode(AltibaseServiceInstance serviceInstance) throws AltibaseServiceException {
+		int nodeId = 0;
+		try {
+			Integer tmpNodeId = jdbcTemplate.queryForObject(DEDICATED_NODES_FIND_FREE_NODE, Integer.class);
+			
+			if (tmpNodeId == null) {
+				throw new AltibaseServiceException("Not exist free node");
+			}
+			nodeId = tmpNodeId.intValue();
+			serviceInstance.setNodeId(nodeId);
 
-		@SuppressWarnings("unchecked")
-		Map<String, String> plan = (Map<String, String>) plans.get(planId);
-
-		if (plan == null) {
-			throw new AltibaseServiceException("no plan");
+			jdbcTemplate.update(DEDICATED_NODES_UPDATE_FIELD, "1", serviceInstance.getNodeId());
+			
+		} catch (InvalidResultSetAccessException e) {
+			throw handleException(e);
+		} catch (DataAccessException e) {
+			throw handleException(e);
 		}
-
-		//1. create shell command(s)
-		//1-1. create directory for database
-		commands.add("mkdir -p " + filePath);
-		//1-2. create database
-		commands.add("cubrid createdb "
-				+ "--db-volume-size="+plan.get("vol")+" "
-				+ "--log-volume-size=100M "
-				+ "--file-path="+filePath+" "
-				+ databaseName+" "+plan.get("charset"));
-		//1-3. start database server
-		commands.add("cubrid server start " + databaseName);
-
-		//2. execute command(s)
-		//return ==> map key: command, val: result
-		Map<String, List<String>> rs = jsch.shell(commands);
-		
-		return "0".equals(rs.get("exitStatus").get(0)) ? true : false;*/
+		return nodeId;
 	}
 
 	
@@ -380,14 +357,23 @@ public class AltibaseAdminService {
 	 * @param password
 	 * @throws AltibaseServiceException
 	 */
-	public void createUser(String userId, String password) throws AltibaseServiceException{
+	public void createUser(String sUrl, String userId, String password) throws AltibaseServiceException{
+		Connection sCon = null;
+		Statement sStmt = null;
 		try {
-			
-			jdbcTemplate.execute("CREATE USER " + userId + " IDENTIFIED BY \"" + password + "\"");
-			jdbcTemplate.execute("GRANT ALL PRIVILEGES TO " + userId);
+			Class.forName("Altibase.jdbc.driver.AltibaseDriver");
+			sCon = DriverManager.getConnection( sUrl );
+			sStmt = sCon.createStatement();
+			sStmt.execute("CREATE USER " + userId + " IDENTIFIED BY \"" + password + "\"");
+			sStmt.execute("GRANT ALL PRIVILEGES TO " + userId);
 			
 		} catch (Exception e) {
 			throw handleException(e);
+		} finally {
+			try {
+				if (sStmt != null) sStmt.close();
+				if (sCon != null) sCon.close();
+			} catch (SQLException e) { }
 		}
 	}
 
@@ -399,13 +385,28 @@ public class AltibaseAdminService {
 	 * @param username
 	 * @throws AltibaseServiceException
 	 */
-	public void deleteUser(String userName) throws AltibaseServiceException {
+	public void deleteUser(String sUrl, String userName) throws AltibaseServiceException {
+//		try {
+//			jdbcTemplate.execute("DROP USER " + userName + " CASCADE");
+//		} catch (Exception e) {
+//			//throw handleException(e);
+//		}
+		Connection sCon = null;
+		Statement sStmt = null;
 		try {
-			jdbcTemplate.execute("DROP USER " + userName + " CASCADE");
+			Class.forName("Altibase.jdbc.driver.AltibaseDriver");
+			sCon = DriverManager.getConnection( sUrl );
+			sStmt = sCon.createStatement();
+			sStmt.execute("DROP USER " + userName + " CASCADE");
+			
 		} catch (Exception e) {
-			//throw handleException(e);
+			throw handleException(e);
+		} finally {
+			try {
+				if (sStmt != null) sStmt.close();
+				if (sCon != null) sCon.close();
+			} catch (SQLException e) { }
 		}
-
 	}
 	
 	/**
@@ -436,34 +437,20 @@ public class AltibaseAdminService {
 		return new AltibaseServiceException(e.getLocalizedMessage());
 	}
 	
-	/*
-	public List<String> getDBList() {
-		String command = "cm_admin listdb";
-		Map<String, List<String>> resultMap = jsch.shell(command);
-
-		//value exam..
-		//listDB = [  1.  DBName1,   2.  DBname2]
-		//I want ... [DBName1, DBname2]
-		List<String> listDB = resultMap.get(command);
-
-		List<String> listDBName = new ArrayList<>();
-		for (int i=0; i < listDB.size(); i++) {
-			 listDBName.add( listDB.get(i).split("  ")[2]);
-		}
-
-		return listDBName;
-	}*/
-
 	private static final class ServiceInstanceRowMapper implements RowMapper<AltibaseServiceInstance> {
         @Override
         public AltibaseServiceInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
             CreateServiceInstanceRequest request = new CreateServiceInstanceRequest();
             request.withServiceInstanceId(rs.getString(1));
-            request.setServiceDefinitionId(rs.getString(2));
-            request.setPlanId(rs.getString(3));
-            request.setOrganizationGuid(rs.getString(4));
-            request.setSpaceGuid(rs.getString(5));
-            return new AltibaseServiceInstance(request);
+            //request.setServiceDefinitionId(rs.getString(2));
+            request.setPlanId(rs.getString(2));
+            request.setOrganizationGuid(rs.getString(3));
+            request.setSpaceGuid(rs.getString(4));
+            AltibaseServiceInstance instance = new AltibaseServiceInstance(request);
+            instance.setNodeId(rs.getInt(5));
+            instance.setHost(rs.getString(6));
+            instance.setPort(rs.getString(7));
+            return instance;
         }
     }
 	

@@ -47,30 +47,30 @@ public class AltibaseAdminServiceTest {
 	@Test
 	public void createDatabase() throws AltibaseServiceException {
 		AltibaseServiceInstance serviceInstance = new AltibaseServiceInstance();
-		serviceInstance.setServiceInstanceId("test_createdb_A");
-		serviceInstance.setDatabaseName("test_createdb_A");
-		serviceInstance.setPlanId("cubrid-plan-A");
-		altibaseAdminService.createDatabase(serviceInstance );
+		serviceInstance.setServiceInstanceId("test_service_instance_id");
+		serviceInstance.setNodeId(1);
+		serviceInstance.setPlanId("5d8f7c3d-ce3d-4487-adbe-63aeab39cb5b");
+		altibaseAdminService.getNode(serviceInstance );
 	}
 	
 	@Test
 	public void deleteDatabase() throws AltibaseServiceException {
 		AltibaseServiceInstance serviceInstance = new AltibaseServiceInstance();
-		serviceInstance.setDatabaseName("87e6aeb685613f06");
+		serviceInstance.setNodeId(1);
 		
-		altibaseAdminService.deleteDatabase(serviceInstance );
+		altibaseAdminService.freeNode(serviceInstance );
 	}
 	
-	@Test
-	public void createUser() throws AltibaseServiceException {
-		altibaseAdminService.createUser("testuser2", "testpass2");
-	}
-	
-	@Test
-	public void deleteUser() throws AltibaseServiceException {
-		altibaseAdminService.deleteUser("testuser2");
-	}
-	
+//	@Test
+//	public void createUser() throws AltibaseServiceException {
+//		altibaseAdminService.createUser("testuser2", "testpass2");
+//	}
+//	
+//	@Test
+//	public void deleteUser() throws AltibaseServiceException {
+//		altibaseAdminService.deleteUser("testuser2");
+//	}
+//	
 	@Test
 	public void getConnectionString() {
 		String database="test_db_name";
@@ -79,7 +79,7 @@ public class AltibaseAdminServiceTest {
 		String host="localhost";
 		String port="20030";
 		
-		String expected = "jdbc:Altibase://"+host+":"+port+"/mydb?user="+username+"&password="+password+":";
+		String expected = "jdbc:Altibase://"+host+":"+port+"/mydb?user="+username+"&password="+password;
 		assertEquals(expected, altibaseAdminService.getConnectionString(username, password, host, port));
 	}
 	
@@ -87,31 +87,31 @@ public class AltibaseAdminServiceTest {
 	public void isExistsService() throws AltibaseServiceException {
 		AltibaseServiceInstance instance = new AltibaseServiceInstance();
 		
-		instance.setDatabaseName("test_db_name");
+		//instance.setDatabaseName("test_db_name");
 		assertTrue(altibaseAdminService.isExistsService(instance));
 		
-		instance.setDatabaseName("test_db_name_not_exist");
+		//instance.setDatabaseName("test_db_name_not_exist");
 		assertFalse(altibaseAdminService.isExistsService(instance));
 	}
 	
 	@Test
 	public void isExistsUser() throws AltibaseServiceException {
 		
-		assertTrue(altibaseAdminService.isExistsUser("test_db_name", "test_db_user_name"));
-		assertFalse(altibaseAdminService.isExistsUser("test_db_name", "test_db_user_name_not_exist"));
+		//assertTrue(altibaseAdminService.isExistsUser("test_db_name", "test_db_user_name"));
+		//assertFalse(altibaseAdminService.isExistsUser("test_db_name", "test_db_user_name_not_exist"));
 	}
 	
 	@Test
 	public void findById() throws AltibaseServiceException {
 		String service_instance_id = "test_service_instance_id";
-		String plan_id = "test_plan_id";
+		String plan_id = "5d8f7c3d-ce3d-4487-adbe-63aeab39cb5b";
 		String db_name = "test_db_name";
 		
 		AltibaseServiceInstance serviceInstance = altibaseAdminService.findById(service_instance_id);
 		
 		assertEquals(service_instance_id, serviceInstance.getServiceInstanceId());
 		assertEquals(plan_id, serviceInstance.getPlanId());
-		assertEquals(db_name, serviceInstance.getDatabaseName());
+		//assertEquals(db_name, serviceInstance.getDatabaseName());
 		
 	}
 	

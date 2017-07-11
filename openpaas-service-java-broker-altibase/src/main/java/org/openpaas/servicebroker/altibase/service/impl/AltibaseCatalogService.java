@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 /**
  * Catalog 정보를 보여주기위한 서비스 클래스
  * 
- * @author Cho Mingu
+ * @author Bethy
  *
  */
 @Service
