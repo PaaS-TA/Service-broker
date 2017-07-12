@@ -77,7 +77,6 @@ public class AltibaseServiceInstanceBindingService implements ServiceInstanceBin
 		}
 		
 		AltibaseServiceInstance instance = altibaseAdminService.findById(request.getServiceInstanceId());
-		String port = instance.getPort();
 		
 		// TODO Password Generator
 		String password = getPassword();
@@ -88,18 +87,22 @@ public class AltibaseServiceInstanceBindingService implements ServiceInstanceBin
 			username = getUsername();
 		} while(altibaseAdminService.isExistsUser(username));
 		
-		String host = env.getRequiredProperty("jdbc.host");
 		String user = env.getRequiredProperty("jdbc.username");
 		String pwd = env.getRequiredProperty("jdbc.password");
+		
+		String host = instance.getHost();
+		String port = instance.getPort();		
+		
+		/* 해당 node에서 새로운 사용자명이 존재하는지 검증합니다.
+		 * user는 sys여야 함 */
 		String url = altibaseAdminService.getConnectionString(user, pwd, host, port);
 		
-		/* 새로운 사용자명이 존재하는지 검증합니다.*/
 		if (altibaseAdminService.isExistsUser(url, username)) {			
 			// 사용자 삭제시 특정 Databas의 사용자를 삭제하지 않아 아래와 같이 사용자 명으로 삭제 처리합니다.
 			altibaseAdminService.deleteUser(url, username);
-		}
-		
+		}		
 		altibaseAdminService.createUser(url, username, password);
+		
 		String bindUrl = altibaseAdminService.getConnectionString(username, password, host, port);
 		Map<String,Object> credentials = new HashMap<String,Object>();
 		credentials.put("uri", bindUrl);
@@ -109,7 +112,7 @@ public class AltibaseServiceInstanceBindingService implements ServiceInstanceBin
 		credentials.put("username", username);
 		credentials.put("password", password);
 		credentials.put("name", "mydb");
-	
+		
 		binding = new ServiceInstanceBinding(request.getBindingId(),
 				instance.getServiceInstanceId(),
 				credentials,
@@ -150,10 +153,12 @@ public class AltibaseServiceInstanceBindingService implements ServiceInstanceBin
 		if (binding != null) {
 			AltibaseServiceInstance instance = altibaseAdminService.findById(binding.getServiceInstanceId());
 			
-			String host = env.getRequiredProperty("jdbc.host");
-			String username = env.getRequiredProperty("jdbc.username");
-			String password = env.getRequiredProperty("jdbc.password");	
-			String url = altibaseAdminService.getConnectionString(username, password, host, instance.getPort());
+			// instance를 위한 node 연결 url 구하기
+			String url = altibaseAdminService.getConnectionString(
+												env.getRequiredProperty("jdbc.username"),
+												env.getRequiredProperty("jdbc.password"),
+												instance.getHost(),
+												instance.getPort());
 			
 			altibaseAdminService.deleteUser(url, binding.getCredentials().get("username").toString());
 			altibaseAdminService.deleteBind(bindingId);

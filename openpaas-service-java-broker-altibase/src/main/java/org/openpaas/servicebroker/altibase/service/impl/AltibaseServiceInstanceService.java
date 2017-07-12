@@ -78,9 +78,12 @@ public class AltibaseServiceInstanceService implements ServiceInstanceService {
 		instance.setServiceInstanceId(request.getServiceInstanceId());
 		instance.setPlanId(request.getPlanId());
 		
-		if (altibaseAdminService.getNode(instance) == 0) {
+		// Dedicated_nodes 중 미사용 node 구하기
+		int nodeId = altibaseAdminService.getNode(instance);
+		if (nodeId == 0) {
 			throw new ServiceBrokerException("Failed to get a dedicated server.");
 		}
+		instance.setNodeId(nodeId);
 
 		altibaseAdminService.save(instance);
 

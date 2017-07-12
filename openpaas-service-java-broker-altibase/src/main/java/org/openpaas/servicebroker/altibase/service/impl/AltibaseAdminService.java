@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -79,7 +80,7 @@ public class AltibaseAdminService {
 	}
 
 	/**
-	 * 같은이름의 Database가 존재하는지 여부를 반환.
+	 * 같은이름의 service instance가 존재하는지 여부를 반환.
 	 * 존재하면 true
 	 * 존재하지않으면 false
 	 * 
@@ -113,7 +114,7 @@ public class AltibaseAdminService {
 	}
 
 	/**
-	 * 같은이름의 user가 존재하는지 여부를 반환.
+	 * 같은 이름의 user가 존재하는지 여부를 반환.
 	 * 존재하면 true
 	 * 존재하지않으면 false
 	 * 
@@ -136,7 +137,17 @@ public class AltibaseAdminService {
 			throw handleException(e);
 		}
 	}
-	
+
+	/**
+	 * 특정 node에 같은 이름의 user가 존재하는지 여부를 반환.
+	 * 존재하면 true
+	 * 존재하지않으면 false
+	 * 
+	 * @param url
+	 * @param username
+	 * @return
+	 * @throws AltibaseServiceException
+	 */
 	public boolean isExistsUser(String url, String username) throws AltibaseServiceException {
 		Connection con = null;
 		Statement stmt = null;
@@ -300,9 +311,39 @@ public class AltibaseAdminService {
 			throw handleException(e);
 		}
 	}
+	
+	/**
+	 * Dedicated_nodes 중 미사용중인 node 하나를 찾아서 ServiceInstance 에 할당
+	 * ssh 이용
+	 * 
+	 * @param serviceInstance
+	 * @return
+	 * @throws AltibaseServiceException
+	 */
+	public int getNode(AltibaseServiceInstance serviceInstance) throws AltibaseServiceException {
+		int nodeId = 0;
+		try {
+			Integer tmpNodeId = jdbcTemplate.queryForObject(DEDICATED_NODES_FIND_FREE_NODE, Integer.class);
+			
+			if (tmpNodeId == null) {
+				
+			}
+			nodeId = tmpNodeId.intValue();
+
+			jdbcTemplate.update(DEDICATED_NODES_UPDATE_FIELD, "1", serviceInstance.getNodeId());
+			
+		} catch (EmptyResultDataAccessException e) {
+			throw new AltibaseServiceException("No more free node for a new service");
+		} catch (InvalidResultSetAccessException e) {
+			throw handleException(e);
+		} catch (DataAccessException e) {
+			throw handleException(e);
+		}
+		return nodeId;
+	}
 
 	/**
-	 * ServiceInstance 정보를 이용하여 database 정지 및 삭제.
+	 * ServiceInstance 정보를 이용하여 node 반환.
 	 * ssh 이용
 	 * 
 	 * @param serviceInstance
@@ -317,94 +358,64 @@ public class AltibaseAdminService {
 			throw handleException(e);
 		}
 	}
-
-	/**
-	 * ServiceInstance 정보를 이용하여 database 생성 및 구동.
-	 * ssh 이용
-	 * 
-	 * @param serviceInstance
-	 * @return
-	 * @throws AltibaseServiceException
-	 */
-	public int getNode(AltibaseServiceInstance serviceInstance) throws AltibaseServiceException {
-		int nodeId = 0;
-		try {
-			Integer tmpNodeId = jdbcTemplate.queryForObject(DEDICATED_NODES_FIND_FREE_NODE, Integer.class);
-			
-			if (tmpNodeId == null) {
-				throw new AltibaseServiceException("Not exist free node");
-			}
-			nodeId = tmpNodeId.intValue();
-			serviceInstance.setNodeId(nodeId);
-
-			jdbcTemplate.update(DEDICATED_NODES_UPDATE_FIELD, "1", serviceInstance.getNodeId());
-			
-		} catch (InvalidResultSetAccessException e) {
-			throw handleException(e);
-		} catch (DataAccessException e) {
-			throw handleException(e);
-		}
-		return nodeId;
-	}
-
 	
 	/**
-	 * 특정 database에 사용자를 추가.
+	 * 특정 node에 사용자를 추가.
 	 * ssh 이용.
 	 * 
-	 * @param database
-	 * @param userId
+	 * @param url
+	 * @param username
 	 * @param password
 	 * @throws AltibaseServiceException
 	 */
-	public void createUser(String sUrl, String userId, String password) throws AltibaseServiceException{
-		Connection sCon = null;
-		Statement sStmt = null;
+	public void createUser(String url, String username, String password) throws AltibaseServiceException{
+		Connection con = null;
+		Statement stmt = null;
 		try {
 			Class.forName("Altibase.jdbc.driver.AltibaseDriver");
-			sCon = DriverManager.getConnection( sUrl );
-			sStmt = sCon.createStatement();
-			sStmt.execute("CREATE USER " + userId + " IDENTIFIED BY \"" + password + "\"");
-			sStmt.execute("GRANT ALL PRIVILEGES TO " + userId);
+			con = DriverManager.getConnection( url );
+			stmt = con.createStatement();
+			stmt.execute("CREATE USER " + username + " IDENTIFIED BY \"" + password + "\"");
+			stmt.execute("GRANT ALL PRIVILEGES TO " + username);
 			
 		} catch (Exception e) {
 			throw handleException(e);
 		} finally {
 			try {
-				if (sStmt != null) sStmt.close();
-				if (sCon != null) sCon.close();
+				if (stmt != null) stmt.close();
+				if (con != null) con.close();
 			} catch (SQLException e) { }
 		}
 	}
 
 	/**
-	 * 특정 database에서 사용자를 삭제
+	 * 특정 node에서 사용자를 삭제
 	 * 
 	 * 
-	 * @param database
+	 * @param url
 	 * @param username
 	 * @throws AltibaseServiceException
 	 */
-	public void deleteUser(String sUrl, String userName) throws AltibaseServiceException {
+	public void deleteUser(String url, String username) throws AltibaseServiceException {
 //		try {
 //			jdbcTemplate.execute("DROP USER " + userName + " CASCADE");
 //		} catch (Exception e) {
 //			//throw handleException(e);
 //		}
-		Connection sCon = null;
-		Statement sStmt = null;
+		Connection con = null;
+		Statement stmt = null;
 		try {
 			Class.forName("Altibase.jdbc.driver.AltibaseDriver");
-			sCon = DriverManager.getConnection( sUrl );
-			sStmt = sCon.createStatement();
-			sStmt.execute("DROP USER " + userName + " CASCADE");
+			con = DriverManager.getConnection( url );
+			stmt = con.createStatement();
+			stmt.execute("DROP USER " + username + " CASCADE");
 			
 		} catch (Exception e) {
 			throw handleException(e);
 		} finally {
 			try {
-				if (sStmt != null) sStmt.close();
-				if (sCon != null) sCon.close();
+				if (stmt != null) stmt.close();
+				if (con != null) con.close();
 			} catch (SQLException e) { }
 		}
 	}
@@ -442,7 +453,6 @@ public class AltibaseAdminService {
         public AltibaseServiceInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
             CreateServiceInstanceRequest request = new CreateServiceInstanceRequest();
             request.withServiceInstanceId(rs.getString(1));
-            //request.setServiceDefinitionId(rs.getString(2));
             request.setPlanId(rs.getString(2));
             request.setOrganizationGuid(rs.getString(3));
             request.setSpaceGuid(rs.getString(4));

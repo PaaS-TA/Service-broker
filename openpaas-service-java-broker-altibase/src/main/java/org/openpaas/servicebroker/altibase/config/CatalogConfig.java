@@ -27,8 +27,8 @@ public class CatalogConfig {
 						"altibase", 
 						"AltibaseDB", 
 						"A simple altibase implementation", 
-						true, 
-						false,
+						true, // bindable
+						false, // planUpdatable
 						getPlans(),
 						Arrays.asList("altibase", "document"),
 						getServiceDefinitionMetadata(),
@@ -101,7 +101,8 @@ public class CatalogConfig {
 						"Altibase-Plan-Dedicated-vm", 
 						"This is an Altibase plan. Dedicated-vm.",
 						getPlanMetadata("B"),
-						false));
+						false //free
+						));
 		
 		return plans;
 	}
