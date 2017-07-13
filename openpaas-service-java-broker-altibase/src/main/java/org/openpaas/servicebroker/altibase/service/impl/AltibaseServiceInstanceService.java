@@ -20,6 +20,7 @@ import org.openpaas.servicebroker.service.ServiceInstanceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,6 +37,9 @@ public class AltibaseServiceInstanceService implements ServiceInstanceService {
 
 	@Autowired
 	private AltibaseAdminService altibaseAdminService;
+	
+	@Autowired
+	private Environment env;
 
 	@Autowired
 	public AltibaseServiceInstanceService(AltibaseAdminService altibaseAdminService) {
@@ -119,7 +123,15 @@ public class AltibaseServiceInstanceService implements ServiceInstanceService {
 
 		if (instance != null) {
 			altibaseAdminService.freeNode(instance);
-			altibaseAdminService.delete(instance.getServiceInstanceId());
+			
+			String user = env.getRequiredProperty("jdbc.username");
+			String pwd = env.getRequiredProperty("jdbc.password");
+			
+			String host = instance.getHost();
+			String port = instance.getPort();
+			String url = altibaseAdminService.getConnectionString(user, pwd, host, port);
+			
+			altibaseAdminService.delete(url, instance.getServiceInstanceId());
 		}
 
 		return instance;		

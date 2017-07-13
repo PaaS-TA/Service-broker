@@ -209,8 +209,22 @@ public class AltibaseAdminService {
 	 * @throws AltibaseServiceException
 	 */
 	
-	public void delete(String id) throws AltibaseServiceException{
-		try {
+	public void delete(String url, String id) throws AltibaseServiceException{
+		Connection con = null;
+		Statement stmt = null;
+		try {		
+			
+			List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+					"select username from broker.service_binding where instance_id=?", id);
+			if (rows.size() > 0) {
+				//Class.forName("Altibase.jdbc.driver.AltibaseDriver");
+				con = DriverManager.getConnection( url );
+				stmt = con.createStatement();
+			}
+			for (Map row : rows) {
+				String username = row.get("USERNAME").toString();
+				stmt.execute("DROP USER " + username + " CASCADE");
+			}
 			
 			jdbcTemplate.update(SERVICE_INSTANCES_DELETE_BY_INSTANCE_ID, id);			
 			jdbcTemplate.update(SERVICE_BINDING_DELETE_BY_INSTANCE_ID, id);
@@ -219,6 +233,13 @@ public class AltibaseAdminService {
 			throw handleException(e);
 		} catch (DataAccessException e) {
 			throw handleException(e);
+		} catch (Exception e) {
+			throw handleException(e);
+		} finally {
+			try {
+				if (stmt != null) stmt.close();
+				if (con != null) con.close();
+			} catch (SQLException e) { }
 		}
 	}
 
@@ -365,7 +386,7 @@ public class AltibaseAdminService {
 		Connection con = null;
 		Statement stmt = null;
 		try {
-			Class.forName("Altibase.jdbc.driver.AltibaseDriver");
+			//Class.forName("Altibase.jdbc.driver.AltibaseDriver");
 			con = DriverManager.getConnection( url );
 			stmt = con.createStatement();
 			stmt.execute("CREATE USER " + username + " IDENTIFIED BY \"" + password + "\"");
@@ -398,7 +419,7 @@ public class AltibaseAdminService {
 		Connection con = null;
 		Statement stmt = null;
 		try {
-			Class.forName("Altibase.jdbc.driver.AltibaseDriver");
+			//Class.forName("Altibase.jdbc.driver.AltibaseDriver");
 			con = DriverManager.getConnection( url );
 			stmt = con.createStatement();
 			stmt.execute("DROP USER " + username + " CASCADE");
@@ -412,7 +433,7 @@ public class AltibaseAdminService {
 			} catch (SQLException e) { }
 		}
 	}
-	
+
 	/**
 	 * connection uri 생성
 	 * 
