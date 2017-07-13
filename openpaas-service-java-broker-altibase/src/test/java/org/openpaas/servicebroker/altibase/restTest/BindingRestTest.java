@@ -84,7 +84,7 @@ public class BindingRestTest {
 		}
 
 		bodyMap.remove("plan_id");
-		bodyMap.put("plan_id", "euckr");
+		bodyMap.put("plan_id", "5d8f7c3d-ce3d-4487-adbe-63aeab39cb5b");
 		entity = new HttpEntity<String>(JsonUtil.convertToJson(bodyMap), headers);
 		response = null;
 

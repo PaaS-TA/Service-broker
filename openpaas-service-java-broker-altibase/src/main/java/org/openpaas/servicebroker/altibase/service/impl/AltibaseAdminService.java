@@ -323,7 +323,7 @@ public class AltibaseAdminService {
 			}
 			nodeId = tmpNodeId.intValue();
 
-			jdbcTemplate.update(DEDICATED_NODES_UPDATE_FIELD, "1", serviceInstance.getNodeId());
+			jdbcTemplate.update(DEDICATED_NODES_UPDATE_FIELD, "1", nodeId);
 			
 		} catch (EmptyResultDataAccessException e) {
 			throw new AltibaseServiceException("No more free node for a new service");
