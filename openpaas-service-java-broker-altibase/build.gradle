@@ -69,7 +69,7 @@ dependencies {
     
     compile("org.apache.commons:commons-dbcp2")
     //runtime "mysql:mysql-connector-java:5.1.27"
-    runtime files('libs/Altibase_Trunk_rev.78821.jar')
+    runtime files('libs/Altibase7_1.jar')
     compile "org.springframework:spring-jdbc:4.0.0.M3"
     
     compile "com.jcraft:jsch:0.1.53"
