@@ -16,7 +16,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
  * Altibase Datasource를 정의 Altibase server에 ssh접속정의.
  * 
  * 
- * @author Bethy
+ * @author Bae Younghee
  *
  */
 

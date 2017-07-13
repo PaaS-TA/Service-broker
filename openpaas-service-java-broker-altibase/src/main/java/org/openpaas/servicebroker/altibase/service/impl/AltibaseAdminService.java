@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 /**
  * Altibase Database의 Util 클래스이다.
  * 
- * @author Bethy
+ * @author Bae Younghee
  *
  */
 @Service

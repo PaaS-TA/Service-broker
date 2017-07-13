@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 /**
  * An instance of a ServiceDefinition.
  * 
- * @author Bethy
+ * @author Bae Younghee
  *
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)

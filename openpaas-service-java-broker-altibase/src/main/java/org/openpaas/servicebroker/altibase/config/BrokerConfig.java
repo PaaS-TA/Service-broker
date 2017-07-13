@@ -11,7 +11,7 @@ import org.springframework.core.io.Resource;
 /** 
  * Force the base spring boot packages to be searched for dependencies.
  * 
- * @author Bethy
+ * @author Bae Younghee
  *
  */
 

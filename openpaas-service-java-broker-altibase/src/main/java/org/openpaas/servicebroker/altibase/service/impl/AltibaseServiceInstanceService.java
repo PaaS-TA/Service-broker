@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
  *  서비스 인스턴스 서비스가 제공해야하는 메소드를 정의한 인터페이스 클래스인 ServiceInstance를 상속하여
  *  AltibaseDB 서비스 인스턴스 서비스 관련 메소드를 구현한 클래스. 서비스 인스턴스 생성/삭제/수정/조회 를 구현한다.
  *  
- * @author Bethy
+ * @author Bae Younghee
  *
  */
 @Service
