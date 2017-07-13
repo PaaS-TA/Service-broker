@@ -53,7 +53,7 @@ public class CatalogRestTest {
 	}
 	
 	/**
-	 * 
+	 * 사용자 ID, 비밀번호가 없을 경우
 	 */
 	@Test	
 	public void getCatalogTest_noUser() {
@@ -97,7 +97,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * 
+	 * 사용자 ID, 비밀번호가 잘못 입력되었을 경우
 	 */
 	@Test	
 	public void getCatalogTest_invalidUser() {
@@ -131,7 +131,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * ?��?��?�� ID, 비�?번호�? ?��?��?��?���? ?��?��?��?��?�� 경우
+	 * 사용자 ID, 비밀번호가 정상적으로 입력되었을 경우
 	 */
 	@Test	
 	public void getCatalogTest_correctUser() {
@@ -165,7 +165,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * Version?�� ?���? ?��?��?��?��?�� 경우
+	 * Version이 잘못 입력되었을 경우
 	 */
 	@Test	
 	public void getCatalogTest_incorrectAPIVersion() {
@@ -199,8 +199,8 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * Catalog ?��보�?? ?��?��?��?���? �??��?��
-	 * Mandatory �?분이 ?�� ?��?���? ?��?���? ?��?��
+	 * Catalog 정보를 정상적으로 가져옴
+	 * Mandatory 부분이 다 들어가 있는지 확인
 	 */
 	@Test	
 	public void getCatalogTest_validCatalog() {
@@ -296,7 +296,7 @@ public class CatalogRestTest {
 	
 	
 	/**
-	 * POST�? ?���?
+	 * POST로 요청
 	 */
 	@Test	
 	public void getCatalogTest_methodPOST() {
@@ -334,7 +334,7 @@ public class CatalogRestTest {
 
 
 	/**
-	 * PUT?���? ?���?
+	 * PUT으로 요청
 	 */
 	@Test	
 	public void getCatalogTest_methodPUT() {
@@ -371,7 +371,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * DELETE�? ?���?
+	 * DELETE으로 요청
 	 */
 	@Test	
 	public void getCatalogTest_methodDELETE() {
@@ -408,7 +408,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * PATCH�? ?���?
+	 * PATCH으로 요청
 	 */
 	@Test	
 	public void getCatalogTest_methodPATCH() {
@@ -448,7 +448,7 @@ public class CatalogRestTest {
 	
 	
 	/**
-	 * OPTIONS�? ?���?
+	 * OPTIONS으로 요청
 	 */
 	@Test	
 	public void getCatalogTest_methodOPTIONS() {
@@ -487,7 +487,7 @@ public class CatalogRestTest {
 	}
 
 	/**
-	 * HEAD�? ?���?
+	 * HEAD으로 요청
 	 */
 	@Test	
 	public void getCatalogTest_methodHEAD() {

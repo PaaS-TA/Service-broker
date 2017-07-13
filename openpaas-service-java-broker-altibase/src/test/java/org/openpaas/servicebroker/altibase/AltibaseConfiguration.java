@@ -2,7 +2,6 @@ package org.openpaas.servicebroker.altibase;
 
 import javax.sql.DataSource;
 
-import org.openpaas.servicebroker.util.JSchUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,25 +20,6 @@ public class AltibaseConfiguration {
 	@Autowired
 	private DataSource dataSource;
 	
-	public @Bean JSchUtil jschUtil() {
-
-		String serverUser = env.getRequiredProperty("altibase.server.userName");
-		String serverHost = env.getRequiredProperty("altibase.server.hostName");
-		int serverPort = Integer.parseInt((String)env.getRequiredProperty("altibase.server.portNumber"));
-		
-		// serverPassword, serverIdentity. Only one of the two
-		String serverPassword = env.getRequiredProperty("altibase.server.password");
-		String serverIdentity = env.getRequiredProperty("altibase.server.identity");
-		
-		JSchUtil jsch = new JSchUtil(serverUser, serverHost, serverPort);
-		
-		if( !"".equals(serverPassword) && serverPassword != null) jsch.setPassword(serverPassword);
-		if( !"".equals(serverIdentity) && serverIdentity != null) jsch.setIdentity(serverIdentity);
-		
-		return jsch;
-	}
-	
-
 	@Bean
     public DataSource dataSource() {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();

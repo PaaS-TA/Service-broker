@@ -14,7 +14,6 @@ import org.openpaas.servicebroker.altibase.model.AltibaseServiceInstance;
 import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
 import org.openpaas.servicebroker.model.ServiceInstance;
 import org.openpaas.servicebroker.model.ServiceInstanceBinding;
-import org.openpaas.servicebroker.util.JSchUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +35,6 @@ public class AltibaseAdminService {
 
 
 	private Logger logger = LoggerFactory.getLogger(AltibaseAdminService.class);
-
-	
-	/* ssh접속을 위한 객체 */
-	@Autowired
-	private JSchUtil jsch;
 
 	/* altibase database 접속을 위한 객체*/
 	@Autowired 
@@ -74,8 +68,7 @@ public class AltibaseAdminService {
 	public static final String DEDICATED_NODES_UPDATE_FIELD = "UPDATE broker.dedicated_nodes SET inuse=? WHERE node_id=?";
 	
 	@Autowired
-	public AltibaseAdminService(JSchUtil jsch, JdbcTemplate jdbcTemplate) {
-		this.jsch = jsch;
+	public AltibaseAdminService(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
