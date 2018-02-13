@@ -1,9 +1,12 @@
 package org.openpaas.servicebroker.model;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import java.util.Map;
 
 /**
  * 서비스 인스턴스를 생성할 때 필요한 Request 정보를 가지고 있는 데이터 모델 bean 클래스. 
@@ -36,6 +39,10 @@ public class CreateServiceInstanceRequest {
 	@JsonProperty("space_guid")
 	private String spaceGuid;
 
+	@JsonSerialize
+	@JsonProperty("parameters")
+	private Map<String, Object> parameters;
+
 	//Cloud Controller dosen't send the definition, it's populated later
 	@JsonIgnore
 	private ServiceDefinition serviceDefinition;
@@ -52,6 +59,11 @@ public class CreateServiceInstanceRequest {
 		this.planId = planId;
 		this.organizationGuid = organizationGuid;
 		this.spaceGuid = spaceGuid;
+	}
+
+	public CreateServiceInstanceRequest(String serviceDefinitionId, String planId, String organizationGuid, String spaceGuid, Map<String, Object> parameters) {
+		this(serviceDefinitionId, planId, organizationGuid, spaceGuid);
+		this.parameters = parameters;
 	}
 	
 	public String getServiceDefinitionId() {
@@ -93,6 +105,18 @@ public class CreateServiceInstanceRequest {
 	public String getServiceInstanceId() { 
 		return serviceInstanceId;
 	}
+
+	public Map<String, Object> getParameters() { return  parameters; }
+	public <T> T getParameters(Class<T> cls) {
+		try {
+			T bean = cls.newInstance();
+			BeanUtils.populate(bean, parameters);
+			return bean;
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Error mapping CreateServiceInstanceRequest parameters to class of type " + cls.getName());
+		}
+	}
+	public void setParameters(Map<String, Object> parameters) { this.parameters = parameters; }
 	
 	public CreateServiceInstanceRequest withServiceDefinition(ServiceDefinition svc) {
 		this.serviceDefinition = svc;
