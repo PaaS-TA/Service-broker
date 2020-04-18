@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd>
+    <useProjectRuleSet>true</useProjectRuleSet>
+    <ruleSetFile>D:\Projects\OpenPaaS\Documents\2차년도\2차년도\테스트\PMD\sample\pmd-rulesets.xml</ruleSetFile>
+    <includeDerivedFiles>false</includeDerivedFiles>
+    <violationsAsErrors>true</violationsAsErrors>
+    <fullBuildEnabled>true</fullBuildEnabled>
+</pmd>
