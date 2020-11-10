@@ -99,7 +99,6 @@ public class AltibaseServiceInstanceBindingService implements ServiceInstanceBin
 		/*	2020.10.30	Replication 관련 추가.		
 			ServiceInstanceBinding 클래스에 NAME, PASSWORD가 없다. 어떻게 Binding 시키는지? 
 		*/
-		
 		if (altibaseAdminService.isRepUser(request.getAppGuid())) {			
 			
 				String userNamePassWD = altibaseAdminService.getDBUsername(request.getAppGuid());
@@ -107,15 +106,6 @@ public class AltibaseServiceInstanceBindingService implements ServiceInstanceBin
 				String[] arrayIm = userNamePassWD.split("!@#%&@#%!");
 				username = arrayIm[0]; 
 				password = arrayIm[1]; 
-			/*	debug	*/
-				logger.debug("username :  {}, Passwork : {}", username, password);
-			/*
-			ServiceInstanceBinding binding2 = altibaseAdminService.findForAppId(request.getAppGuid());
-			if (binding2 != null) {
-				password = binding2.getDBPassword();
-				username = binding2.getDBUsername();
-			}
-			*/
 			
 		} else {
 			
@@ -138,11 +128,6 @@ public class AltibaseServiceInstanceBindingService implements ServiceInstanceBin
 		}		
 
 		/* String url = altibaseAdminService.getConnectionString(user, pwd, host, port);  */
-		
-		/*	debug	*/
-		logger.debug("url : {} ,  username :  {}, Passwork : {}", url, username, password);
-		
-		
 		altibaseAdminService.createUser(url, username, password);
 		
 		String bindUrl = altibaseAdminService.getConnectionString(username, password, host, port);
