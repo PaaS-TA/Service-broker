@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
  * An instance of a ServiceDefinition.
  * 
  * @author Bae Younghee
- *
+ * @modify jhjeong
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class AltibaseServiceInstance extends ServiceInstance{
@@ -39,7 +39,7 @@ public class AltibaseServiceInstance extends ServiceInstance{
 	public AltibaseServiceInstance(DeleteServiceInstanceRequest request) { 
 		super(request);
 	}
-	
+	 
 	/**
 	 * Create a service instance from a update request. If fields 
 	 * are not present in the request they will remain null in the 
@@ -77,4 +77,5 @@ public class AltibaseServiceInstance extends ServiceInstance{
 	public void setNodeId(int aNodeId) {
 		mNodeId = aNodeId;
 	}
+	
 }

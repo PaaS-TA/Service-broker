@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class AltibaseAdminService {
 
-
 	private Logger logger = LoggerFactory.getLogger(AltibaseAdminService.class);
 
 	/* altibase database 접속을 위한 객체*/
@@ -43,8 +42,8 @@ public class AltibaseAdminService {
 	//private Map<String, Object> plans = null;
 	
 	private final RowMapper<AltibaseServiceInstance> mapper = new ServiceInstanceRowMapper();
-	
 	private final RowMapper<ServiceInstanceBinding> mapper2 = new ServiceInstanceBindingRowMapper();
+	private final RowMapper<ServiceInstanceBinding> mapper3 = new ServiceInstanceBindingRowMapper();
 	
 	public static final String SERVICE_INSTANCES_SELECT_FILDS = "instance_id, plan_id, organization_guid, space_guid, a.node_id, host, port";
 	public static final String SERVICE_INSTANCES_FIND_BY_INSTANCE_ID = 
@@ -64,6 +63,9 @@ public class AltibaseAdminService {
 	public static final String SERVICE_BINDING_DELETE_BY_INSTANCE_ID = "DELETE FROM broker.service_binding WHERE instance_id = ?";
 	public static final String SERVICE_BINDING_FIND_USERNAME_BY_INSTANCE_ID = "select username from broker.service_binding where instance_id = '%s'";
 	
+	/* 2020.10.30. For Replication */
+	public static final String SERVICE_BINDING_FIND_USER_BY_APP_ID = "select username, password from broker.service_binding where app_id = ? LIMIT 1";
+		
 	public static final String DEDICATED_NODES_FIND_FREE_NODE = "SELECT node_id FROM broker.dedicated_nodes WHERE inuse='0' LIMIT 1";
 	public static final String DEDICATED_NODES_UPDATE_FIELD = "UPDATE broker.dedicated_nodes SET inuse=? WHERE node_id=?";
 	
@@ -105,6 +107,29 @@ public class AltibaseAdminService {
 			throw handleException(e);
 		}*/
 	}
+	
+	
+	/*
+		* 2020.10.30
+		* 이중화 대상 User인지 여부를 반환.
+	*/
+	
+	
+	public boolean isRepUser(String appGuid) throws AltibaseServiceException {
+		try {
+
+			List<Map<String,Object>> guids = jdbcTemplate.queryForList("SELECT username "
+					+ "FROM broker.service_binding "
+					+ "WHERE app_id = '" + appGuid + "' LIMIT 1");
+
+			return guids.size() > 0 ? true : false;
+			
+		} catch (InvalidResultSetAccessException e) {
+			throw handleException(e);
+		} catch (DataAccessException e) {
+			throw handleException(e);
+		}
+	}	
 
 	/**
 	 * 같은 이름의 user가 존재하는지 여부를 반환.
@@ -183,6 +208,41 @@ public class AltibaseAdminService {
 		} catch (Exception e) {
 		}
 		return serviceInstance;
+	}
+
+	/*
+		* 2020.10.30
+		* Replication 처리를 위하여 동일한 app_id 를 사용하는 계정이 있는지 확인. 
+	*/
+	public ServiceInstanceBinding findForAppId(String id) throws AltibaseServiceException {
+		ServiceInstanceBinding ServiceInstanceBinding = null;
+		try {
+			ServiceInstanceBinding = jdbcTemplate.queryForObject(SERVICE_BINDING_FIND_USER_BY_APP_ID, mapper3, id); 
+			
+		} catch (Exception e) {
+		}
+		return ServiceInstanceBinding;
+	}
+
+	/*
+		* 2020.10.30
+		* Replication 처리를 위하여 동일한 app_id 를 사용하는 계정이 있는지 확인. 
+	*/
+	public String getDBUsername(String id) throws AltibaseServiceException {
+		String UserNMPW = null; 
+		try {
+				List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+					"SELECT USERNAME, PASSWORD FROM broker.service_binding where app_id = '" + id +"' LIMIT 1");
+			
+			if (rows.size() > 0) {
+				for (Map row : rows) {
+					UserNMPW = row.get("USERNAME").toString() + "!@#%&@#%!" + row.get("PASSWORD").toString();
+				}
+			}
+		} catch (Exception e) {
+			throw handleException(e);
+		}
+		return UserNMPW;
 	}
 
 	/**

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.openpaas.servicebroker.model.CreateServiceInstanceRequest;
 import org.openpaas.servicebroker.altibase.model.AltibaseServiceInstance;
 import org.openpaas.servicebroker.exception.ServiceBrokerException;
 import org.openpaas.servicebroker.exception.ServiceInstanceBindingExistsException;
@@ -77,30 +78,71 @@ public class AltibaseServiceInstanceBindingService implements ServiceInstanceBin
 		}
 		
 		AltibaseServiceInstance instance = altibaseAdminService.findById(request.getServiceInstanceId());
-		
-		// TODO Password Generator
-		String password = getPassword();
-		String username = null;
 
-		// Username Generator (Unique)
-		do {
-			username = getUsername();
-		} while(altibaseAdminService.isExistsUser(username));
-		
+		/*	2020.10.30	For Replication 	
+			* App_Guid 값으로 이중화 대상인지를 체크.
+			* 삭제할 때는? 
+		*/
+		/* 해당 node에서 새로운 사용자명이 존재하는지 검증합니다.
+		 * user는 sys여야 함 */
+
 		String user = env.getRequiredProperty("jdbc.username");
 		String pwd = env.getRequiredProperty("jdbc.password");
 		
 		String host = instance.getHost();
-		String port = instance.getPort();		
+		String port = instance.getPort();	
 		
-		/* 해당 node에서 새로운 사용자명이 존재하는지 검증합니다.
-		 * user는 sys여야 함 */
 		String url = altibaseAdminService.getConnectionString(user, pwd, host, port);
+		String password = null;
+		String username = null;		
+				
+		/*	2020.10.30	Replication 관련 추가.		
+			ServiceInstanceBinding 클래스에 NAME, PASSWORD가 없다. 어떻게 Binding 시키는지? 
+		*/
 		
-		if (altibaseAdminService.isExistsUser(url, username)) {			
-			// 사용자 삭제시 특정 Databas의 사용자를 삭제하지 않아 아래와 같이 사용자 명으로 삭제 처리합니다.
-			altibaseAdminService.deleteUser(url, username);
+		if (altibaseAdminService.isRepUser(request.getAppGuid())) {			
+			
+				String userNamePassWD = altibaseAdminService.getDBUsername(request.getAppGuid());
+				logger.debug("userNamePassWD :  {}", userNamePassWD);
+				String[] arrayIm = userNamePassWD.split("!@#%&@#%!");
+				username = arrayIm[0]; 
+				password = arrayIm[1]; 
+			/*	debug	*/
+				logger.debug("username :  {}, Passwork : {}", username, password);
+			/*
+			ServiceInstanceBinding binding2 = altibaseAdminService.findForAppId(request.getAppGuid());
+			if (binding2 != null) {
+				password = binding2.getDBPassword();
+				username = binding2.getDBUsername();
+			}
+			*/
+			
+		} else {
+			
+				// TODO Password Generator
+				password = getPassword();
+				username = null;
+			
+			// Username Generator (Unique)
+			do {
+				username = getUsername();
+			} while(altibaseAdminService.isExistsUser(username));
+			
+			/* 해당 node에서 새로운 사용자명이 존재하는지 검증합니다.
+			* user는 sys여야 함 */
+			if (altibaseAdminService.isExistsUser(url, username)) {			
+				// 사용자 삭제시 특정 Databas의 사용자를 삭제하지 않아 아래와 같이 사용자 명으로 삭제 처리합니다.
+				altibaseAdminService.deleteUser(url, username);
+			}
+			
 		}		
+
+		/* String url = altibaseAdminService.getConnectionString(user, pwd, host, port);  */
+		
+		/*	debug	*/
+		logger.debug("url : {} ,  username :  {}, Passwork : {}", url, username, password);
+		
+		
 		altibaseAdminService.createUser(url, username, password);
 		
 		String bindUrl = altibaseAdminService.getConnectionString(username, password, host, port);
