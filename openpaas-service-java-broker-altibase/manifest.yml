@@ -3,4 +3,4 @@ applications:
 - name: openpaas-altibase-broker
   memory: 768M
   instances: 1
-  path: build/libs/openpaas-service-java-broker-altibase.war
+  path: build/libs/openpaas-service-java-broker-altibase.jar
