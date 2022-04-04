@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
  *  AltibaseDB 서비스 인스턴스 서비스 관련 메소드를 구현한 클래스. 서비스 인스턴스 생성/삭제/수정/조회 를 구현한다.
  *  
  * @author Bae Younghee
- *
+ * @modify hscho
  */
 @Service
 public class AltibaseServiceInstanceService implements ServiceInstanceService {
@@ -78,9 +78,11 @@ public class AltibaseServiceInstanceService implements ServiceInstanceService {
 			}
 		}
 
-		instance = new AltibaseServiceInstance();
+		instance = new AltibaseServiceInstance(request);
+		/* commented, because of aboving REQUEST argument
 		instance.setServiceInstanceId(request.getServiceInstanceId());
 		instance.setPlanId(request.getPlanId());
+		*/
 		
 		// Dedicated_nodes 중 미사용 node 구하기
 		int nodeId = altibaseAdminService.getNode(instance);
