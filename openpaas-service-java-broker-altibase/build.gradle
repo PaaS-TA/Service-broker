@@ -1,0 +1,95 @@
+buildscript {
+
+    ext {
+        gradleVersion = '4.9'
+        springBootVersion = '1.5.14.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/libs-snapshot" }
+        maven { url "https://repo.spring.io/plugins-release"}
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'application'
+
+ext {
+    springBootCfServiceBrokerVersion = "2.4.0"
+    baseName = 'openpaas-service-java-broker-altibase'
+    version =  '2.4'
+
+    hibernateValidatorVersion = '5.1.0.Final'
+    jsonPathVersion = '0.9.1'
+    springBootVersion = '1.5.14.RELEASE'
+    jacocoVersion = '0.8.4'
+}
+
+mainClassName = 'org.openpaas.servicebroker.altibase.config.Application'
+sourceCompatibility = 1.8
+version = '1.0'
+
+jar {
+    manifest {
+        attributes  'Title': 'Altibase Broker', 'Version': version, 'Main-Class': mainClassName
+    }
+    archiveName 'openpaas-service-java-broker-altibase.jar'
+    dependsOn configurations.runtime
+    from {
+        configurations.compile.collect {it.isDirectory()? it: zipTree(it)}
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://repo.spring.io/libs-snapshot" }
+    maven { url "https://repo.spring.io/plugins-release"}
+}
+
+configurations {
+    providedRuntime
+}
+
+dependencies {
+    
+    compile files('libs/openpaas-service-java-broker.jar')
+    
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
+
+    testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testCompile("com.jayway.jsonpath:json-path:${jsonPathVersion}")
+	testCompile("org.apache.httpcomponents:httpclient:4.4.1")
+    testCompile 'junit:junit:4.12'
+    testCompile 'com.sun.xml.security:xml-security-impl:1.0'
+    
+	compile("org.apache.commons:commons-dbcp2")
+    
+    runtime files('libs/Altibase7_1.jar')
+    compile "org.springframework:spring-jdbc:4.0.0.M3"
+
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.9'
+}
+
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "${jacocoVersion}"
+}
+
+test {
+    ignoreFailures=true
+    jacoco {
+        destinationFile = file("$buildDir/jacoco/jacoco-overall.exec")
+    }
+}
